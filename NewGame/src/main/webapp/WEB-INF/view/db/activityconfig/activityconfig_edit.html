@@ -1,0 +1,59 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">活动ID: </td>
+					<td>${activityconfig.ID!}
+						<input type="hidden" name="activityconfig.ID" value="${activityconfig.ID!}"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">活动名称: </td>
+					<td><input type="text" name="activityconfig.ActivityName" value="${activityconfig.ActivityName!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送金币: </td>
+					<td><input type="text" name="activityconfig.GiveScore" value="${activityconfig.GiveScore!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">免费次数: </td>
+					<td><input type="text" name="activityconfig.FreeCounts" value="${activityconfig.FreeCounts!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">花费金币: </td>
+					<td><input type="text" name="activityconfig.Price" value="${activityconfig.Price!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">状态: </td>
+					<td>
+						@if(activityconfig.Nullity == 1){
+						<input type="radio" name="activityconfig.Nullity" value="1" checked="checked"/>启用
+						<input type="radio" name="activityconfig.Nullity" value="0"/>禁用
+						@} else if(activityconfig.Nullity == 0){
+						<input type="radio" name="activityconfig.Nullity" value="1"/>启用
+						<input type="radio" name="activityconfig.Nullity" value="0" checked="checked"/>禁用
+						@}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">活动图片: </td>
+					<td>
+						<blade:imgupload id="ActivityImgUrl" name="activityconfig.ImgUrl" value="${activityconfig.ImgUrl!}" auto="" returnType="url"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td><input type="text" name="activityconfig.Remarks" value="${activityconfig.Remarks!}" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

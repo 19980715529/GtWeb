@@ -1,0 +1,51 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+	<form data-url="${ctxPath}/${code}/saveblood" method="post" class="form-horizontal" role="form">
+		<div class="space-4"></div>
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间信息: </td>
+					<td>${room.roomname!}
+						<!-- <select id="ServerID" onchange="changeRoomInfo(this)" name="blood.serverid"></select> -->
+						<input type="hidden" name="blood.kindid" value="${room.kindid!}"/>
+						<input type="hidden" name="blood.serverid" value="${room.serverid!}"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">执行时间: </td>
+					<td>
+						<input type="text" id="operatetime" name="blood.begintime"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池配置目标值: </td>
+					<td>
+						<input name="blood.bloodchange" id="score" autoComplete='off' value="0"/>
+						<span class="text-red">>0表示房间放水，<0表示房间吃分</span>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td id="showC"></td>
+				</tr>
+			</tbody>
+		</table>
+		<div class="space-4"></div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确定添加",btn_close:"关闭"}) {}
+</form>
+@}
+
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+	laydate({
+		elem : '#operatetime',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+</script>
+<script src="${ctxPath}/static/search/numhandler.js" type="text/javascript" ></script>

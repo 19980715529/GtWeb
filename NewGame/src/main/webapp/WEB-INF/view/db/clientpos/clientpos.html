@@ -1,0 +1,53 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('包开发游戏配置','clientpos');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "<span class='sort-cols'>包ID</span>","包名称","pos1"];
+		var _colmodel=[   
+		                  {name:"clientType", index:"clientType"},
+		                  {name:"PackageName", sortable:false},
+						  {name:"pos1", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"clientType"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"包ID",index:"clientType",type:"text"},
+			@			  {name:"包名称",index:"PackageName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	@include("/common/_listscript.html"){}
+@}	

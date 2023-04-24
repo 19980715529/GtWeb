@@ -1,0 +1,356 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+    var ctx = "${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "";
+    var ServerID = '${ServerID}';
+    var BloodPondID = '${BloodPondID}';
+    var where = '{"startTime":"' +getBeforeDate(1) +' 00:00:00","endTime":"' +getBeforeDate(0)+' 00:00:00"}';
+
+    $(function() {
+        initGrid();
+    });
+
+    function initGrid() {
+        var grid_url = ctx + "/${code}/bcDataList";//查询列表接口
+        var _colnames = [ "时间", "剩余血池", "血池平衡值"];
+        var _colmodel = [ { name : "InsertTime", sortable:false }, 
+                          { name : "BloodPondScore", sortable:false }, 
+                          { name : "BloodPondVal", sortable:false }
+                          ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames : _colnames,
+            colModel : _colmodel,
+            postData : {ServerID:ServerID,BloodPondID:BloodPondID,where:encodeURI(where)},
+            multiselect : false,
+            rownumbers : false,
+            rowNum:-1,
+            sortname:"InsertTime",
+            sortorder:"desc",
+            height: 'auto'
+        });
+
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <form data-url="" method="post" class="" role="form">
+        <!-- 配置查询 -->
+        <div class="statistics-search">
+            <!-- 简单查询第一组 -->
+            <label class=""> 房间ServerID： </label> 
+            <input type="text" id="ServerID" value="${ServerID}"/>
+            <!-- 简单查询第二组 -->
+            <label class=""> 时间： </label> 
+            <input type="text" id="starttime" /> - 
+            <input type="text" id="endtime" /> 
+            
+            <!-- 简单查询按钮 -->
+            <label class="">
+                <button class="btn btn-sx btn-white" type="button"
+                    onclick="goSearch()">查询</button>
+            </label>
+        </div>
+    </form>
+
+    <div id="myChart" style="height: 400px;"></div>
+    <table id="grid-table"></table>
+</div>
+<script src="${ctxPath}/static/echarts/echarts.min.js"></script>
+<script type="text/javascript">
+    $(function(){
+        getData(ServerID,BloodPondID,encodeURI(where));
+    });
+    
+    function getData(ServerID,BloodPondID,where) {
+        $.get('${ctxPath}/room/bcData?ServerID='+ServerID+'&BloodPondID='+BloodPondID+'&where='+where, function (data) {
+            var data = JSON.parse(data);
+            var tempdata = data.data.data;
+            var bdata = []; // 血池平衡值
+            var cbdata = []; // 血池触底值
+            var tdata = []; // X时间轴
+            var ddata = []; // 当前血池值
+            var BloodPond = data.data.BloodPond;
+            for ( var i=0; i<tempdata.length;i++) {
+                bdata[i] = BloodPond.bloodpondval;
+                cbdata[i] = BloodPond.bloodpondbalancevalout;
+                tdata[i] = tempdata[i]['InsertTime'];
+                ddata[i] = tempdata[i]['BloodPondScore'];
+            }
+            genCharts(tdata,ddata,bdata,BloodPond,cbdata);
+        });
+    }
+    
+    function genCharts(xAxisData,seriesData,balanceData,BloodPond,cbdata) {
+        var yd = [];
+        yd.push(BloodPond.bloodpondval*BloodPond.flasealerttimes2);
+        yd.push(BloodPond.bloodpondval*BloodPond.flasealerttimes1);
+        yd.push(BloodPond.bloodpondval);
+        yd.push(BloodPond.bloodpondval*BloodPond.truealerttimes1);
+        yd.push(BloodPond.bloodpondval*BloodPond.truealerttimes2);
+        yd.push(BloodPond.bloodpondbalancevalout);
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById("myChart"));
+        myChart.setOption(option = {
+                title: {
+                    text: '血池变化',
+                    left: 'center'
+                },
+                tooltip: {
+                    show:true,
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['血池平衡','血池','血池触底值'],
+                    left: 'right',
+                    y:'middle',
+                    orient: 'vertical',
+                    padding: [
+                              5,  // 上
+                              40, // 右
+                              5,  // 下
+                              5, // 左
+                          ]
+                },
+                xAxis: {
+                    axisTick:{
+                        //interval:0,
+                        show:true,
+                        alignWithLabel:true
+                    },
+                    axisLabel: {
+                        show:true,
+                        //interval:0,
+                        rotate:40,
+                        formatter: function(value, index) {
+                            // 格式化成月/日，只在第一个刻度显示年份
+                            if(BladeTool.isNotEmpty(value)) {
+                                var date = new Date(value);
+                                var texts = [date.getHours(),date.getMinutes()];
+                                return texts.join(':');
+                            } else {
+                                return '';
+                            }
+                        }
+                    },
+                    boundaryGap:true,
+                    data: xAxisData
+                },
+                yAxis: {
+                    splitLine: {
+                        show: true
+                    },
+                    type: 'value',
+                    name : '血池',
+                    nameLocation:'middle',
+                    nameRotate:360,
+                    nameGap:80,
+                    scale:true,
+                    min:(BloodPond.bloodpondval*BloodPond.flasealerttimes2),
+                    max:(BloodPond.bloodpondval*BloodPond.truealerttimes2),
+                   /*axisLabel: {
+                        formatter: function (value, index) {
+                            return value;
+                        }
+                    },
+                    data:yd*/
+                },
+                smooth: true,
+                series: [
+                         {
+                            name:'血池平衡',
+                            type:'line',
+                            data:balanceData,
+                            //symbol: 'circle',
+                            //symbolSize: 8,
+                            itemStyle: {
+                                normal: {
+                                    color: '#EA5335',
+                                    opacity:0
+                                }
+                            },
+                            lineStyle: {
+                                normal: {
+                                    color: '#EA5335',
+                                    width:5
+                                }
+                            },
+                            /*markLine: {
+                                label: {
+                                    normal:{
+                                        show:true,
+                                        position:'middle',
+                                        formatter:function(params){
+                                            return (params.name)+':'+(params.value)
+                                        }
+                                    }
+                                },
+                                lineStyle: {
+                                    normal: {
+                                        color:'#e00a30',
+                                        type:'dotted'
+                                    }
+                                },
+                                data:[{
+                                    name:'触底值',
+                                    yAxis:yd[5]
+                                },{
+                                    name:'吃分警戒值',
+                                    yAxis:yd[1]
+                                },{
+                                    name:'吃分极限值',
+                                    yAxis:yd[0]
+                                },{
+                                    name:'放分警戒值',
+                                    yAxis:yd[3]
+                                },{
+                                    name:'放分极限值',
+                                    yAxis:yd[4]
+                                },{
+                                    name:'平衡值',
+                                    yAxis:BloodPond.bloodpondval
+                                }
+                                ]
+                            }*/
+                         },
+                         {
+                            name:'血池',
+                            type:'line',
+                            data:seriesData,
+                            //symbol: 'circle',
+                            //symbolSize: 8,
+                            itemStyle: {
+                                normal: {
+                                    color: '#33C3F7',
+                                    opacity:0
+                                }
+                            }
+                          },
+                          {
+                            name:'血池触底',
+                            type:'line',
+                            data:cbdata,
+                            //symbol: 'circle',
+                            //symbolSize: 8,
+                            itemStyle: {
+                                normal: {
+                                    color: '#000000',
+                                    opacity:0
+                                }
+                            },
+                            lineStyle: {
+                                normal: {
+                                    color: '#000000',
+                                    width:5
+                                }
+                            }
+                            }
+                         ]
+            });
+        /*var mm = myChart.getModel().getComponent('yAxis', 0).axis.scale.getExtent();
+        var min=mm[0],max=mm[1];
+        var minFlag = false,maxFlag = false;
+        if(min>yd[0]) {
+            min = yd[0];
+            minFlag = true;
+        }
+        if(max<yd[4]) {
+            max = yd[4];
+            maxFlag = true;
+        }
+        if(maxFlag || minFlag) {
+            myChart.setOption(option = {
+                    yAxis: {
+                        min:min,
+                        max:max,
+                    }
+            },{
+                notMerge:false,
+                lazyUpdate: false
+            });
+        }
+        console.log(mm);*/
+        window.onresize = myChart.resize;
+    }
+
+    function goSearch() {
+        var ServerID = $("#ServerID").val();
+        var wheres = {};
+        
+        if(BladeTool.isEmpty(ServerID)) {
+            layer_alert('房间ID不能为空!', "warn");
+            return;
+        }
+        
+        var start_time = $("#starttime").val();
+        var end_time = $("#endtime").val();
+        if(start_time > end_time) {
+            layer_alert('开始时间不能大于结束时间!', "warn");
+            return;
+        }
+        if(BladeTool.isNotEmpty(start_time)) {
+            wheres['startTime'] = start_time;
+        }
+        if(BladeTool.isNotEmpty(end_time)) {
+            wheres['endTime'] = end_time;
+        }
+        var where = "";
+        
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+        
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+        
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        // 更新图表
+        getData(ServerID,'',where);
+        
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                ServerID:ServerID,where : where
+            }
+        }).trigger("reloadGrid");
+        
+    }
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){} 
+@}
+
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+    laydate({
+        elem : '#starttime',
+        format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+        istime: true,
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem : '#endtime',
+        format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+        istime: true,
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    
+    $("#starttime").val(getBeforeDate(1) + " 00:00:00");
+    $("#endtime").val(getBeforeDate(1) + " 23:59:59");
+</script>

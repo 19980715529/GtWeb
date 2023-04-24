@@ -1,0 +1,344 @@
+@layout("/common/_container.html"){
+
+<script src="${ctxPath}/static/echarts/echarts.min.js"></script>
+ 
+<ul id="myTab" class="nav nav-tabs">
+	<li class="active">
+		<a href="#home" data-toggle="tab">在线数据</a>
+	</li>
+	<li><a href="#dayAvg" data-toggle="tab">日平均在线</a></li>
+	<li><a href="#dayHighest" data-toggle="tab">日最高在线</a></li>
+</ul>
+<!-- 配置grid -->
+<div class="row" style="margin-top:10px;">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 用户类型： </label> 
+			<select class="" id="assist_type">
+				<option value="">请选择</option>
+				<option value="系统bug补偿">普通用户</option>
+				<option value="活动赠送">员工</option>
+				<option value="盗号问题">大R</option>
+				<option value="其他">小R</option>
+				<option value="其他">至尊VIP</option>
+			</select>
+			<!-- 简单查询第二组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="start_time" value="" class="" />
+			<select id="start_h"></select>时
+			- 
+			<input type="text" id="end_time" value="" class="" />
+			<select id="end_h"></select>时
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+</div>
+<div id="myTabContent" class="tab-content">
+	<div class="tab-pane fade in active" id="home" style="height: 450px;"></div>
+	<div class="tab-pane fade" id="dayAvg"></div>
+	<div class="tab-pane fade" id="dayHighest"></div>
+</div>
+
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	var homexdata = [['0:00','-2.5M'],['2:50','0M'],['5:00','2.5M'],['7.50','0M']];
+	var dayAvgxdata = [];
+	var dayHighestxdata = [];
+	$(function(){
+		genTimeDom($("#start_h"),24);	
+		genTimeDom($("#end_h"),24);	
+		genEchart('home');
+		
+		$('.nav-tabs a').on('show.bs.tab', function(event){
+	        $(event.target.hash).css("height","450px").siblings().css("height","0");
+	        genEchart(event.target.hash.replace('#',''));
+	    });
+		
+		function genArray(data,type) {
+			data = [['0:00','-2.5'],['2:50','0'],['5:00','2.5'],['7.50','0']];
+			var temp = [];
+			for (var i = 0; i < data.length; i++) {
+				temp[i] = data[i][type];
+			}
+			return temp;
+		}
+		
+		function genEchart(id) {
+			//myChart.showLoading(); 
+			switch(id) {
+				case 'home':
+					if(homexdata.length <= 0) {
+						$.get('${ctxPath}/statistics/getJson', function (data) {
+							var homexdata = JSON.parse(data);
+							getData(id,homexdata);
+						});
+					} else {
+						getData(id,homexdata);
+					}
+					break;
+				case 'dayAvg':
+					if(homexdata.length <= 0) {
+						$.get('${ctxPath}/statistics/getJson', function (data) {
+							var dayAvgxdata = JSON.parse(data);
+							getData(id,dayAvgxdata);
+						});
+					} else {
+						getData(id,dayAvgxdata);
+					}
+					break;
+				case 'dayHighest':
+					if(homexdata.length <= 0) {
+						$.get('${ctxPath}/statistics/getJson', function (data) {
+							var dayHighestxdata = JSON.parse(data);
+							getData(id,dayHighestxdata);
+						});
+					} else {
+						getData(id,dayHighestxdata);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		
+		function getData(id,data) {
+		// 基于准备好的dom，初始化echarts实例
+		var myChart = echarts.init(document.getElementById(id));
+		//myChart.showLoading();   
+		    myChart.setOption(option = {
+		        title: {
+		            text: '在线统计',
+		            left: 'center'
+		        },
+		        tooltip: {
+		            trigger: 'axis'
+		        },
+		        legend: {
+		        	show: true,
+		        	zlevel:10,
+		        	z:10,
+		        	data: [{
+		        	    name: '在线',
+		        	    // 强制设置图形为圆。
+		        	    icon: 'circle',
+		        	    // 设置文本为红色
+		        	    textStyle: {
+		        	        color: '#33C3F7'
+		        	    }
+		        	}],
+	                left: 'right',
+	                y:'middle',
+	                orient: 'vertical'
+	            },
+		        xAxis: {
+		            data: genArray(data.data,0)
+		        },
+		        yAxis: {
+		            splitLine: {
+		                show: true
+		            },
+		            min: -7.5,
+		            max: 7.5,
+		            interval: 2.5,
+		            type: 'value',
+		            axisLabel: {
+		                formatter: function (value, index) {
+	                        return value + 'M';
+	                    }
+		            }
+		        },
+		        /*
+		        toolbox: {
+		        	orient: 'vertical',
+		            feature: {
+		                dataZoom: {
+		                    show:false
+		                },
+		                restore: {show:false},
+		                saveAsImage: {}
+		            }
+		        },*/
+		        lineStyle: {
+		        	normal: {
+		        		color: '#33C3F7'
+		        	}
+		        },
+		        smooth: true,
+		        dataZoom: [{
+		            startValue: '2014-06-01'
+		        }, {
+		            type: 'inside'
+		        }],
+		        /*
+		        visualMap: {
+		            top: 200,
+		            right: 10,
+		            pieces: [{
+		                gt: 0,
+		                lte: 50,
+		                color: '#096'
+		            }, {
+		                gt: 50,
+		                lte: 100,
+		                color: '#ffde33'
+		            }, {
+		                gt: 100,
+		                lte: 150,
+		                color: '#ff9933'
+		            }, {
+		                gt: 150,
+		                lte: 200,
+		                color: '#cc0033'
+		            }, {
+		                gt: 200,
+		                lte: 300,
+		                color: '#660099'
+		            }, {
+		                gt: 300,
+		                color: '#7e0023'
+		            }],
+		            outOfRange: {
+		                color: '#999'
+		            }
+		        }*/
+		        series: {
+		            name: '在线',
+		            type: 'line',
+		            data: genArray(data.data,1),
+		            /*
+		            markLine: {
+		            	lineStyle: {
+		            		normal: {
+		            			color: 'black'
+		            		}
+		            	},
+		            	type: 'solid',
+		                silent: true,
+		                data: [{
+		                    yAxis: 50
+		                }, {
+		                    yAxis: 100
+		                }, {
+		                    yAxis: 150
+		                }, {
+		                    yAxis: 200
+		                }, {
+		                    yAxis: 300
+		                }]
+		            }*/
+		            smooth: true,
+	                lineStyle: {
+	                    normal: {opacity: 0.5}
+	                }
+		        }
+		    });
+		    window.onresize = myChart.resize;
+		}
+	});
+	
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		layer_alert('开始搜索...', "warn");
+    	return;
+    	
+		var user_type = $("#user_type").val();
+		var user_info = $("#user_info").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(user_type) && BladeTool.isEmpty(user_info)) {
+			layer_alert('请输入' + $("#user_type").text() + '!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(user_info) && BladeTool.isEmpty(user_type)) {
+			layer_alert('请选择搜索用户类型!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(user_info) && BladeTool.isNotEmpty(user_type)) {
+			wheres[user_type] = user_info;
+		}
+		
+		var admin_name = $("#admin_name").val();
+		if(BladeTool.isNotEmpty(admin_name)) {
+			wheres['adminname'] = admin_name;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+	    if(start_time > end_time) {
+	    	layer_alert('开始时间不能大于结束时间!', "warn");
+	    	return;
+	    }
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['createtime_dategt'] = start_time;
+		}
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['createtime_datelt'] = end_time;
+		}
+		
+		var assist_type = $("#assist_type").val();
+		if(BladeTool.isNotEmpty(assist_type)) {
+			wheres['operatetype'] = assist_type;
+		}
+	    
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+		btn_stage.bind(toolbar);
+        reloadGrid();
+	}
+</script>
+
+@}	

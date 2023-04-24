@@ -1,0 +1,32 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+			<table class="table table-bordered">
+				<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
+					<td colspan="3">${accounttypename.clientType!}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包名称: </td>
+					<td>${accounttypename.name!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">金币比率: </td>
+					<td colspan="3">${accounttypename.ratio!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td>${accounttypename.remarks!}</td>
+				</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+</div>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

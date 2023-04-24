@@ -1,0 +1,150 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "";
+	var _filter = '{"PlatformID":"-1","startTime":"' +getBeforeDate(30) +'","endTime":"' +getBeforeDate(1)+'"}';
+	_filter = encodeURI(_filter);
+
+	$(function() {
+		initGrid();
+		$("#start_time").val(getBeforeDate(30));
+		$("#end_time").val(getBeforeDate(1));
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/raulist";//查询列表接口
+		jQuery(grid_selector).jqGrid({
+			url: grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : ["日期","(新增)IOS","(新增)赠送","新增"],
+			colModel : [
+			            {name : "ApplyDate", width : 100, sortable:false,align:'center'}, 
+			            {name : "newios", width : 100, sortable:false,align:'center'},
+			            {name : "newbus", width : 100, sortable:false,align:'center'},
+			            {name : "newtotal", width : 100, sortable:false,align:'center'}
+			            ],
+			postData : {where:_filter,type:'new'},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:-1
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '<span class="text-red">--</span>';
+			return html;
+		}
+	}
+</script>
+<!-- 配置grid -->
+<div class="row" style="margin-top:10px;">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="statistics-search">
+					<!-- 简单查询第一组 -->
+			<span id="GameTypeForm">
+				<label class=""> 游戏平台： </label> 
+				<select id="ptypeid"></select>
+			</span>
+			<!-- 简单查询第一组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="start_time" value="" class="" />
+			- 
+			<input type="text" id="end_time" value="" class="" />
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+			</label>
+		</div>
+	</form>
+	
+	<!-- grid -->
+	<table id="grid-table"></table>
+</div>
+
+<script src="${ctxPath}/static/echarts/echarts.min.js"></script>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+		$('.nav-tabs a').on('show.bs.tab', function(event){
+	        //$(event.target.hash).css("height","450px").siblings().css("height","0");
+	    });
+	
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		max: laydate.now(-1),
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		max: laydate.now(-1),
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	// 获取平台列表
+	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+        	var type = data.data;
+        	var html = '<option value="-1">请选择</option><option value="0">其他</option>';
+        	for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			}
+        	$("#ptypeid").html(html);
+        }
+ 	}).start();
+	
+	function goSearch() {
+		var wheres = {};
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime'] = getBeforeDate(1);
+				$("#end_time").val(getBeforeDate(1));
+			}
+		}
+		var PlatformID = $("#ptypeid").val();
+		if(BladeTool.isNotEmpty(PlatformID)) {
+			wheres['PlatformID'] = PlatformID;
+		}
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			}
+		}).trigger("reloadGrid");
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

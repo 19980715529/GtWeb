@@ -1,0 +1,25 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">领取金币数量: </td>
+					<td>${onlinegold.Amount!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">领取间隔时间: </td>
+					<td>${onlinegold.Time_Id!}分钟</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">允许领取次数: </td>
+					<td>${onlinegold.Prop_Id!}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

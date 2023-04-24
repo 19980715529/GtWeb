@@ -1,0 +1,45 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏ID: </td>
+					<td>${gameitem.GameID!}
+						<input type="hidden" name="gameitem.GameID" value="${gameitem.GameID!}" />
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+					<td><input type="text" name="gameitem.GameName" value="${gameitem.GameName!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">支持类型: </td>
+					<td><input type="text" name="gameitem.SuportType" value="${gameitem.SuportType!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">链接地址: </td>
+					<td><input type="text" name="gameitem.DataBaseAddr" value="${gameitem.DataBaseAddr!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数据库名: </td>
+					<td><input type="text" name="gameitem.DataBaseName" value="${gameitem.DataBaseName!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">服务器版本: </td>
+					<td><input type="text" name="gameitem.ServerVersion" value="${gameitem.ServerVersion!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">客户端版本: </td>
+					<td><input type="text" name="gameitem.ClientVersion" value="${gameitem.ClientVersion!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">服务器名称: </td>
+					<td><input type="text" name="gameitem.ServerDLLName" value="${gameitem.ServerDLLName!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">客户端名称: </td>
+					<td colspan="3"><input type="text" name="gameitem.ClientExeName" value="${gameitem.ClientExeName!}" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

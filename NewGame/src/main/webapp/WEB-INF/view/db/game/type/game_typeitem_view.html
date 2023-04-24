@@ -1,0 +1,25 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">类型ID: </td>
+					<td>${gametype.TypeID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">类型名称: </td>
+					<td>${gametype.TypeName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td>${gametype.SortID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否有效: </td>
+					<td>${gametype.NullityName!}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

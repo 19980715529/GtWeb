@@ -1,0 +1,31 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡名称: </td>
+					<td><input type="text" name="livcardconfig.CardName" value=""/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡价格: </td>
+					<td><input type="text" name="livcardconfig.CardPrice" value="" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡游戏豆: </td>
+					<td><input type="text" name="livcardconfig.Currency" value="" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡游戏币: </td>
+					<td><input type="text" name="livcardconfig.Gold" value="" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

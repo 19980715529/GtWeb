@@ -1,0 +1,41 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/givetransfer/givetransfer" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家ID: </td>
+					<td>
+						<input name="player.userid" type="text"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送类型: </td>
+					<td>
+						<select name="player.type">
+							<option value="0">金币赠送转移</option>
+							<option value="1">银行赠送转移</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送金币数: </td>
+					<td>
+						<input name="player.score" value="0" id="score" autoComplete='off'/>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td id="showC"></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script src="${ctxPath}/static/search/numhandler.js" type="text/javascript" ></script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认",btn_close:"关闭"}) {}
+@}

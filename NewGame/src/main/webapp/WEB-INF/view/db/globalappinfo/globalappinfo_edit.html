@@ -1,0 +1,65 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<input type="hidden" name="globalappinfo.Buy_Id" value="${globalappinfo.Buy_Id!0}" />
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品类型(type_id): </td>
+					<td><input type="text" name="globalappinfo.type_id" value="${globalappinfo.type_id!}"/>
+						<!-- <select id="" name="globalappinfo.type_id">
+							@if(globalappinfo.type_id == 1){
+							<option value="1" selected="selected">苹果产品</option>
+							@} else {
+							<option value="1">苹果产品</option>
+							@}
+						</select> -->
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品编号: </td>
+					<td><input type="text" name="globalappinfo.IOS_Product_Id" value="${globalappinfo.IOS_Product_Id!}" class="form-control"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品价格: </td>
+					<td><input type="text" name="globalappinfo.payrmb" value="${globalappinfo.PayRMB!0}" class="form-control"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送游戏币: </td>
+					<td><input type="text" name="globalappinfo.gold" value="${globalappinfo.Gold!0}" class="form-control"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
+					<td>
+						<select name="globalappinfo.clienttype" id="clienttype"></select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script>
+		$(function() {
+			// 获取平台列表
+			new Ajax("${ctxPath}/newsplatform/getPlatformInfo?rankStaus=1", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="0">0(默认)</option>';
+		        	for (var i = 0; i < type.length; i++) {
+						html += '<option value="' + type[i]['clientType'] + '"';
+						if('${globalappinfo.clientType!0}'==type[i]['clientType']){
+							html += ' selected="selected"';
+						}
+						html += '>' + type[i]['name'] + '</option>';
+					}
+		        	$("#clienttype").html(html);
+		        }
+		 	}).start();
+		});
+	</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

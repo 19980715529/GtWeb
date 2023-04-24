@@ -1,0 +1,99 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var ctx = "${ctxPath}";
+	$(function(){
+		backDom('在线管理员','onlineUser');
+		initGrid();
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/online";//查询列表接口
+		var _colnames=[ "用户ID","登录名",  "用户主机地址","session创建时间","session最后访问时间","session id","超时时间","状态"/* ,"操作" */];
+		var _colmodel=[   {name:"userId",sortable:false, width:80},
+						  {name:"username",sortable:false, width:80, sortable:false},
+						  {name:"host",sortable:false, width:80, sortable:false},
+						  {name:"startTimestamp",sortable:false, width:80, sortable:false},
+						  {name:"lastAccessTime",sortable:false, width:100, sortable:false},
+						  {name:"id",sortable:false, width:80, sortable:false},
+						  {name:"timeout",sortable:false, width:50, sortable:false},
+						  {name:"status",sortable:false, width:50, sortable:false}/* ,
+						  {name:"",sortable:false, width:50, sortable:false,formatter:rowShow} */
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//caption: "用户管理",
+		    shrinkToFit:true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"id"},
+			multiselect : false,//定义是否可以多选
+			rownumbers : false,
+			rowNum:-1,
+			postData: {},
+			beforeSelectRow: function(rowid, e) { 
+			},
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+			}
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '<a title="剔除" class="text-33C3F7 iframeurl" onclick="forceLogout(\'' + rowObject.id + '\')" href="#" ><strong>剔除</strong></a>';
+			return html;
+		}
+	}
+
+	function forceLogout(id) {
+        layer.confirm('确定剔除？', {
+            icon: 3,
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                url:ctx + '/user/forceLogout/' + id,
+                type:'post',
+                dataType:'json',
+                async: false,
+                success:function (data) {
+                    if(data.code === 0){
+                        layer.msg(data.message, {shift: 1});
+                        reloadTab();
+                        return false;
+                    }
+                    else{
+                        layer_alert(data.message, "error");
+                        return false;
+                    }
+                },
+                error:function (state,type, err) {
+                    console.log(type);
+                    console.log(err);
+                    console.log(state);
+                }
+            })
+        }, function () {
+            //layer.msg('已取消');
+        });
+	}	
+</script>
+
+
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="">
+
+	<script type="text/javascript">
+		
+	</script>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	<!-- 引入列表页所需js -->
+	@include("/common/_listscript.html"){}
+@}	

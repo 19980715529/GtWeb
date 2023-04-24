@@ -1,0 +1,54 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">	
+		<!-- 表单 -->
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">角色名称: </td>
+					<td>
+						<input name="blade_role.name" value="${role.name}" />
+						<input type="hidden" name="blade_role.id" value="${role.id}" />
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">角色类型: </td>
+					<td>
+						<select name="blade_role.tips">
+							@ if(role.tips == 'administrator' && (shiro.getUser().isSysRole == true)){
+								<option value="administrator" selected="selected">系统管理员</option>
+								<option value="admin">高级管理员</option>
+								<option value="user">初级管理员</option>
+							@}
+							@ else if(shiro.getUser().isSysRole == true){
+								<option value="administrator">系统管理员</option>
+							@}
+							@if(role.tips == 'admin'){
+								<option value="admin" selected="selected">高级管理员</option>
+								<option value="user">初级管理员</option>
+							@}
+							@ else if(role.tips == 'user'){
+								<option value="admin">高级管理员</option>
+								<option value="user" selected="selected">初级管理员</option>
+							@}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td>${role.num}</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"修改",btn_close:"关闭"}) {}	
+	</form>
+	<script type="text/javascript">
+		$(function(){
+			$("#btn_save").bind("click",function(){
+				setTimeout(function(){parent.initZtree();}, 499);
+			});
+		});
+	</script>
+@}

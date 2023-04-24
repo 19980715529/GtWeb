@@ -1,0 +1,173 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员ID: </td>
+					<td>${viptype.MemberOrder!}
+						<input type="hidden" name="viptype.MemberOrder" value="${viptype.MemberOrder!}"/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员名称: </td>
+					<td><input name="viptype.MemberName" value="${viptype.MemberName!}"/></td>
+				</tr>
+				<tr>	
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员权限: </td>
+					<td colspan="3">
+						<table>
+							<tr>
+								<td>
+									@if(CanPlay == 1){
+										<input type="checkbox" name="viptype.UserRight" value="1" checked="checked"/>禁止进行游戏
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="1" />禁止进行游戏
+									@}
+								</td>
+								<td>
+									@if(CanLookon == 1){
+										<input type="checkbox" name="viptype.UserRight" value="2" checked="checked"/>禁止旁观游戏
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="2" />禁止旁观游戏
+									@}
+								</td>
+								<td>
+									@if(CanWisper == 1){
+										<input type="checkbox" name="viptype.UserRight" value="4" checked="checked"/>禁止发送私聊
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="4" />禁止发送私聊
+									@}
+								</td>
+								<td>
+									@if(CanRoomChat == 1){
+										<input type="checkbox" name="viptype.UserRight" value="8" checked="checked"/>禁止大厅聊天
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="8" />禁止大厅聊天
+									@}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									@if(CanGameChat == 1){
+										<input type="checkbox" name="viptype.UserRight" value="16" checked="checked"/>禁止游戏聊天
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="16" />禁止游戏聊天
+									@}
+								</td>
+								<td>
+									@if(CanGameTop == 1){
+										<input type="checkbox" name="viptype.UserRight" value="64" checked="checked"/>禁止上榜
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="64" />禁止上榜
+									@}
+								</td>
+								<td>
+									@if(CanGameTrade == 1){
+										<input type="checkbox" name="viptype.UserRight" value="128" checked="checked"/>禁止交易
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="128" />禁止交易
+									@}
+								</td>
+								<td>
+									@if(CanTrumpet == 1){
+										<input type="checkbox" name="viptype.UserRight" value="32" checked="checked"/>禁止发送小喇叭
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="32" />禁止发送小喇叭
+									@}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									@if(CanDoubleScore == 1){
+										<input type="checkbox" name="viptype.UserRight" value="256" checked="checked"/>游戏双倍积分
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="256" />游戏双倍积分
+									@}
+								</td>
+								<td>
+									@if(CanKillOutUser == 1){
+										<input type="checkbox" name="viptype.UserRight" value="512" checked="checked"/>游戏踢出用户
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="512" />游戏踢出用户
+									@}
+								</td>
+								<td>
+									@if(CanEnterVipRoom == 1){
+										<input type="checkbox" name="viptype.UserRight" value="1024" checked="checked"/>能进入VIP房间
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="1024" />能进入VIP房间
+									@}
+								</td>
+								<td>
+									@if(IsGameMatchUser == 1){
+										<input type="checkbox" name="viptype.UserRight" value="268435456" checked="checked"/>游戏比赛用户
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="268435456" />游戏比赛用户
+									@}
+								</td>
+							</tr>
+							<tr>
+								<td>
+									@if(CanSendGift == 1){
+										<input type="checkbox" name="viptype.UserRight" value="2048" checked="checked"/>赠送礼物功能
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="2048" />赠送礼物功能
+									@}
+								</td>
+								<td>
+									@if(CanOnlineNotice == 1){
+										<input type="checkbox" name="viptype.UserRight" value="4096" checked="checked"/>上线公告功能
+									@} else{
+										<input type="checkbox" name="viptype.UserRight" value="4096" />上线公告功能
+									@}
+								</td>
+								<td colspan="2"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">任务奖励: </td>
+					<td><input name="viptype.TaskRate" value="${viptype.TaskRate!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商城折扣: </td>
+					<td><input name="viptype.ShopRate" value="${viptype.ShopRate!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">银行优惠: </td>
+					<td><input name="viptype.InsureRate" value="${viptype.InsureRate!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日赠送: </td>
+					<td><input name="viptype.DayPresent" value="${viptype.DayPresent!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日登陆礼包: </td>
+					<td><input name="viptype.DayGiftID" value="${viptype.DayGiftID!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">创建时间: </td>
+					<td>${viptype.CollectDate!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td><input name="viptype.CollectNote" value="${viptype.CollectNote!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">拥有金币: </td>
+					<td><input name="viptype.ScoreCount" value="${viptype.ScoreCount!0}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加在线奖励: </td>
+					<td><input name="viptype.OnlineReward" value="${viptype.OnlineReward}" />%</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加救济金奖励: </td>
+					<td><input name="viptype.Relieffund" value="${viptype.Relieffund}" />%</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加签到奖励: </td>
+					<td><input name="viptype.Sign" value="${viptype.Sign}" />%</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加膜拜奖励: </td>
+					<td colspan="3"><input name="viptype.Visiting" value="${viptype.Visiting}" />%</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

@@ -1,0 +1,344 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var ServerID = '${ServerID}';
+	var KindID = '${KindID}';
+	var ks = new Map();
+	var where = '{"ServerID":"'+ServerID+'","startTime":"' +getBeforeDate(0) +' 00:00:00","endTime":"' +getBeforeDate(0)+' 23:59:59"}';
+	export_source = 'record_bloodcontrol.blood_change_detail';
+	export_type = 'blood_change';
+	
+	$(function() {
+		$(".Current_page",parent.document).html('血池变化');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/bcDataList";//查询列表接口
+		var _colnames = [ "时间", "剩余血池", "血池平衡值"];
+		var _colmodel = [ { name : "WriteDate", sortable:false }, 
+		                  { name : "Blood_Pool", sortable:false }, 
+		                  { name : "lMaxEatScore", sortable:false }
+		                  ];
+
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {ServerID:ServerID,where:encodeURI(where)},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:50,
+			sortname:"WriteDate",
+			sortorder:"desc",
+			height: 'auto'
+		});
+	}
+</script>
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="statistics-search">
+			<!-- 简单查询第一组 -->
+			<label class=""> 房间信息： </label> 
+			<select id="ServerID"></select>
+			<!-- 简单查询第二组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="starttime" /> - 
+			<input type="text" id="endtime" /> 
+			
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white" type="button"
+					onclick="goSearch()">查询</button>
+			</label>
+		</div>
+	</form>
+
+	<div id="myChart" style="height: 400px;"></div>
+	<table id="grid-table" style="margin-bottom: 50px;"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/highcharts/highcharts.js"></script>
+<script src="${ctxPath}/static/highcharts/exporting.js"></script>
+<script type="text/javascript">
+	$(function(){
+		getData(ServerID,encodeURI(where));
+		ks.put('4',4);
+		ks.put('12',12);
+		ks.put('13',13);
+		/* ks.put('22',22); */
+		new Ajax("${ctxPath}/room/getRoomInfo", function (data) {
+		    if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		    	var type = data.data;
+		    	var html = '<option value="">请选择</option>';
+		    	for (var i = 0; i < type.length; i++) {
+		    		html += '<option value="' + type[i]['ServerID']+','+type[i]['KindID']+ '"';
+		    		if(ServerID == type[i]['ServerID']) {
+		    			html += ' selected="selected"';	
+		    		}
+					html += '>' + type[i]['ServerName'] + '</option>';
+				}
+		    	$("#ServerID").html(html);
+		    }
+		}).start();
+	});
+	
+	function Create2DArray(rows) {
+		  var arr = [];
+
+		  for (var i=0;i<rows;i++) {
+		     arr[i] = [];
+		  }
+
+		  return arr;
+		}
+	
+	function getData(ServerID,where) {
+		$.get('${ctxPath}/room/bcData?ServerID='+ServerID+'&where='+where, function (data) {
+			var data = JSON.parse(data);
+			var tempdata = data.data;
+			var len = tempdata.length;
+			var bdata = []; // 血池平衡值
+			var cbdata = []; // 血池触底值
+			var tdata = []; // X时间轴
+			var ddata = []; // 当前血池值
+			for ( var i=0; i<len;i++) {
+				var date = tempdata[i]['WriteDate'];
+				bdata[i] = tempdata[i]['lMaxEatScore'];
+				cbdata[i] = tempdata[i]['lTotalLimitScore'];
+				tdata[i] = date;
+				ddata[i] = tempdata[i]['Blood_Pool'];
+			}
+			if(ks.containsValue(KindID)){
+				genChartsByFish(tdata,ddata,bdata,cbdata);
+			} else {
+				genCharts(tdata,ddata,bdata,cbdata);
+			}
+		});
+	}
+	
+	function genCharts(xAxisData,seriesData,balanceData,cbdata) {
+		// 基于准备好的dom，初始化echarts实例
+		Highcharts.chart('myChart', {
+
+		    title: {
+		        text: '血池变化'
+		    },
+
+		    yAxis: {
+		        title: {
+		            text: '血池',
+		            rotation:360
+		        }
+		    },
+		    legend: {
+		        layout: 'vertical',
+		        align: 'right',
+		        verticalAlign: 'middle'
+		    },
+		    
+		    tooltip: {
+		    	shared: true
+		    },
+		    
+		    xAxis: {
+		        categories:xAxisData,
+		        labels: {
+		        	formatter: function() {
+		        		// 格式化成月/日，只在第一个刻度显示年份
+            			if(BladeTool.isNotEmpty(this.value)) {
+	            		    var date = new Date(this.value);
+	            		    var texts = [date.getHours(),date.getMinutes()];
+	            		    return texts.join(':');
+            			} else {
+            				return '';
+            			}
+		        	}
+		        }
+		    },
+
+		    series: [{
+		        name: '血池平衡',
+		        data: balanceData,
+		        color: '#EA5335',
+		        type: 'spline',
+		        marker:{
+		        	enabled:false
+		        }
+		        //lineWidth: 5
+		    }, {
+		        name: '血池',
+		        data: seriesData,
+		        color: '#33C3F7',
+		        type: 'spline'
+		    }, {
+		        name: '血池触底',
+		        data: cbdata,
+		        color: '#000000',
+		        type: 'spline',
+		        marker:{
+		        	enabled:false
+		        }
+		        //lineWidth: 5
+		    }],
+		    
+		    credits: {  
+		    	  enabled: false  
+		    	}
+
+		});
+	}
+	function genChartsByFish(xAxisData,seriesData,balanceData,cbdata) {
+		// 基于准备好的dom，初始化echarts实例
+		Highcharts.chart('myChart', {
+
+		    title: {
+		        text: '血池变化'
+		    },
+
+		    yAxis: {
+		        title: {
+		            text: '血池',
+		            rotation:360
+		        }
+		    },
+		    legend: {
+		        layout: 'vertical',
+		        align: 'right',
+		        verticalAlign: 'middle'
+		    },
+		    
+		    tooltip: {
+		    	shared: true
+		    },
+		    
+		    xAxis: {
+		        categories:xAxisData,
+		        labels: {
+		        	formatter: function() {
+		        		// 格式化成月/日，只在第一个刻度显示年份
+            			if(BladeTool.isNotEmpty(this.value)) {
+	            		    var date = new Date(this.value);
+	            		    var texts = [date.getHours(),date.getMinutes()];
+	            		    return texts.join(':');
+            			} else {
+            				return '';
+            			}
+		        	}
+		        }
+		    },
+
+		    series: [{
+		        name: '血池平衡',
+		        data: balanceData,
+		        color: '#EA5335',
+		        type: 'spline',
+		        marker:{
+		        	enabled:false
+		        }
+		    }, {
+		        name: '血池',
+		        data: seriesData,
+		        color: '#33C3F7',
+		        type: 'spline'
+		    }],
+		    
+		    credits: {  
+		    	  enabled: false  
+		    	}
+
+		});
+	}
+
+	function goSearch() {
+		var ServerID = $("#ServerID").val();
+		var wheres = {};
+		if(BladeTool.isEmpty(ServerID)) {
+			layer_alert('房间ID不能为空!', "warn");
+	    	return;
+		} else {
+			var sids = ServerID.split(',');
+			ServerID = sids[0];
+			wheres['ServerID'] = ServerID;
+			KindID = sids[1];
+		}
+		
+		var start_time = $("#starttime").val();
+		var end_time = $("#endtime").val();
+	    if(start_time > end_time) {
+	    	layer_alert('开始时间不能大于结束时间!', "warn");
+	    	return;
+	    }
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime'] = start_time;
+		}
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime'] = end_time;
+		}
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		// 更新图表
+		getData(ServerID,where);
+		
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+		
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){} 
+@include("/common/_function/_rightmenu.html"){}
+@}
+
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+	laydate({
+		elem : '#starttime',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#endtime',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	$("#starttime").val(getBeforeDate(0) + " 00:00:00");
+	$("#endtime").val(getBeforeDate(0) + " 23:59:59");
+</script>

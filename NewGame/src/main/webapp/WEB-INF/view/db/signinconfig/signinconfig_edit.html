@@ -1,0 +1,38 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<input type="hidden" name="signinconfig.id" value="${signinconfig.id!} "/>
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">天数: </td>
+					<td>
+						<input type="text" name="signinconfig.signInDays" value="${signinconfig.SignInDays!}"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">奖励类型: </td>
+					<td>
+						<input type="radio" name="signinconfig.rewardType" value="2" ${signinconfig.RewardType==2?"checked":""}>转盘次数</input>&nbsp;&nbsp;
+						<input type="radio" name="signinconfig.rewardType" value="1" ${signinconfig.RewardType==1?"checked":""}>金币</input>&nbsp;&nbsp;
+						<input type="radio" name="signinconfig.rewardType" value="3" ${signinconfig.RewardType==3?"checked":""}>待定</input>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">奖励最小值: </td>
+					<td><input type="text" name="signinconfig.reward" value="${signinconfig.Reward!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">奖励最大值: </td>
+					<td><input type="text" name="signinconfig.reward1" value="${signinconfig.Reward1!}"/></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

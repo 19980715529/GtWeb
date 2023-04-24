@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+	http://www.springframework.org/schema/task 
+	http://www.springframework.org/schema/task/spring-task-4.3.xsd ">
+	<task:scheduler id="dataScheduler" pool-size="5"/>
+	<!-- 0/5 0 1 * * ? [秒] [分] [小时] [日] [月] [周] [年] -->
+<!--	<bean id="globalTask" class="com.smallchill.common.task.GlobalTask"></bean>-->
+<!--	<bean id="globalDelayQueue" class="com.smallchill.common.task.GlobalDelayQueue"></bean>-->
+	<task:annotation-driven />
+<!--	<task:scheduled-tasks scheduler="dataScheduler">-->
+		<!-- 每一分钟执行一次 -->
+<!--		<task:scheduled ref="globalTask" method="run" cron="0 0/1 * * * ?" />-->
+		<!--		每周星期天凌晨1点执行一次-->
+<!--		<task:scheduled ref="globalTask" method="run" cron="0 0 1 ? * L" />-->
+		<!-- 早九点到晚五点每三十分钟执行一次 -->
+		<!-- <task:scheduled ref="globalTask" method="run" cron="0 0/30 9-17 * * ?" /> -->
+		<!--每一秒执行一次-->
+<!--		<task:scheduled ref="globalDelayQueue" method="run" cron="*/5 * * * * ?" />-->
+<!--	</task:scheduled-tasks>-->
+</beans>

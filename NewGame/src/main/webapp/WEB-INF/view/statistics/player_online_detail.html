@@ -1,0 +1,52 @@
+@layout("/common/_container.html"){
+<style>
+.ui-jqgrid .ui-jqgrid-htable, .ui-jqgrid-btable {
+    width: 50%!important;
+}
+</style>
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "";
+	var _filter = '';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter = '{"KindID":"${id}"}';
+	}
+
+	$(function() {
+		initGrid();
+	});
+
+	function initGrid() {
+		jQuery("#grid-table").jqGrid({
+			url:ctx + "/${code}/rpoclist",
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : ["房间名称","当前在线人数"],
+			colModel : [
+			            {name : "ServerName", sortable:false,align:'center'}, 
+			            {name : "ServerName", sortable:false,align:'center'}
+			            ],
+			postData : {where: _filter},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:-1,
+			sortname:"OnlineCount",
+			sortorder:"desc",
+			height: 'auto'
+		});
+	}
+</script>
+
+<!-- 配置grid -->
+<div class="row">
+	<div class="col-xs-6 tb-grid">
+		<div class="space-4"></div>
+		<div class="space-4"></div>
+		<!-- grid -->
+		<table id="grid-table"></table>
+	</div>
+</div>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

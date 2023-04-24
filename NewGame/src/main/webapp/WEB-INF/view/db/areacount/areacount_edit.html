@@ -1,0 +1,56 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">区服ID: </td>
+					<td>${areacount.serverID!}
+						<input name="areacount.serverID" value="${areacount.serverID!}" type="hidden"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">端口: </td>
+					<td><input name="areacount.port" value="${areacount.port!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当前在线人数: </td>
+					<td><input name="areacount.userCount" value="${areacount.userCount!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">刷新时间: </td>
+					<td><input id="deploy_time" name="areacount.overDueTime" value="${areacount.overDueTime!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否允许进人: </td>
+					<td>
+						@if(areacount.isOpen == 1) {
+							<input type="radio" name="areacount.isOpen" value="1" checked="checked"/>允许
+							<input type="radio" name="areacount.isOpen" value="0"/>不允许
+						@} else{
+							<input type="radio" name="areacount.isOpen" value="1"/>允许
+							<input type="radio" name="areacount.isOpen" value="0" checked="checked"/>不允许
+						@}
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+laydate({
+	elem : '#deploy_time',
+	format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+	//festival: true, //显示节日
+	choose : function(datas) { //选择日期完毕的回调
+		/*   alert('得到：'+datas); */
+	}
+});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

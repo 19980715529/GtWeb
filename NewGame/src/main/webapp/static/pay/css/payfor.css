@@ -1,0 +1,235 @@
+* {
+    margin: 0;
+    padding: 0
+}
+ol, ul {
+    list-style: none;
+}
+input:focus {
+    outline: none;
+}
+.layui-tab-content {
+     padding: 0px;
+}
+.container{
+    position: relative;
+    width: 1334px;
+    height: 750px;
+    background-color: #00a0e9;
+}
+.row1{
+    position: absolute;
+    left: 30px;
+    width:380px;
+    height: 687px;
+    background-color: #7c69af;
+}
+.row2{
+    position: absolute;
+    left:451px;
+    width:852px;
+    height: 687px;
+    background-color: #ed9c28;
+}
+
+.pay-btn:nth-of-type(1) {
+    margin-top: 33px;
+    background-image: url("../image/dikuang1.png");
+    color: black;
+}
+.pay-btn{
+    position: relative;
+    display: block;
+    width: 316px;
+    height: 108px;
+    line-height: 108px;
+    margin-left: 31px;
+    margin-top: 55px;
+    background-image: url("../image/dikuang2.png");
+    box-shadow: 0px 4px 4px 0px #666;
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 52px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.not-btn{
+    position: relative;
+    display: block;
+    width: 316px;
+    height: 108px;
+    line-height: 108px;
+    margin-left: 31px;
+    margin-top: 55px;
+    background-image: url("../image/dikuang3.png");
+    box-shadow: 0px 4px 4px 0px #666;
+    color: #fff;
+    white-space: nowrap;
+    text-align: center;
+    font-size: 52px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.call-btn{
+    position: relative;
+    display: block;
+    width: 238px;
+    height: 76px;
+    text-align: center;
+    font-size: 37px;
+    color: #fff;
+    line-height: 76px;
+    margin-left: 71px;
+    margin-top: 140px;
+    background-image: url("../image/dianwotoushu.png");
+    box-shadow: 0px 4px 4px 0px #666;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.pay-info{
+    width:852px;
+    height: 687px;
+    background-color: white;
+}
+.weixin-prompt{
+    position: relative;
+    display: block;
+    width: 852px;
+    height: 234px;
+    background-color: white;
+    background-image: url("../image/wx.png");
+    background-size: 100% 100%;
+    border: none;
+}
+.alipay-prompt{
+    position: relative;
+    display: block;
+    width: 852px;
+    height: 234px;
+    background-color: white;
+    background-image: url("../image/zfb.png");
+    background-size: 100% 100%;
+    border: none;
+}
+.number_amount{
+    position: relative;
+    display: block;
+    width: 852px;
+    height: 105px;
+    margin-top: 32px;
+    background-color: #ed9c28;
+    font-size: 35px;
+}
+.number_amount input{
+    position: relative;
+    text-align: center;
+    margin-left: 26px;
+    width: 474px;
+    height: 42px;
+    font-size: 32px;
+}
+.show_doc{
+    position: relative;
+    margin-left: 64px;
+}
+.show_doc2{
+    position: relative;
+    margin-left: 64px;
+    margin-top: 8px;
+}
+.number_chose{
+    position: relative;
+    width: 825px;
+    height: 200px;
+}
+.number_chose li:nth-of-type(1){
+    margin-left: 88px;
+}
+.number_chose li:nth-of-type(5){
+    margin-left: 88px;
+}
+.number_chose li{
+    float: left;
+    list-style-type: none;
+    width: 153px;
+    padding: 0px;
+    margin-left: 22px;
+    margin-top: 23px;
+    font-size: 25px;
+    text-align: center;
+    height: 88px;
+}
+.click_red {
+    background-color: #f14529 !important;
+    color: white !important;
+}
+.click_white {
+    background-color: white !important;
+    color: black !important;
+}
+.but_num{
+    position: relative;
+    list-style-type: none;
+    height: 49px;
+    width: 151px;
+    text-align: center;
+    line-height: 51px;
+    background-color: white;
+    font-size: 30px;
+    color: black;
+    border: 1px solid #9d9d9d;
+    padding: 0px;
+}
+.paybutton{
+    position: relative;
+    width: 300px;
+    height: 76px;
+    margin-top: 28px;
+    margin-left: 318px;
+    background-image: url("../image/paybutton.png");
+    background-size: 100% 100%;
+}
+body .return-class .layui-layer-content{width: 659px;height: 407px}
+body .return-class .layui-layer-title{color:#fff; border: none;}
+body .return-class .layui-layer-btn{ }
+body .return-class .layui-layer-btn a{background:#333;}
+body .return-class .layui-layer-btn .layui-layer-btn1{background:#999;}
+
+
+body .QrCode-class .layui-layer-title{height:0px;display: none;border:0px}
+body .QrCode-class .layui-layer-content{width: 450px;height: 400px}
+body .QrCode-class .layui-layer-setwin a{color:#ed9c28;}
+#tips_success{
+    display: none;
+    position: relative;
+    width: 659px;
+    height: 407px;
+    background-image: url("../image/chenggong.png");
+}
+#yes{
+    position: relative;
+    left: 223px;
+    top: 295px;
+    width:215px;
+    height:75px;
+    background-image: url("../image/qeuding.png");
+}
+#tips_error{
+    display: none;
+    position: relative;
+    width: 659px;
+    height: 407px;
+    background-image: url("../image/shibai.png");
+}
+#no{
+    position: relative;
+    left: 223px;
+    top: 295px;
+    width:215px;
+    height:75px;
+    background-image: url("../image/qeuding.png");
+}

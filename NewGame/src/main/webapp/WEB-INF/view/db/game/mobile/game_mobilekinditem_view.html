@@ -1,0 +1,48 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏ID: </td>
+					<td>${gamemobilekind.KindID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+					<td>${gamemobilekind.KindName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">模板名称: </td>
+					<td>${gamemobilekind.ModuleName!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">模板版本号: </td>
+					<td>${gamemobilekind.ClientVersion!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">资源版本号: </td>
+					<td>${gamemobilekind.ResVersion!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td>${gamemobilekind.SortID!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏归属: </td>
+					<td>
+						@if((gamemobilekind.KindMark == 1) || (gamemobilekind.KindMark == 3)){
+							IOS
+						@}
+						@if((gamemobilekind.KindMark == 2) || (gamemobilekind.KindMark == 3)){
+							&nbsp;&nbsp;Android
+						@}
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">禁用状态: </td>
+					<td>${gamemobilekind.NullityName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类型: </td>
+					<td colspan="3">${gamemobilekind.TypeName!}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

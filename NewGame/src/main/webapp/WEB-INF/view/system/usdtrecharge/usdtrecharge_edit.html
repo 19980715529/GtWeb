@@ -1,0 +1,61 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+  <div class="col-xs-12 tb-grid">
+    <form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+      <input type="hidden" name="usdtrecharge.id" value="${usdtrecharge.id}">
+      <table class="table table-bordered">
+        <tbody>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单号: </td>
+          <td><input type="text" name="usdtrecharge.orderNumber" value="${usdtrecharge.orderNumber}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单生成时间: </td>
+          <td><input type="text" name="usdtrecharge.createTime" value="${usdtrecharge.createTime}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单状态: </td>
+          <td id="td1"><input type="hidden" id="orderStatus" value="${usdtrecharge.orderStatus}"/></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家id: </td>
+          <td><input type="text" name="usdtrecharge.userId" value="${usdtrecharge.userId}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家钱包地址: </td>
+          <td><input type="text" name="usdtrecharge.urlPay" value="${usdtrecharge.urlPay}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家电话: </td>
+          <td><input type="text" name="usdtrecharge.phone" value="${usdtrecharge.phone}" readonly/></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单金额: </td>
+          <td><input type="text" name="usdtrecharge.topUpAmount" value="${usdtrecharge.topUpAmount}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">获得金币: </td>
+          <td><input type="text" name="usdtrecharge.gold" value="${usdtrecharge.gold}" readonly/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">完成时间: </td>
+          <td><input type="text" name="usdtrecharge.endTime" value="${usdtrecharge.endTime}" readonly/></td>
+        </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</div>
+<script>
+  var dict_progress = {
+    '1':"待支付",
+    '2':"已完成",
+    '3':"已关闭"
+  }
+  var cellvalue = $("#orderStatus").val()
+  var text2= '已完成：<input type="radio" name="usdtrecharge.orderStatus" value="2"/><br>'
+  var text3= '支付失败：<input type="radio" name="usdtrecharge.orderStatus" value="3"/> &nbsp&nbsp'
+  var text4= '<span class="label label-warning">订单已经关闭不可以操作</span>'
+  var html = function () {
+    if(cellvalue === '1'){
+      return '待支付：<input type="radio" name="usdtrecharge.orderStatus" value="1" checked/> &nbsp&nbsp'+text2+text3;
+    }else if(cellvalue === '2'){
+      return '已完成：<input type="radio" name="usdtrecharge.orderStatus" value="3" checked/> &nbsp&nbsp';
+    }else {
+      return text4;
+    }
+  }
+  $('#td1').append(html)
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

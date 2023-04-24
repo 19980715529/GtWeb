@@ -1,0 +1,38 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">平台类型: </td>
+					<td>
+						<select name="newplayerprop.platid">
+							<option value="0">苹果</option>
+							<option value="1">安卓</option>
+							<option value="2">PC</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">类型: </td>
+					<td>
+						<select name="newplayerprop.Prop_Id">
+							<option value="1">金币</option>
+							<option value="2">奖券</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数量: </td>
+					<td><input name="newplayerprop.amount" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

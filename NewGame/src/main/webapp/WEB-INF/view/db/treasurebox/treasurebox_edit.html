@@ -1,0 +1,29 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/treasurebox/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">宝箱类型ID: </td>
+					<td>${treasurebox.ID!}
+					<input type="hidden" name="treasurebox.ID" value="${treasurebox.ID!}"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">宝箱类型名称: </td>
+					<td><input name="treasurebox.TreasureBoxType" value="${treasurebox.TreasureBoxType!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">宝箱类型价格: </td>
+					<td><input name="treasurebox.Free" value="${treasurebox.Free!}" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

@@ -1,0 +1,266 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{';
+	//var _filter = '';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter += '"UserID":"${id}"';
+	}else{
+		_filter += '"startTime_gt":"' +getBeforeDate(0) +'","endTime":"' +getBeforeDate(0)+'"';
+	}
+	_filter += '}';
+	_filter = encodeURI(_filter);
+	
+	$(function() {
+		backDom('用户点控记录','point_control_log');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = [ "ID","玩家ID", "昵称", "管理员", "点控时间", "总输赢",/*"点控剩余值",*/ "旧作弊率", "新作弊率", "点控分数", "说明" ];
+		var _colmodel = [ 
+		                  { name : "userid", hidden:true}, 
+		                  { name : "userid", sortable:false, formatter:genLink}, 
+		                  { name : "NickName", sortable:false, formatter:genLink}, 
+		                  { name : "AdminUser", sortable:false}, 
+		                  { name : "writedate", sortable:false},  
+		                  { name : "winScore", sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0'}}, 
+		                  //{ name : "CheatingTotalWaste", sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0'}}, 
+		                  { name : "oldlCheatRate", sortable:false}, 
+		                  { name : "newlCheatRate", sortable:false}, 
+		                  { name : "newlCheatLimit", sortable:false, sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0'}}, 
+		                  { name : "memo", sortable:false,width:300} ];
+		var ids = {};
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {where: _filter,sort:'writedate',order:'desc'},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:100,
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				//ids[rowdata['userid']] = rowdata['userid'];
+				//objToal['lose'] += rowdata['winScore'];
+				if(BladeTool.isNotEmpty(rowdata['winScore']) && rowdata['winScore']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_winScore]').addClass('text-red');
+				}
+				
+				/* if(BladeTool.isNotEmpty(rowdata['newlCheatRate'])) {
+					if(rowdata['newlCheatRate']>0) {
+						totalcoin += rowdata['newlCheatLimit'];
+					} else if(rowdata['newlCheatRate']<0) {
+						totalcoin -= rowdata['newlCheatLimit'];
+					}
+				} */
+			},
+			gridComplete:function() {
+				new Ajax("${ctxPath}/point/getAllWinAdnLose?where="+encodeURI(_filter), function (data) {
+			        if(data.code == 0 && BladeTool.isNotEmpty(data.data) ) {
+			        var temp = data.data;
+					$("#wintotal").text(fmoney(temp.win.winPoint,0));
+					$("#losetotal").text(fmoney(temp.lose.losePoint,0));
+			     }
+			 	}).start();
+			}
+		});
+		function genLink(cellvalue, options, rowObject) {
+			var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.userid+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.userid+'"><strong>' + cellvalue + '</strong></a>';
+			return html;
+		}
+	}
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: 'fa',
+	        close: true
+	    });
+	}
+</script>
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 管理员： </label> 
+			<input type="text" id="admin_name"/> 
+				
+			<!-- 简单查询第二组 -->
+			<label> 用户： </label> 
+			<select id="user_type">
+				<option value="UserID">玩家ID</option>
+				<option value="NickName">玩家名称</option>
+			</select> 
+			<input type="text" value="${id!}" id="user_info"/>
+			
+			<!-- 简单查询第三组 -->
+			<label class=""> 点控时间： </label> 
+			<input type="text" id="starttime"/>- 
+			<input type="text" id="endtime"/> 
+			
+			<!-- 简单查询第四组 -->
+			<label> 是否异常： </label>
+			<select id="exType">
+				<option value="">请选择</option>
+				<option value="1">是</option>
+				<option value="0">否</option>
+			</select>
+			
+			<!-- 简单查询第五组 -->
+			<label> 输赢： </label>
+			<select id="win">
+				<option value="">请选择</option>
+				<option value="0">输</option>
+				<option value="1">赢</option>
+			</select>
+			<!-- 简单查询第六组 -->
+			<!-- <label> 点控状态： </label>
+			<select id="status">
+				<option value="">请选择</option>
+				<option value="0">进行中</option>
+				<option value="1">已结束</option>
+			</select> -->
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="search()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	
+	<div class="total-block">
+		总赢点控：<span class="text-red" id="wintotal">0</span>
+		总输点控：<span class="text-red" id="losetotal">0</span>
+		, <span class="text-red">（备注：总输赢栏位为添加作弊率时玩家当时的总输赢。）</span>
+	</div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#starttime',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#endtime',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	$(function(){
+		if(BladeTool.isEmpty('${id}')) {
+			$('#starttime').val(getBeforeDate(0));
+			$('#endtime').val(getBeforeDate(0));
+		}
+	});
+	
+	function search() {
+		var user_type = $("#user_type").val();
+		var user_info = $("#user_info").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(user_info)) {
+			wheres[user_type] = user_info;
+		}
+		
+		var admin_name = $("#admin_name").val();
+		if(BladeTool.isNotEmpty(admin_name)) {
+			wheres['AdminUser'] = admin_name;
+		}
+		
+		var start_time = $("#starttime").val();
+		var end_time = $("#endtime").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime_gt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime'] = getBeforeDate(0);
+				$("#endtime").val(getBeforeDate(0));
+			}
+		}
+		
+		var exType = $("#exType").val();
+		if(BladeTool.isNotEmpty(exType)) {
+			wheres['MemberTypeID'] = exType;
+		}
+		var win = $("#win").val();
+		if(BladeTool.isNotEmpty(win)) {
+			wheres['CheatingRateNew'] = win;
+		}
+		var status = $("#status").val();
+		if(BladeTool.isNotEmpty(status)) {
+			wheres['IsOnControl'] = status;
+		}
+	    
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1,
+			gridComplete:function() {
+				new Ajax("${ctxPath}/point/getAllWinAdnLose?where="+where, function (data) {
+			        if(data.code == 0 && BladeTool.isNotEmpty(data.data) ) {
+			        var temp = data.data;
+					$("#wintotal").text(fmoney(temp.win.winPoint,0));
+					$("#losetotal").text(fmoney(temp.lose.losePoint,0));
+			     }
+			 	}).start();
+			}
+		}).trigger("reloadGrid");
+	}
+	function resetForm() {
+		$("input").val("");
+		//$("select").val("");
+		$('#starttime').val(getBeforeDate(0));
+		$('#endtime').val(getBeforeDate(0));
+		reloadGrid();
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

@@ -1,0 +1,59 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">邮件标题: </td>
+                    <td ><input type="text" name="emailmodel.title" value=""/></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">发件人: </td>
+                    <td>
+                        <select id="sender" name="emailmodel.senderId" value=""></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数量: </td>
+                    <td><input type="text" name="emailmodel.amount" value=""/></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">附件类型: </td>
+                    <td>
+                        <!--附件类型：1：金币，2：转盘-->
+                        <input type="radio" value="1" name="emailmodel.attachment" >金币</input>
+                        <input type="radio" value="2" name="emailmodel.attachment" >转盘</input>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">邮件内容: </td>
+                    <td colspan="3">
+                        <textarea name="emailmodel.content" cols="90"></textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var ctx = "${ctxPath}";
+    $(function (){
+        getSenders()
+    })
+    function getSenders() {
+        new Ajax( ctx+ "/${code}/senders", function (data) {
+            if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data;
+                var html = '';
+                for (var i = 0; i < type.length; i++) {
+                    html += '<option value="' + type[i]['id']+'">' + type[i]['sender'] + '</option>';
+                }
+                $("#sender").html(html);
+            }
+        }).start();
+    }
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

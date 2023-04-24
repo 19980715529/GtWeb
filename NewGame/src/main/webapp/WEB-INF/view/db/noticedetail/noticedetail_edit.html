@@ -1,0 +1,33 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<input name="noticedetail.id" type="hidden" value="${noticedetail.id!}"/>
+		<input name="noticedetail.version" value="${noticedetail.version!0}" type="hidden"/>
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告clientID: </td>
+					<td><input name="noticedetail.clientID" value="${noticedetail.clientID!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告标题: </td>
+					<td>
+						<input name="noticedetail.name" value="${noticedetail.name!}"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告内容: </td>
+					<td>
+						<textarea rows="10" cols="50" name="noticedetail.content">${noticedetail.content!}</textarea>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

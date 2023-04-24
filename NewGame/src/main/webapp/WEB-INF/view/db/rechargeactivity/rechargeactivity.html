@@ -1,0 +1,123 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('充值双倍活动配置','rechargeactivity');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "id","充值活动开启时间","充值活动结束时间","额外赠送金币","额外赠送奖卷","活动期间可购买次数","充值产品编号","包ID","包名"];
+		var _colmodel=[   
+		                  {name:"id", hidden:true},
+		                  {name:"beginTime", sortable:false,width:300},
+		                  {name:"endTime", sortable:false},
+						  {name:"extraGold", sortable:false},
+						  {name:"extraTicket", sortable:false},
+						  {name:"buyTimes", sortable:false},
+						  {name:"pid", sortable:false},
+						  {name:"clientType", sortable:false},
+						  {name:"PackageName", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			rownumbers : false,
+			jsonReader:{id:"id"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<form data-url="" method="post" class="" role="form">
+				<!-- 配置查询 -->
+				<div class="">
+					<!-- 简单查询第一组 -->
+					<label class=""> 时间： </label> 
+					<input type="text" id="start_time" value="" class="" />
+					- 
+					<input type="text" id="end_time" value="" class="" />
+		
+					<!-- 简单查询按钮 -->
+					<label class="">
+						<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+						<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+					</label>
+				</div>
+			</form>
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	<script>
+	function goSearch() {
+		var wheres = {};
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+	    if(start_time > end_time) {
+	    	layer_alert('开始时间不能大于结束时间!', "warn");
+	    	return;
+	    }
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['InsertTime_dategt'] = start_time;
+		}
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['InsertTime_datelt'] = end_time;
+		}
+		
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		jQuery(grid_selector).jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+        reloadGrid();
+	}
+	</script>
+	@include("/common/_listscript.html"){}
+@}	

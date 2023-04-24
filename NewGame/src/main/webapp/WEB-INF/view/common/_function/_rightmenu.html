@@ -1,0 +1,5 @@
+<script type="text/javascript">
+	var rightMenuHtml='${func.getRightMenu(shiro.getUser().id, shiro.getUser().roles, "", isFresh!false, isExport!true)}';
+	//$.contextMenuInit(grid_selector,rightMenuHtml,'${code}');
+	$.contextMenuInit(grid_selector,rightMenuHtml,'${code}');
+</script>

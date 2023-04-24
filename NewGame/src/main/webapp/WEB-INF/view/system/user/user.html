@@ -1,0 +1,157 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var export_source = "user.sqlserverlist";
+	if("${func.isMySql()}" == "true"){
+		export_source = "user.sqlserverlist";
+	}
+	
+	$(function(){
+		backDom('管理员管理','user');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "序列","登录名","姓名","绑定手机号", "创建时间","最后登录时间","最后登录IP","帐号状态","角色"];
+		var _colmodel=[   {name:"id",index:"id", width:80,hidden:true},
+						  {name:"account",sortable:false, width:80, sortable:false},
+						  {name:"name",sortable:false, width:80, sortable:false},
+						  {name:"phone",sortable:false, width:80, sortable:false},
+						  {name:"createtime",index:"createtime", width:100, sortable:false},
+						  {name:"lastlogintime",index:"lastlogintime", width:80, sortable:false},
+						  {name:"lastloginip",sortable:false, width:50, sortable:false},
+						  {name:"statusname",sortable:false, width:50, sortable:false,formatter:rowShow},
+						  {name:"roleid",width:50, sortable:false,hidden:true}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//caption: "用户管理",
+		    shrinkToFit:true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"id"},
+			pager : pager_selector,
+			rowNum:100,
+			postData: {sort: "createtime desc, status desc, account", order: "desc"},
+			beforeSelectRow: function(rowid, e) { 
+				if(e.type == 'click'){
+				     i = $.jgrid.getCellIndex($(e.target).closest('td')[0]),  
+		             cm = jQuery("#grid-table").jqGrid('getGridParam', 'colModel');  
+		             return (cm[i].name == 'cb'); //当点击的单元格的名字为cb时，才触发选择行事件
+	            }
+			},
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				var urole = ${shiro.getUser().isSysRole};
+				if((urole == false) && (rowdata['roleid'].contains('7'))) {
+					$("#jqg_grid-table_"+rowid).attr("disabled","disabled");
+				}
+			}
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='statusname') {
+				if(rowObject.statusname == '锁定') {
+					html += '<span class="text-red">' + cellvalue + '</span>';
+				} else {
+					html += '<span>' + cellvalue + '</span>';
+				}
+			}
+			return html;
+		}
+	}
+	
+</script>
+
+
+	<!-- 配置grid -->
+	<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label id="searchthis1">登录名： </label> 
+			<input type="text"  id="inputs1" class="resetValid" style="margin-left:-3px;"/>
+			<input type="hidden" id="hides1" value="account" type="text"/>
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" id="gotoSearch">查询</button>
+				<button class="btn btn-sx btn-white" id="gotoReset">重置</button>
+			</label>
+		</div>
+	</form>
+		<div class="">
+
+	<script type="text/javascript">
+		var isAutoPage = true;
+		$(function () {
+		    $("#gotoSearch").bind("click", function () {
+		        var key1 = $("#hides1").val();
+		        var value1 = $("#inputs1").val();
+		        var filter = "";
+		        if (typeof (_filter) != "undefined") {
+		            filter = _filter;
+		        }
+		        var where = (BladeTool.isEmpty(filter)) ? "" : filter.replace("}", "");
+		        if (BladeTool.isNotEmpty(key1) && BladeTool.isNotEmpty(value1)) {
+		            where += (BladeTool.isEmpty(filter) ? "{" : ",") + "\"" + key1 + "\":\"" + value1 + "\"";
+		        }
+		        if (BladeTool.isNotEmpty(where) && BladeTool.isEmpty(exwhere)) {
+		            where += "}";
+		        }
+		        else if (BladeTool.isNotEmpty(where) && BladeTool.isNotEmpty(exwhere)) {
+		            where += exwhere.replace("{", ",");
+		        }
+		        else {
+		            where = BladeTool.format(exwhere);
+		        }
+		        where = (BladeTool.isEmpty(key1) && BladeTool.isEmpty(key2) && BladeTool.isEmpty(where)) ? "" : encodeURI(where);
+				isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		        var pageNum = $jqGrid.getGridParam('page');
+		        $jqGrid.jqGrid("setGridParam",  { 
+					datatype : "json",
+		        	postData: {
+		        		where: where 
+		        	}, 
+		        	page: (isAutoPage) ? pageNum : 1 
+		       	}).trigger("reloadGrid");
+		    });
+		
+		    $("#gotoReset").bind("click", function () {
+		    	$("#inputs1").val("");
+				$(".resetValid").val("");
+		        btn_stage.bind(toolbar);
+		        reloadGrid();
+		    });
+		});
+		
+		function openTree(type,index,name,source){
+			layer.open({
+        	    type: 2,
+        	    title:"树形选择",
+        	    area: ["250", "420px"],
+        	    fix: false, //不固定
+        	    maxmin: true,
+        	    content: "${ctxPath}/ztree/open/?type="+type+"&index="+index+"&name="+name+"&check=radio"+"&source="+source
+        	});
+		}
+		
+	</script>
+	<!-- 按钮组 -->
+	<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	<!-- 引入列表页所需js -->
+	@include("/common/_listscript.html"){}
+@}	

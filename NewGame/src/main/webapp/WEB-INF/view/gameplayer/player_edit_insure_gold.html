@@ -1,0 +1,58 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/updateBankGold" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家ID: </td>
+					<td>${player.UserID}
+						<input name="player.UserID" value="${player.UserID}" type="hidden"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当前拥有银行金币: </td>
+					<td>${player.InsureScore!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">扣除银行金币数: </td>
+					<td>
+						<input name="player.score" value="0" id="score" autoComplete='off'/>
+						<input type="hidden" name="player.oldScore" value="${player.InsureScore!0}" />
+						<span class="text-red">当<0表示增加, >0表示扣除</span>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td id="showC"></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">操作类型: </td>
+					<td>
+						<select name="player.type">
+							<option value="系统BUG补偿">系统BUG补偿</option>
+							<option value="活动补偿">活动补偿</option>
+							<option value="异常数据">异常数据</option>
+							<option value="其他">其他</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">操作理由: </td>
+					<td>
+						<textarea rows="5" cols="50" name="player.remark" placeholder="操作理由不得少于两个汉字"></textarea>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script>
+	var isAutoFlushTab = true;
+</script>
+<script src="${ctxPath}/static/search/numhandler.js" type="text/javascript" ></script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认扣除",btn_close:"关闭"}) {}
+@}

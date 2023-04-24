@@ -1,0 +1,302 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+
+	$(function() {
+		backDom('玩家在线列表','play_user_online_list');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/online";//查询列表接口
+		var _colnames = [ "房间ID","备注名","<span class='sort-cols'>房间名称</span>", "ID","玩家ID","靓号", "昵称", "<span class='sort-cols'>资产</span>",
+			"总兑换金额", "<span class='sort-cols'>总充值额</span>", "<span class='sort-cols'>注册时间</span>", "<span class='sort-cols'>最后登录时间</span>", "<span class='sort-cols'>总输赢<span>",
+			"<span class='sort-cols'>当日输赢</span>", "作弊率", "作弊限额","<span class='sort-cols'>最后作弊完成时间</span>", "游戏平台", "类型","默认排序"];
+		var _colmodel = [
+		                  {name : "ServerID",hidden:true},
+		                  {name : "tipsName",hidden:true},
+		                  {name : "ServerName",index : "ServerName",formatter:rowShow},
+		                  {name : "UserID",sortable:false,hidden:true},
+		                  {name : "UserID",sortable:false,formatter:rowShow},
+            			  {name : "BeautifulID",sortable:false},
+		                  {name : "NickName",sortable:false,formatter:rowShow},
+		                  {name : "TScore",index : "TScore",formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+		                  // {name : "UserMedal",sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+							// 总兑换金额
+		                  {name : "ExchangeAmount",sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+							// 总充值额
+		                  {name : "totalRecharge",index : "totalRecharge",formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+		                  {name : "RegisterDate",index : "RegisterDate"},
+							//  LastLoginTime
+		                  {name : "LastLoginTime",index : "LastLoginTime"},
+							// 总输赢
+		                  {name : "TotalWin",index : "TotalWin",formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+		                  {name : "todayScore",index : "todayScore",formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0',decimalPlaces:0}},
+		                  {name : "CheatRate",sortable:false},
+		                  {name : "LimitScore",sortable:false},
+							//
+		                  {name : "lastEndCheatTime",index:"lastEndCheatTime"},
+		                  {name : "PackageName",sortable:false},
+		                  {name : "TypeName",sortable:false,formatter:rowShow},
+		                  {name : "TotalScore",hidden:true} ];
+
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:100,
+			sortname:"TScore",
+			sortorder:"desc",
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				if(BladeTool.isNotEmpty(rowdata['CheatRate'])) {
+					if(rowdata['CheatRate']>0) {
+						$('#'+rowid).addClass('bg-d3d4d1');
+					} else if(rowdata['CheatRate']<0) {
+						$('#'+rowid).addClass('bg-b0f30b');
+					}
+				}
+				if(BladeTool.isNotEmpty(rowdata['RealScore']) && rowdata['RealScore']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_RealScore]').addClass('text-red');
+				}
+				if(BladeTool.isNotEmpty(rowdata['todayScore']) && rowdata['todayScore']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_todayScore]').addClass('text-red');
+				}
+			},
+			gridComplete:function() {
+				new Ajax("${ctxPath}/player/getOnlineTotal", function (data) {
+			        if(data.code == 0) {
+			        	var temp = data.data;
+			        	$("#gold").text(fmoney(temp.TScore,0));
+						$("#recharge").text(fmoney(temp.RechargeAmount,0));
+						var winClass = '';
+						if(temp.RealScore>0){
+							winClass = 'text-red';
+						}
+						$("#win").text(fmoney(temp.RealScore,0)).addClass(winClass);
+						$('#totalUser').text(fmoney(temp.UserCount,0));
+			        }
+			 	}).start();
+			},
+			beforeSelectRow: function(rowid, e) { 
+				if(e.type == 'click'){
+				     return false;
+	            }
+			}
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			var cName = options.colModel.name;
+			if(cName=='UserID' || cName=='NickName') {
+				if(cName=='NickName' && BladeTool.isNotEmpty(rowObject.tipsName)) {
+					html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong><span class="text-red">'+rowObject.tipsName+'</span></a>';
+				} else {
+					html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+				}
+			} else if(cName=='TypeName') {
+				html = rowObject.TypeName+rowObject.isInnerMemberName;
+			} else if(cName=='ServerName') {
+				if(rowObject.ServerID=='0') {
+					html += '大厅';
+				} else {
+					html += cellvalue;
+				}
+			} else if(cName=='') {
+				html += '<span class="text-red">--</span>';
+			}
+			return html;
+		}
+	}
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 房间名称： </label> 
+			<select id="ServerType">
+				<option value="ServerID">房间ID</option>
+				<option value="ServerName">房间名称</option>
+			</select> 
+			<input type="text" id="ServerName" value="" placeholder="" class="" />
+			<!-- 简单查询第二组 -->
+			<label class=""> 注册时间： </label> 
+			<input type="text" id="start_time" value="" class="" />- 
+			<input type="text" id="end_time" value="" class="" />
+			<!-- 简单查询第三组 -->
+			<label class=""> 控制状态： </label> 
+			<select id="IsControll">
+				<option value="">请选择</option>
+				<option value="1">控制中</option>
+				<option value="0">未控制</option>
+			</select>
+			<!-- 简单查询第四组 -->
+			<label class=""> 游戏平台： </label> 
+			<select id="ptypeid"></select>
+			<label class="">显示至尊VIP： </label> 
+			<input type="checkbox" id="showVip">
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+	<div class="total-block">
+		总人数：<span id="totalUser">0</span>
+		金币数：<span id="gold">0</span>
+		充值：<span id="recharge">0</span>
+		总输赢：<span id="win">0</span>
+	</div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	// 获取平台列表
+	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+        	var type = data.data;
+        	var html = '<option value="">请选择</option>';
+        	for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			}
+        	$("#ptypeid").html(html);
+        }
+ 	}).start();
+	
+	function goSearch() {
+		var ServerName = $("#ServerName").val();
+		var Nullity = $("#IsControll").val();
+		var GamePlatform = $("#ptypeid").val();
+		var showVip = document.getElementById('showVip');
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(ServerName)) {
+			var type = $('#ServerType').val();
+			wheres[type] = ServerName;
+		}
+		if(BladeTool.isNotEmpty(Nullity)) {
+			wheres['IsControll'] = Nullity;
+		}
+		if(BladeTool.isNotEmpty(GamePlatform)) {
+			wheres['PackageName'] = GamePlatform;
+		}
+		if(BladeTool.isNotEmpty(showVip)) {
+			wheres['showVip'] = showVip.checked;
+		}
+		console.log(wheres['showVip']);
+
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['RegisterDate_datelte'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['RegisterDate_dategt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['RegisterDate_datelte'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+
+		var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1,
+			gridComplete:function() {
+				new Ajax("${ctxPath}/player/getOnlineTotal?where="+where, function (data) {
+			        if(data.code == 0) {
+			        	var temp = data.data;
+			        	$("#gold").text(fmoney(temp.TScore,0));
+						$("#recharge").text(fmoney(temp.RechargeAmount,0));
+						var winClass = '';
+						if(temp.RealScore>0){
+							winClass = 'text-red';
+						}
+						$("#win").text(fmoney(temp.RealScore,0)).addClass(winClass);
+						$('#totalUser').text(fmoney(temp.UserCount,0));
+			        }
+			 	}).start();
+			}
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+        reloadGrid();
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

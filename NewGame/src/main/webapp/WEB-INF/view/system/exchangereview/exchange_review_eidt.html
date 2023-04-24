@@ -1,0 +1,177 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+            <input type="hidden" name="status" value="${exchange.status}"  />
+            <input type="hidden" name="exchange_review.id" value="${exchange.id}">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">渠道类型: </td>
+                    <td>
+                        <input type="text" id="channel" name="exchange_review.channelId1" value="${exchange.channel}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">订单号: </td>
+                    <td>
+                        <input type="text" name="exchange_review.orderNumber" value="${exchange.orderNumber}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">用户id: </td>
+                    <td>
+                        <input type="text" name="exchange_review.userId" value="${exchange.userId}" readonly />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户反馈信息: </td>
+                    <td>
+                        <textarea rows="2" cols="20" name="exchange_review.msg" readonly>${exchange.msg}</textarea>
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">银行号: </td>
+                    <td>
+                        <input type="text" name="exchange_review.bankNumber" value="${exchange.bankNumber}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">持卡人: </td>
+                    <td>
+                        <input type="text" name="exchange_review.cardholder" value="${exchange.cardholder}" readonly />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">银行消息: </td>
+                    <td>
+                        <input type="text" name="exchange_review.bank" value="${exchange.bank}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">来源平台: </td>
+                    <td>
+                        <input type="text" name="exchange_review.sourcePlatform" value="${exchange.sourcePlatform}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">兑换金额: </td>
+                    <td>
+                        <input type="text" name="exchange_review.amount" value="${exchange.amount}" readonly />
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">消耗金币: </td>
+                    <td>
+                        <input type="text" name="exchange_review.gold" value="${exchange.gold}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">消耗打码量: </td>
+                    <td>
+                        <input type="text" name="exchange_review.consumptionCode" value="${exchange.consumptionCode}" readonly />
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">操作人员: </td>
+                    <td>
+                        <input type="text" name="exchange_review.operator" value="${exchange.operator}" readonly />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">当前兑换进度: </td>
+                    <td id="td0" style="vertical-align: middle !important;text-align:center;">
+                    </td>
+                    <td id="td1" colspan="2">
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">小渠道: </td>
+                    <td id="channelId"></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">反馈: </td>
+                    <td colspan="5">
+                        <textarea rows="2" cols="90" name="exchange_review.feedback" ${exchange.status==7?"readonly":""}>${exchange.feedback}</textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var dict_progress = {
+        '1':"待支付",
+        '2':"待审核",
+        '3':"已关闭",
+        '4':"已完成",
+        '5':"已退回",
+        '6':"支付失败",
+        '7':"已关闭",
+        '8':"待发送"
+    }
+    var cellvalue = $("[name='status']").val()
+    var text1= '完成兑换：<input type="radio" name="exchange_review.status" value="4"/> &nbsp&nbsp'
+    var text2= '退回订单：<input type="radio" name="exchange_review.status" value="5"/> &nbsp&nbsp'
+    var text3= '审核通过：<input type="radio" name="exchange_review.status" value="8"/> &nbsp&nbsp'
+    var text4= '关闭订单：<input type="radio" name="exchange_review.status" value="3"/>&nbsp&nbsp'
+    var text6= '关闭订单：<input type="radio" name="exchange_review.status" value="7"/>&nbsp&nbsp'
+    var text7= '发送订单：<input type="radio" name="exchange_review.status" value="1"/>&nbsp&nbsp'
+    var text5= '<span class="label label-warning">订单已经关闭不可以操作</span>'
+    var html = function () {
+        if(cellvalue === '1'){
+            return text1+text2;
+        }else if(cellvalue === '2'){
+            return text3+text1+'<br/>'+text2;
+        }else if(cellvalue === '3' || cellvalue==='7'){
+            // 关闭的订单不可以操作
+            return text5
+        }else if(cellvalue === '6'){
+            // 支付失败的订单进行退回
+            return text2
+        }else if(cellvalue === '5'){
+            // 退回的订单进行失败关闭
+            return text6
+        }else if (cellvalue === '4'){
+            // 完成的订单可以进行完成关闭
+            return text4
+        }else if (cellvalue === '8'){
+            // 待发送的订单可以进行发送或者退回
+            return text7+text2
+        }
+    }
+    $('#td1').append(html)
+    var statu = '<span class="label label-info">'+dict_progress[cellvalue]+'</span>'
+    $('#td0').append(statu)
+
+    var ctx="${ctxPath}";
+    // 获取所有兑换小渠道
+    function getChannel(){
+        new Ajax(ctx + "/rechargechannel/getExchangeChannelMin", function (data) {
+            if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data.rows;
+                var html = '<select name="exchange_review.channelId"><option value="">请选择小渠道</option>';
+                for (var i = 0; i < type.length; i++) {
+                    html += '<option value="' + type[i]['id'] + '">' + type[i]['name'] + '</option>';
+                }
+                $("#channelId").html(html+'</select>');
+            }
+        }).start();
+    }
+    $('input:radio[name="exchange_review.status"]').change(function () {
+        var id=$("input[name='exchange_review.status']:checked").val();
+        if (id==='1'){
+            getChannel();
+        }else {
+            var channel=$("#channel").val();
+            var html = '<input type="text" name="exchange_review.channel" value="'+channel+'" readonly/>'
+            $("#channelId").html(html);
+        }
+    })
+    // $(function () {
+    //     var channel=$("#channel").val();
+    //     if (channel===''){
+    //         getChannel();
+    //     }else {
+    //         var html = '<input type="text" name="exchange_review.channel" value="'+channel+'" readonly/>'
+    //         $("#channelId").html(html);
+    //     }
+    // })
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

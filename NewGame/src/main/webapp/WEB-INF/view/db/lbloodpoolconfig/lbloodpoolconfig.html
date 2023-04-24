@@ -1,0 +1,68 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('血池配置','lbloodpoolconfig');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "<span class='sort-cols'>房间ID</span>","<span class='sort-cols'>房间名称</span>","状态","高严重报警线","过高严重报警线吐分概率", "高报警线","高报警线吐分概率","顶线拐点(血池平衡值)","通常吐分概率","底线拐点","通常吃分概率","低报警线","过低报警线吃分概率","低严重报警线","低严重低报警线吃分概率"];
+		var _colmodel=[   {name:"serverID", index:"ServerID"},
+						  {name:"ServerName", index:"ServerName"},
+						  {name:"StatusName", sortable:false},
+						  {name:"failMaxLine", sortable:false},
+						  {name:"maxFailOutCheat", sortable:false},
+						  {name:"maxLine", sortable:false},
+						  {name:"maxOutCheat", sortable:false},
+						  {name:"highLine", sortable:false},
+						  {name:"normalOutCheat", sortable:false},
+						  {name:"zeroLine", sortable:false},
+						  {name:"normalEatCheat", sortable:false},
+						  {name:"minLine", sortable:false},
+						  {name:"minEatCheat", sortable:false},
+						  {name:"failMinLine", sortable:false},
+						  {name:"minFailEatCheat", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"serverID"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto'
+		});
+		
+
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"房间ID",index:"serverID",type:"text"},
+			@			  {name:"房间名称",index:"ServerName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

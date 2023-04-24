@@ -1,0 +1,88 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品名称: </td>
+					<td><input name="awardinfo.AwardName" value="" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品类型: </td>
+					<td>
+						<select name="awardinfo.TypeID" id="TypeID"></select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品价格: </td>
+					<td><input name="awardinfo.Price" value="0" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品库存: </td>
+					<td><input name="awardinfo.Inventory" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">已售数量: </td>
+					<td><input name="awardinfo.BuyCount" value="0" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td><input name="awardinfo.SortID" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品状态: </td>
+					<td>
+						<input type="radio" name="awardinfo.Nullity" value="0" checked="checked"/>上架
+						<input type="radio" name="awardinfo.Nullity" value="1"/>下架
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">允许退货: </td>
+					<td>
+						<input type="radio" name="awardinfo.IsReturn" value="0" checked="checked"/>不允许
+						<input type="radio" name="awardinfo.IsReturn" value="1"/>允许
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">展示小图: </td>
+					<td><!-- <input name="awardinfo.SmallImage" type="file" /> -->
+						<blade:imgupload id="SmallImage" name="awardinfo.SmallImage" auto="" returnType="url" value=""/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">展示大图: </td>
+					<td><!-- <input name="awardinfo.BigImage" type="file" /> -->
+						<blade:imgupload id="BigImage" name="awardinfo.BigImage" auto="" returnType="url" value=""/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">下单信息: </td>
+					<td>
+						<input type="checkbox" name="awardinfo.needinfo" value="1"/>真实姓名
+						<input type="checkbox" name="awardinfo.needinfo" value="2"/>手机号码
+						<input type="checkbox" name="awardinfo.needinfo" value="4"/>QQ|微信
+						<input type="checkbox" name="awardinfo.needinfo" value="8"/>收货地址及邮编
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">描述: </td>
+					<td colspan="3">
+						<blade:kindeditor id="formattedBody" name="awardinfo.Description" height="200px"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script>
+var isAutoFlushTab=false;
+$(function() {
+	new Ajax("${ctxPath}/awardtype/getAwardType", function (data) {
+        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+        	var type = data.data;
+        	var html = '<option value="1">请选择</option>';
+        	for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['TypeID'] + '"';
+				html += '>' + type[i]['TypeName'] + '</option>';
+        	}
+        	$("#TypeID").html(html);
+        }
+ 	}).start();
+});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

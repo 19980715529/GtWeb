@@ -1,0 +1,99 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('充值渠道管理','recharge_channel');
+        initGrid();
+        initMenuBtn("btns","recharge_channel");
+    });
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["渠道id","商户名", "大渠道名称","小渠道","是否关闭","充值是否显示标签","游戏中排的排序","游戏单次充值最小","渠道单次充值最大","渠道税率","金币倍率","总赢倍率","渠道额外赠送","单位","充值/兑换"];
+        var _colmodel=[
+            {name:"id",index:"id",hidden:true},
+            {name:"mcName",index:"mcName"},
+            {name:"channelName", sortable:false},
+            {name:"name", sortable:false},
+            {name:"isOpen", sortable:false,formatter:rowShow},
+            {name:"isLabel", sortable:false,formatter:hotShow},
+            {name:"sort",sortable:false},
+            {name:"min", sortable:false},
+            {name:"max", sortable:false},
+            {name:"channelTaxRate", sortable:false},
+            {name:"goldProportion", sortable:false},
+            {name:"winConf", sortable:false},
+            {name:"give", sortable:false},
+            {name:"unit", sortable:false},
+            {name:"type", formatter:rowType}
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {},
+            rowNum:100,
+            height: 'auto'
+        });
+
+
+    }
+    function rowShow(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isOpen') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">开启</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">关闭</span>';
+            }
+        }
+        return html;
+    }
+    function hotShow(cellvalue,options,rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isLabel') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">NEW</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">否</span>';
+            }else {
+                html += '<span class="label label-info">HOT</span>';
+            }
+        }
+        return html;
+    }
+    function rowType(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='type') {
+            if(rowObject.type === 1) {
+                html += '<span class="label label-info">兑换</span>';
+            } else if(rowObject.type === 0) {
+                html += '<span class="label label-warning">充值</span>';
+            }
+        }
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <!-- 按钮组 -->
+        <div class="welljq well-sm" id="btns"></div>
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script>
+</script>
+@include("/common/_listscript.html"){}
+<link rel="stylesheet" href="${ctxPath}/static/zTree/css/zTreeStyle/zTreeStyle.css" />
+<script src="${ctxPath}/static/zTree/js/jquery.ztree.core.js" type="text/javascript" ></script>
+@}

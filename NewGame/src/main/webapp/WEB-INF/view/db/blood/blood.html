@@ -1,0 +1,73 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "血池ID","血池名称", "当前血池值","血池常规触底值","血池平衡值","放分警戒倍数配置","放分极限倍数配置","吃分警戒倍数配置","吃分极限倍数配置","放分作弊率1","放分作弊率2","放分作弊率3","吃分作弊率1","吃分作弊率2","吃分作弊率3","血池银行","当前状态","是否对玩家点控有影响","是否生效"];
+		var _colmodel=[   {name:"ID", sortable:true},
+						  {name:"BloodPondbalanceName", sortable:false},
+						  {name:"BloodPondbalanceVal", sortable:false},
+						  {name:"BloodPondbalanceValOut", sortable:false},
+						  {name:"BloodPondVal", sortable:false},
+						  {name:"TrueAlertTimes1", sortable:false},
+						  {name:"TrueAlertTimes2", sortable:false},
+						  {name:"FlaseAlertTimes1", sortable:false},
+						  {name:"FlaseAlertTimes2", sortable:false},
+						  {name:"TrueCheatate1", sortable:false},
+						  {name:"TrueCheatate2", sortable:false},
+						  {name:"TrueCheatate3", sortable:false},
+						  {name:"FlaseCheatate1", sortable:false},
+						  {name:"FlaseCheatate2", sortable:false},
+						  {name:"FlaseCheatate3", sortable:false},
+						  {name:"BloodPondBank", sortable:false},
+						  {name:"StateName", sortable:false},
+						  {name:"IsMustControlName", sortable:false},
+						  {name:"NullityName", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"ID"},
+			pager : pager_selector,
+			postData: {sort:'CreateTime',order:'desc'},
+			rowNum:100,
+			sortname:"ID",
+			sortorder:"ACS",
+			height: 'auto'
+		});
+		
+
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"血池ID",index:"ID",type:"text"},
+			@			  {name:"血池名称",index:"BloodPondbalanceName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

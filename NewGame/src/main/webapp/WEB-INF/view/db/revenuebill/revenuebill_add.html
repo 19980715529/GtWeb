@@ -1,0 +1,128 @@
+@layout("/common/_container.html"){
+<style>
+	td table td {
+		padding: 2px 5px;
+	}
+	.form-group {
+		margin-top: 10px;
+	}
+</style>
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<div class="form-group">
+			<label class="col-sm-4 control-label" >至尊VIP税收汇集账户： </label>
+			<div class="col-sm-4">
+				<input type="text" id="superVip" value="" placeholder="请输入至尊VIP税收汇集账户" class="form-control"/>
+				<input type="hidden" id="superVipID" name="revenuebill.ExtremeUserID" value="" placeholder="请输入至尊VIP税收汇集账户" class="form-control"/>
+			</div>
+		</div>
+		<div class="total-block bg-eeeeee text-center">
+			<span>增加下属至尊VIP</span>
+		</div>
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;" class="bg-F5F5F5">至尊VIP ID</td>
+					<td style="vertical-align: middle !important;" class="bg-F5F5F5">至尊VIP昵称</td>
+					<td style="vertical-align: middle !important;" class="bg-F5F5F5">操作</td>
+				</tr>
+				<tr id="deline">	
+					<td colspan="3">&nbsp;</td>
+				</tr>
+				<tr>	
+					<td colspan="3">至尊VIP ID：
+						<input type="text" id="subVip" placeholder="请输入至尊VIPID"/>
+						<input type="button" value="增加" id="addSubVip"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script>
+	var isSuperArray = {}; // 用于判断重复添加
+	var isAddArray = {}; // 用于判断重复添加
+	$(function() {
+		$('#addSubVip').click(function(){
+			var subVip = $('#subVip').val();
+			checkVip('sub',subVip,'下属账户:');
+			});
+		});
+	// 检查用户
+	function checkVip(type,subVip,remark) {
+		var isCheck = false; 
+		if(BladeTool.isEmpty(subVip)) {
+			layer_alert(remark + '<span class="text-red">至尊VIP ID不能为空, 请输入!</span>', "warn");
+			return isCheck;
+		} else if((type=='super') && BladeTool.isNotEmpty(isAddArray[subVip])) {
+			layer_alert(remark + '<span class="text-red">该账户添加过下属账户!</span>', "warn");
+			return isCheck;
+		} else if((type=='sub') && (BladeTool.isNotEmpty(isAddArray[subVip]) || BladeTool.isNotEmpty(isSuperArray[subVip]))) {
+			layer_alert(remark + '<span class="text-red">该账户已设置过上级账户或已添加过下属账户!</span>', "warn");
+			return isCheck;
+		} else {
+			var ajax = new Ajax(BladeApp.ctxPath + "/revenuebill/checkSubVIP", function (data) {
+			        if(data.code == 0) {
+			        	var checkData = data.data;
+			        	switch(checkData.isExist) {
+			        	case 0:
+			        		layer_alert(remark + '<span class="text-red">该账户不存在!</span>', "warn");
+			        		break;
+			        	case 1:
+			        		layer_alert(remark + '<span class="text-red">该账户已设置为上级汇集账户!</span>', "warn");
+			        		break;
+			        	case 2:
+			        		layer_alert(remark + '<span class="text-red">该账户已设置为其他上级汇集账户的下属账户!</span>', "warn");
+			        		break;
+			        	default:
+			        		var user = checkData.user;
+			        		if(type == 'sub') {
+			        			isAddArray[user.gameid] = user.userid;	
+				        		var html = '<tr>';
+				        		html += '<td>'+user.gameid+'<input type="hidden" name="revenuebill.BranchUserID" value="'+user.userid+'"/></td>';
+				        		html += '<td>'+user.nickname+'</td>';
+				        		html += '<td><a href="javascript:void(0);" onclick="delVip(this,'+user.gameid+')">删除</a></td>';
+				        		html += '</tr>';
+				        		$("#deline").before(html);
+			        		} else {
+			        			$('#superVipID').val(user.userid);
+			        			isSuperArray[user.gameid] = user.userid;
+			        		}
+			        		isCheck = true; 
+			        		break;
+			        	}
+			        }
+			 });
+			ajax.async = false;
+			ajax.set('subVip',subVip);
+			ajax.start();
+			return isCheck;
+		}
+	}
+	// 删除元素
+	function delVip(obj,id){
+		$(obj).parent().parent().remove();
+		delete isAddArray[id];
+	}
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_other_save:"完成",btn_close:"关闭"}) {}
+		
+<script>
+	$(function(){
+		$("#btn_other_save").bind("click",function(){
+			$('#btn_other_save').attr('disabled','disabled');
+			var superVip = $('#superVip').val();
+			var isCheck = checkVip('super',superVip,'上级账户:');
+			if(isCheck){
+				$("form").submit();
+			} else {
+				$('#btn_other_save').removeAttr('disabled');
+			}
+		});
+	});
+</script>
+@}

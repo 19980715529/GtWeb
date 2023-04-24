@@ -1,0 +1,248 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{}';
+
+	$(function() {
+		backDom('至尊VIP列表','vip_admin_list');
+		initGrid();
+		initMenuBtn("btns", "vip_admin_list");
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = [ "id","VIP ID", "靓号","昵称", "资产","银行金币", "礼物笔数", "近一周总额","是否仓库号","操作"];
+		var _colmodel = [ 
+		                  {name:"UserID",index:"UserID", width:80,hidden:true},
+		                  {name : "UserID", width : 100, sortable:false, formatter:genLink},
+						  {name : "BeautifulID", width : 100, sortable:false, formatter:genLink},
+						  {name : "NickName", width : 100, sortable:false, formatter:genLink},
+		                  {name : "Score", width : 100, index:"Score", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "InsureScore", width : 100, index:"InsureScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "SendNum", width : 80, index:"SendNum", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:","}}, 
+		                  {name : "WeekSendScore", width : 100, index:"WeekSendScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "IsWarehouseName", width : 100, sortable:false},
+		                  {name : "IsWarehouse", width : 100, sortable:false, formatter:genLink}];
+
+		var totalcoin = 0;
+		var vipIds = '';
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			jsonReader:{id:"UserID"},
+			postData : {where: _filter},
+			rowNum:100,
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				if(BladeTool.isNotEmpty(rowdata['Score']) && rowdata['UserID']!='19715') {
+					totalcoin += rowdata['Score'];
+				}
+				if(BladeTool.isNotEmpty(rowdata['InsureScore']) && rowdata['UserID']!='19715') {
+					totalcoin += rowdata['InsureScore'];
+				}
+				vipIds += rowdata['UserID'] + ',';
+			},
+			gridComplete:function() {
+				/* $("#totalcoin").text(fmoney(totalcoin,0)); */
+				totalcoin = 0;
+				computeVIPTotal(_filter);
+				vipIds = '';
+			}
+		});
+		
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			var cName = options.colModel.name;
+			 if(cName=='IsWarehouse') {
+					if(cellvalue==1){
+						html = '<a title="取消仓库号" class="text-33C3F7 iframeurl" onclick="cancelToWareHouse(' + rowObject.UserID + ')" href="#" ><strong>取消仓库号</strong></a>';
+					} else {
+						html = '<a title="设为仓库" class="text-33C3F7 iframeurl" onclick="setToWareHouse(' + rowObject.UserID + ')" href="#" ><strong>设为仓库</strong></a>';
+					}
+					
+			}else {
+				html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			return html;
+		}
+	}
+
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+	
+	function computeVIPTotal(_filter) {
+	    var ajax = new Ajax(BladeApp.ctxPath + "/vip/getTotal?where="+encodeURI(_filter), function (data) {
+	        if (data.code === 0) {
+	        	var temp = (data.data);
+	    		$("#daysend").text(fmoney((temp['DaySendScore']),3));
+	    		$("#daynum").text(fmoney(temp['DaySendNum'],3));
+	    		$("#score").text(fmoney((temp['ownScore']),3));
+	    		$("#insorescore").text(fmoney((temp['InsureScore']),3));
+	    		$("#totalcoin").text(fmoney((temp['ownScore']+temp['InsureScore']),3));
+	        }
+	    });
+	    ajax.start();
+	}
+	
+	function setToWareHouse(id) {
+        layer.confirm('确定将该VIP号设为仓库号？', {
+            icon: 3,
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                url:ctx + '/player/setToWareHouse/' + id,
+                type:'post',
+                dataType:'json',
+                async: false,
+                success:function (data) {
+                    if(data.code === 0){
+                        layer.msg(data.message, {shift: 1});
+                        goSearch();
+                        return false;
+                    }
+                    else{
+                        layer_alert(data.message, "error");
+                        return false;
+                    }
+                },
+                error:function (state,type, err) {
+                    console.log(type);
+                    console.log(err);
+                    console.log(state);
+                }
+            })
+        }, function () {
+            //layer.msg('已取消');
+        });
+	}
+	function cancelToWareHouse(id) {
+        layer.confirm('确定取消仓库号设置？', {
+            icon: 3,
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                url:ctx + '/player/cancelToWareHouse/' + id,
+                type:'post',
+                dataType:'json',
+                async: false,
+                success:function (data) {
+                    if(data.code === 0){
+                        layer.msg(data.message, {shift: 1});
+                        goSearch();
+                        return false;
+                    }
+                    else{
+                        layer_alert(data.message, "error");
+                        return false;
+                    }
+                },
+                error:function (state,type, err) {
+                    console.log(type);
+                    console.log(err);
+                    console.log(state);
+                }
+            })
+        }, function () {
+            //layer.msg('已取消');
+        });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<select class="" id="UserType">
+				<option value="UserID">玩家ID</option>
+				<option value="Accounts">玩家昵称</option>
+				<option value="BeautifulID">靓号</option>
+			</select>
+			<input type="text" id="UserInfo"/>
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+	
+	<div class="total-block">
+		总金币：<span class="text-red" id="totalcoin">0</span>
+		当日赠送：<span class="text-red" id="daysend">0</span>
+		当日赠送笔数：<span class="text-red" id="daynum">0</span>
+		VIP金币：<span class="text-red" id="score">0</span>
+		VIP银行金币：<span class="text-red" id="insorescore">0</span>
+	</div>
+	<div class="welljq well-sm" id="btns"></div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script type="text/javascript">
+	
+	function goSearch() {
+		var UserType = $("#UserType").val();
+		var UserInfo = $("#UserInfo").val();
+		var wheres = {};
+		wheres['MemberTypeID'] = '3';
+		wheres['StartTime'] = getBeforeDate(60);
+		
+		if(BladeTool.isNotEmpty(UserInfo)) {
+			wheres[UserType] = UserInfo;
+		}
+	    
+	    var filter = "";
+        var where = (BladeTool.isEmpty(filter)) ? "{" : filter.replace("}", ",");
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		btn_stage.bind(toolbar);
+        reloadGrid();
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

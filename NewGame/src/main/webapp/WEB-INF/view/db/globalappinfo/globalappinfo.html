@@ -1,0 +1,61 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('手机支付配置','globalappinfo');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "产品ID","产品编号","价格","游戏币","包ID","包名","type_id"];
+		var _colmodel=[   
+		                  {name:"Buy_Id", sortable:false},
+		                  {name:"IOS_Product_Id", sortable:false,width:300},
+		                  {name:"PayRMB", sortable:false},
+						  {name:"Gold", sortable:false},
+						  {name:"clientType", sortable:false},
+						  {name:"PackageName", sortable:false},
+						  {name:"type_id", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			rownumbers : false,
+			jsonReader:{id:"Buy_Id"},
+			pager : pager_selector,
+			postData: {},
+			sortname:"IOS_Product_Id",
+			sortorder:"asc",
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"产品ID",index:"IOS_Product_Id",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

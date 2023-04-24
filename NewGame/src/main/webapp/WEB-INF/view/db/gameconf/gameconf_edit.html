@@ -1,0 +1,53 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+  <div class="col-xs-12 tb-grid">
+    <form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+      <input type="hidden" name="gameconf.id" value="${gameconf.id}"/>
+      <table class="table table-bordered">
+        <tbody>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+          <td ><input type="text" name="gameconf.name" value="${gameconf.name}"/></td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+          <td><input type="text" name="gameconf.sort" value="${gameconf.sort}"/></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+          <td>
+            <input type="radio" name="gameconf.isOpen" value="0" ${gameconf.isOpen==0?"checked":""}>关闭</input>&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="gameconf.isOpen" value="1" ${gameconf.isOpen==1?"checked":""}>开启</input>
+          </td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">界面状态: </td>
+          <td>
+            <input type="radio" name="gameconf.state" value="0" ${gameconf.state==0?"checked":""}/>无&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="gameconf.state" value="1" ${gameconf.state==1?"checked":""}/>new&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="gameconf.state" value="2" ${gameconf.state==2?"checked":""}/>hot&nbsp;&nbsp;&nbsp;
+          </td>
+
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别: </td>
+          <td>
+            <select name="gameconf.type" value="${gameconf.type}">
+              <option value="slots">slots</option>
+              <option value="poker">poker</option>
+              <option value="fishing">fishing</option>
+            </select>
+          </td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别中排序: </td>
+          <td>
+            <input type="text" name="gameconf.typeSort" value="${gameconf.typeSort}"/>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</div>
+<script>
+
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}
