@@ -35,8 +35,7 @@ public class Utils {
         } else {
             str = String.format("%0" + subStrLength + "d", userId);
         }
-        String orderNum = localDate + randomNumeric + str;
-        return orderNum;
+        return localDate + randomNumeric + str;
     }
 
     // 生成拼接成请求的Sign格式
@@ -59,6 +58,7 @@ public class Utils {
         }
         // 得到加密前数据
         originStr.append("key=").append(appkey);
+        System.out.println(originStr);
         try {
             sign = MD5(originStr.toString());
         }catch (Exception e){

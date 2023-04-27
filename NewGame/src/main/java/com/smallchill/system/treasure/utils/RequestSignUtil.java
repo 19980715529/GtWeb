@@ -202,7 +202,7 @@ public class RequestSignUtil {
     public static String doPost(String url, JSONObject json) {
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(url);
-        post.setHeader("x-forwarded-for", "192.168.0.1");
+        post.setHeader("x-forwarded-for", "52.76.118.232");
         String response = "";
         try {
             StringEntity s = new StringEntity(json.toString());

@@ -10,6 +10,7 @@ import com.smallchill.game.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class AnnouncementController extends BaseController implements ConstShiro
     /**
      * 公告接口
      */
-    @Autowired
+    @Resource
     private CommonService commonService;
     @PostMapping("/notice")
     public AjaxResult notice(){
@@ -50,17 +51,22 @@ public class AnnouncementController extends BaseController implements ConstShiro
         return json(list);
     }
     /**
-     * 或许包配置
+     * 获取包配置
      */
     @PostMapping("/clientConf")
     public AjaxResult clientConf(@RequestParam Integer cid){
         if (cid==null){
             return fail("包id错误");
         }
-        Map map = Db.selectOne("select clientType,ratio from login.dbo.ClientPos where clientType=#{clientType}", CMap.init().set("clientType", cid));
+        Map map = Db.selectOne("select clientType,ratio from login.dbo.ClientPos where clientType=#{clientType}",
+                CMap.init().set("clientType", cid));
         if (map==null){
             return fail("包id错误");
         }
+        // 获取包中游戏  blade_dict 56
+        List<Map> games = Db.selectList("select id,sort,state,gameId,name,(select name from blade_dict where a.type=id) as type " +
+                "from [RYPlatformManagerDB].[dbo].[game_conf] as a where isOpen=1 and clientType=#{clientType} order by sort", CMap.init().set("clientType", cid));
+        map.put("games",games);
         return json(map);
     }
     /**
@@ -73,8 +79,8 @@ public class AnnouncementController extends BaseController implements ConstShiro
         }
         if (map.get("userId") !=null && StrKit.notBlank(map.get("userId").toString())){
             map.put("createTime",new Date());
-            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime,clientType) values (#{userId},#{Money},#{type},#{createTime},#{clientType})",
-                    map);
+            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime,clientType) " +
+                    "values (#{userId},#{Money},#{type},#{createTime},#{clientType})", map);
             return "success";
         }else {
             return "fail";

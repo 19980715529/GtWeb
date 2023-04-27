@@ -58,14 +58,14 @@ public class CallbackDockingController extends BaseController implements ConstSh
     @Transactional
     public String callback(@RequestParam Map<String,Object> param){
         // 回调需要执行RechargeRecord函数
-//        if (param==null){
-//            return "fail";
-//        }
-//        LOGGER.error(param);
-//        Boolean b = HttpClientUtils.Md5RarpVerification(param);
-//        if (!b){
-//            return "fail";
-//        }
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean b = HttpClientUtils.Md5RarpVerification(param);
+        if (!b){
+            return "fail";
+        }
         String orderNum = param.get("mchOrdernum").toString();
         // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败。一般成功、失败时才会回调
         String status = param.get("status").toString();
@@ -77,69 +77,70 @@ public class CallbackDockingController extends BaseController implements ConstSh
         if (rechargeRecords==null){
             return "fail";
         }
+        Blade blade = Blade.create(RechargeRecords.class);
         GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
         // 判断充值是否成功  订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败。一般成功、失败时才会回调   订单状态，1：待支付，2：已完成，3：已失败
         if(Integer.parseInt(status)==20){
             // 判断状态已经改变为已经完成，就不在处理
-//            if (rechargeRecords.getOrderStatus()==2){
-//                return "success";
+            if (rechargeRecords.getOrderStatus()==2){
+                return "success";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+//            // 充值成功将状态修改为已完成
+//            rechargeRecords.setOrderStatus(2);
+//            // 执行存储过程
+//            extracted(rechargeRecords);
+//            // 将订单从队列中移除
+//            globalDelayQueue.cancelOrder(orderNum);
+//
+//            if (rechargeRecords.getIsFirstCharge() == 1){
+//                // 充值成功记录玩家金币变动记录,并且添加金币
+//                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
+//            }else {
+//                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
 //            }
-            // 充值成功将状态修改为已完成
-            rechargeRecords.setOrderStatus(2);
-            // 执行存储过程
-            extracted(rechargeRecords);
-            LOGGER.error("执行存储过程成功");
-            // 将订单从队列中移除
-            globalDelayQueue.cancelOrder(orderNum);
-
-            if (rechargeRecords.getIsFirstCharge() == 1){
-                // 充值成功记录玩家金币变动记录,并且添加金币
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
-            }else {
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
-            }
-            // 充值成功添加金币
-            if (rechargeRecords.getIsFirstCharge()==1){
-                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
-                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
-            }
-            // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
-                    CMap.init().set("userId", rechargeRecords.getUserId()));
-            if (re<1){
-                rechargeRecords.setIsThatTay(1);
-            }
-            // 向游戏服务器发送请求
-            Map<String, Object> gameParam = new HashMap<>();
-            gameParam.put("Userid",rechargeRecords.getUserId());
-            gameParam.put("gameCoin",rechargeRecords.getTopUpAmount());
-            gameParam.put("gold",rechargeRecords.getGold());
-            gameParam.put("Type",0);
-            // 判断是否首充
-            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-            gameParam.put("IsFirstRecharge",0);
-            emailParam.put("goldType",5);
-            if (rechargeRecords.getIsFirstCharge() == 1){
-                gameParam.put("IsFirstRecharge",1);
-                // 设置邮件类型 首充
-                emailParam.put("goldType",207);
-            }
-            SendHttp.sendGame1002(gameParam);
-            // 充值成功时发送的邮件内容
-            emailParam.put("toUserid",rechargeRecords.getUserId());
-            emailParam.put("gold",0);
-            SendHttp.sendEmail(emailParam);
+//            // 充值成功添加金币
+//            if (rechargeRecords.getIsFirstCharge()==1){
+//                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
+//                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
+//            }
+//            // 判断是否用户第一笔成功的充值
+//            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
+//                    CMap.init().set("userId", rechargeRecords.getUserId()));
+//            if (re<1){
+//                rechargeRecords.setIsThatTay(1);
+//            }
+//            // 向游戏服务器发送请求
+//            Map<String, Object> gameParam = new HashMap<>();
+//            gameParam.put("Userid",rechargeRecords.getUserId());
+//            gameParam.put("gameCoin",rechargeRecords.getTopUpAmount());
+//            gameParam.put("gold",rechargeRecords.getGold());
+//            gameParam.put("Type",0);
+//            // 判断是否首充
+//            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
+//            gameParam.put("IsFirstRecharge",0);
+//            emailParam.put("goldType",5);
+//            if (rechargeRecords.getIsFirstCharge() == 1){
+//                gameParam.put("IsFirstRecharge",1);
+//                // 设置邮件类型 首充
+//                emailParam.put("goldType",207);
+//            }
+//            SendHttp.sendGame1002(gameParam);
+//            // 充值成功时发送的邮件内容
+//            emailParam.put("toUserid",rechargeRecords.getUserId());
+//            emailParam.put("gold",0);
+//            SendHttp.sendEmail(emailParam);
         }else if(Integer.parseInt(status)==30){
             // 充值失败将状态修改为已关闭
             rechargeRecords.setOrderStatus(3);
             // 将订单从队列中移除
             globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setEndTime(new Date());
+            rechargeRecordsService.update(rechargeRecords);
         }else{
             // 将充值中和为充值的订单状态不改变
             return "success";
         }
-        rechargeRecords.setEndTime(new Date());
-        rechargeRecordsService.update(rechargeRecords);
         return "success";
     }
 
@@ -155,48 +156,33 @@ public class CallbackDockingController extends BaseController implements ConstSh
         if (!b){
             return "fail";
         }
-        String orderNum = param.get("mchOrdernum").toString();
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        String orderNum = params.getString("mchOrdernum");
         // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败。一般成功、失败时才会回调
-        String status = param.get("status").toString();
+        int status = params.getIntValue("status");
         // 平台订单号
-        String ordernum = param.get("ordernum").toString();
-        // 根据订单id查询用户订单
-        Map<String, Object> map = new HashMap<>();
-        map.put("orderNumber", orderNum);
-        // 兑换成功
-        Map emailParam = RechargeExchangeCommon.getEmailConf(4);
+        String ordernum = params.getString("ordernum");
         // 根据订单号查询兑换订单
-        ExchangeReview exchangeReview = exchangeReviewService.findFirstBy("orderNumber=#{orderNumber}", map);
-        Map<String, Object> db_map = new HashMap<>();
-        if (exchangeReview != null) {
-            // 存储平台订单号
-            exchangeReview.setPfOrderNum(ordernum);
-            emailParam.put("gold",0);
-            emailParam.put("toUserid",exchangeReview.getUserId());
-            // 获取兑换订单
-            // 判断充值是否成功
-            if (Integer.parseInt(status) == 20) {
-                // 判断状态已经改变为已经完成，就不在处理
-//                if (exchangeReview.getStatus()==3 || exchangeReview.getStatus() ==4){
-//                    return "success";
-//                }
-                // 支付成功兑换状态变为已完成
-                exchangeReview.setStatus(4);
-                // 执行存储过程
-                extracted(exchangeReview);
-                // 设置兑换成功的192.168.0.112类型
-                emailParam.put("goldType",206);
-                // 兑换成功时发送邮件
-                SendHttp.sendEmail(emailParam);
-                exchangeReview.setEndTime(new Date());
-            } else if (Integer.parseInt(status) == 30) {
-                // 支付失败兑换变为支付失败
-                exchangeReview.setStatus(6);
-                exchangeReview.setEndTime(new Date());
-            }
-            // 修改订单状态
-            exchangeReviewService.update(exchangeReview);
+        ExchangeReview exchangeReview = exchangeReviewService.findFirstBy("orderNumber=#{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview == null) {
+            return "";
         }
+        // 存储平台订单号
+        exchangeReview.setPfOrderNum(ordernum);
+        // 判断充值是否成功
+        if (status == 20) {
+            // 判断状态已经改变为已经完成，就不在处理
+            if (exchangeReview.getStatus()==3 || exchangeReview.getStatus() ==4){
+                return "success";
+            }
+            successExcExecuted(exchangeReview);
+        } else if (status == 30) {
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+        }
+        // 修改订单状态
+        exchangeReviewService.update(exchangeReview);
         return "success";
     }
 
@@ -217,63 +203,63 @@ public class CallbackDockingController extends BaseController implements ConstSh
         String status = param.get("status").toString();
         GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
         Map<String,Object> params = new HashMap<>();
-        // 根据订单号重新兑换订单
+        // 根据订单号查询兑换订单
         params.put("orderNumber",order_no);
         Blade blade = Blade.create(RechargeRecords.class);
         RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNumber}", params);
         if (rechargeRecords == null){
             return "ok";
         }
-
         if ("success".equals(status)){
             // 判断状态已经改变为已经完成，就不在处理
-//            if (rechargeRecords.getOrderStatus()==2){
-//                return "ok";
+            if (rechargeRecords.getOrderStatus()==2){
+                return "ok";
+            }
+            successRecExecuted(blade,order_no,rechargeRecords,globalDelayQueue);
+//            extracted(rechargeRecords);
+//            // 回调成功,根据超时订单号将订单从延迟列表中取消
+//            globalDelayQueue.cancelOrder(order_no);
+//            // 金币变动记录
+//            if (rechargeRecords.getIsFirstCharge()==1){
+//                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
+//            }else {
+//                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
 //            }
-            extracted(rechargeRecords);
-            // 回调成功,根据超时订单号将订单从延迟列表中取消
-            globalDelayQueue.cancelOrder(order_no);
-            // 金币变动记录
-            if (rechargeRecords.getIsFirstCharge()==1){
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
-            }else {
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
-            }
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
-                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
-            }
-            // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
-                    CMap.init().set("userId", rechargeRecords.getUserId()));
-            if (re<1){
-                rechargeRecords.setIsThatTay(1);
-            }
-            // 向游戏服务器发送请求
-            Map<String, Object> gameParam = new HashMap<>();
-            gameParam.put("Userid",rechargeRecords.getUserId());
-            gameParam.put("gameCoin",rechargeRecords.getGold());
-            gameParam.put("gold",rechargeRecords.getTopUpAmount());
-            gameParam.put("Type",0);
-            gameParam.put("IsFirstRecharge",0);
-            // 获取充值成功的邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-            // 普通充值类型
-            emailParam.put("goldType",5);
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                gameParam.put("IsFirstRecharge",1);
-                // 邮件类型首充
-                emailParam.put("goldType",207);
-            }
-            SendHttp.sendGame1002(gameParam);
-            emailParam.put("gold",0);
-            emailParam.put("toUserid",rechargeRecords.getUserId());
-            SendHttp.sendEmail(emailParam);
-            rechargeRecords.setEndTime(new Date());
-            rechargeRecords.setOrderStatus(2);
-            blade.update(rechargeRecords);
+//            // 判断是否首充
+//            if (rechargeRecords.getIsFirstCharge()==1){
+//                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
+//                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
+//            }
+//            // 判断是否用户第一笔成功的充值
+//            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
+//                    CMap.init().set("userId", rechargeRecords.getUserId()));
+//            if (re<1){
+//                rechargeRecords.setIsThatTay(1);
+//            }
+//            // 向游戏服务器发送请求
+//            Map<String, Object> gameParam = new HashMap<>();
+//            gameParam.put("Userid",rechargeRecords.getUserId());
+//            gameParam.put("gameCoin",rechargeRecords.getGold());
+//            gameParam.put("gold",rechargeRecords.getTopUpAmount());
+//            gameParam.put("Type",0);
+//            gameParam.put("IsFirstRecharge",0);
+//            // 获取充值成功的邮件
+//            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
+//            // 普通充值类型
+//            emailParam.put("goldType",5);
+//            // 判断是否首充
+//            if (rechargeRecords.getIsFirstCharge()==1){
+//                gameParam.put("IsFirstRecharge",1);
+//                // 邮件类型首充
+//                emailParam.put("goldType",207);
+//            }
+//            SendHttp.sendGame1002(gameParam);
+//            emailParam.put("gold",0);
+//            emailParam.put("toUserid",rechargeRecords.getUserId());
+//            SendHttp.sendEmail(emailParam);
+//            rechargeRecords.setEndTime(new Date());
+//            rechargeRecords.setOrderStatus(2);
+//            blade.update(rechargeRecords);
         } else if ("fail".equals(status)) {
             // 从延迟队列中移除并且更新状态
             globalDelayQueue.cancelOrder(order_no);
@@ -311,20 +297,10 @@ public class CallbackDockingController extends BaseController implements ConstSh
         }
         if ("success".equals(result)){
             // 防止重复回调
-//            if (exchangeReview.getStatus()==3 || exchangeReview.getStatus()==4){
-//                return "ok";
-//            }
-            // 回调成功
-            exchangeReview.setStatus(4);
-            exchangeReview.setEndTime(new Date());
-            // 执行存储过程
-            extracted(exchangeReview);
-            // 兑换成功发送邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(4);
-            emailParam.put("gold", 0);
-            emailParam.put("toUserid", exchangeReview.getUserId());
-            emailParam.put("goldType",206);
-            SendHttp.sendEmail(emailParam);
+            if (exchangeReview.getStatus()==3 || exchangeReview.getStatus()==4){
+                return "ok";
+            }
+            successExcExecuted(exchangeReview);
         } else if ("fail".equals(result)) {
             // 支付失败兑换变为支付失败
             exchangeReview.setStatus(6);
@@ -338,11 +314,13 @@ public class CallbackDockingController extends BaseController implements ConstSh
         return "ok";
     }
 
+
+
     /**
      * MetaPay充值回调
      */
     @PostMapping(value = "/recharge_meta_callback",consumes = "application/json")
-    public String rechageMetaCallback(@RequestBody Map<String,Object> param){
+    public String rechargeMetaCallback(@RequestBody Map<String,Object> param){
         if (param==null){
             return "fail";
         }
@@ -358,55 +336,16 @@ public class CallbackDockingController extends BaseController implements ConstSh
         RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}",
                 CMap.init().set("orderNum",orderNum));
         if (rechargeRecords==null){
-            return "success";
+            return "SUCCESS";
         }
         // 获取平台订单
         GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
         int status = params.getIntValue("status");
         if (status==0){
-            // 回调成功,根据超时订单号将订单从延迟列表中取消
-            globalDelayQueue.cancelOrder(orderNum);
-            // 金币变动记录
-            if (rechargeRecords.getIsFirstCharge()==1){
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
-            }else {
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
+            if (rechargeRecords.getOrderStatus()==2){
+                return "SUCCESS";
             }
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
-                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
-            }
-            // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
-                    CMap.init().set("userId", rechargeRecords.getUserId()));
-            if (re<1){
-                rechargeRecords.setIsThatTay(1);
-            }
-            // 向游戏服务器发送请求
-            Map<String, Object> gameParam = new HashMap<>();
-            gameParam.put("Userid",rechargeRecords.getUserId());
-            gameParam.put("gameCoin",rechargeRecords.getGold());
-            gameParam.put("gold",rechargeRecords.getTopUpAmount());
-            gameParam.put("Type",0);
-            gameParam.put("IsFirstRecharge",0);
-            // 获取充值成功的邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-            // 普通充值类型
-            emailParam.put("goldType",5);
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                gameParam.put("IsFirstRecharge",1);
-                // 邮件类型首充
-                emailParam.put("goldType",207);
-            }
-            SendHttp.sendGame1002(gameParam);
-            emailParam.put("gold",0);
-            emailParam.put("toUserid",rechargeRecords.getUserId());
-            SendHttp.sendEmail(emailParam);
-            rechargeRecords.setEndTime(new Date());
-            rechargeRecords.setOrderStatus(2);
-            blade.update(rechargeRecords);
+            successRecExecuted(blade, orderNum, rechargeRecords, globalDelayQueue);
         }else if (status==2){
             // 从延迟队列中移除并且更新状态
             globalDelayQueue.cancelOrder(orderNum);
@@ -414,8 +353,10 @@ public class CallbackDockingController extends BaseController implements ConstSh
             rechargeRecords.setEndTime(new Date());
             blade.update(rechargeRecords);
         }
-        return "success";
+        return "SUCCESS";
     }
+
+
 
     /**
      * MetaPay兑换回调
@@ -438,17 +379,11 @@ public class CallbackDockingController extends BaseController implements ConstSh
         ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
         int status = params.getIntValue("status");
         if (status==0){
+            if (exchangeReview.getStatus()==3 || exchangeReview.getStatus() ==4){
+                return "SUCCESS";
+            }
             // 回调成功
-            exchangeReview.setStatus(4);
-            exchangeReview.setEndTime(new Date());
-            // 执行存储过程
-            extracted(exchangeReview);
-            // 兑换成功发送邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(4);
-            emailParam.put("gold", 0);
-            emailParam.put("toUserid", exchangeReview.getUserId());
-            emailParam.put("goldType",206);
-            SendHttp.sendEmail(emailParam);
+            successExcExecuted(exchangeReview);
         }else if (status==2){
             // 支付失败兑换变为支付失败
             exchangeReview.setStatus(6);
@@ -457,30 +392,278 @@ public class CallbackDockingController extends BaseController implements ConstSh
         }
         // 修改订单状态
         blade.update(exchangeReview);
+        return "SUCCESS";
+    }
+    /**
+     * OMOM 充值回调
+     */
+    @PostMapping(value = "/recharge_omom_callback",consumes = "application/json")
+    public String rechargeOmomCallback(@RequestBody Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5OmoVerification(param);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("校验成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("orderid");
+        // 获取平台订单号
+        String PfOrderNum = params.getString("transaction_id");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "ok";
+        }
+        rechargeRecords.setPfOrderNum(PfOrderNum);
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        // 获取状态
+        String status = params.getString("returncode");
+        if ("00".equals(status)){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "ok";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else {
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecords.setEndTime(new Date());
+            blade.update(rechargeRecords);
+        }
+        return "ok";
+    }
+    /**
+     * OMOM 兑换回调
+     */
+    @PostMapping(value = "/exchange_omom_callback",consumes = "application/json")
+    public String exchangeOmomCallback(@RequestBody Map<String,Object> param){
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5OmoVerification(param);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("校验成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("orderid");
+        // 根据订单号查询兑换订单
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "ok";
+        }
+        // 获取平台订单号
+        int code = params.getIntValue("returncode");
+        if (code==2){
+            if (exchangeReview.getStatus()==3 || exchangeReview.getStatus()==4){
+                return "ok";
+            }
+            // 回调成功
+            successExcExecuted(exchangeReview);
+        }else if (code==3){
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            // 兑换失败，发送邮件是在退回的时候进行发送
+        }else {
+            // 待处理中的不做如何处理
+            return "ok";
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "ok";
+    }
+
+    /**
+     * AIPay 充值回调
+     * @return
+     */
+    @PostMapping(value = "/recharge_AIPay_callback",consumes = "application/json")
+    public String rechargeAIPayCallback(@RequestBody Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        String sign = SendHttp.getSign(params);
+        if (!params.getString("sign").equals(sign)){
+            return "fail";
+        }
+        LOGGER.error("校验成功");
+        // 获取订单号
+        String orderNum = params.getString("merchantOrderId");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "ok";
+        }
+        // 获取订单状态
+        int status = params.getIntValue("status");
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        if (status==1){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "ok";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else if (status==2){
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecords.setEndTime(new Date());
+            blade.update(rechargeRecords);
+        }else {
+            return "ok";
+        }
+        return "ok";
+    }
+
+    /**
+     * AIPay 兑换回调
+     * @param param
+     * @return
+     */
+    @PostMapping(value = "/exchange_AIPay_callback",consumes = "application/json")
+    public String exchangeAIPayCallback(@RequestBody Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        String sign = SendHttp.getSign(params);
+        if (!params.getString("sign").equals(sign)){
+            return "fail";
+        }
+        LOGGER.error("校验成功");
+        // 根据订单号查询兑换订单
+        String orderNum = params.getString("merchantOrderId");
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "ok";
+        }
+        // 获取订单状态
+        int status = params.getIntValue("status");
+        if (status==1){
+            if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
+                return "ok";
+            }
+            // 回调成功
+            successExcExecuted(exchangeReview);
+        } else if (status==2) {
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            // 兑换失败，发送邮件是在退回的时候进行发送
+
+        }else {
+            // 不做处理
+            return "ok";
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "ok";
+    }
+
+    /**
+     * WePay 充值回调
+     * @return
+     */
+    @PostMapping("/recharge_WePay_callback")
+    public String rechargeWePayCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5WePayVerification(param,WEPAY_CKEY);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("mchOrderNo");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "success";
+        }
+        // 获取支付状态
+        int result = params.getIntValue("tradeResult");
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        if (result==1){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "success";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else {
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecords.setEndTime(new Date());
+            blade.update(rechargeRecords);
+        }
         return "success";
     }
 
 
     /**
-     * 兑换需要执行的存储过程
-     * @param review
+     * WePay 兑换回调
+     * @param param
+     * @return
      */
-    private void extracted(ExchangeReview review) {
-        HashMap<String, Object> stored = new HashMap<>();
-        stored.put("userId", review.getUserId());
-        stored.put("Gold", review.getAmount());
-        stored.put("GameCoin", review.getGold());
-        stored.put("OrderNum",review.getOrderNumber());
-        stored.put("type",1);
-        storedProcedure(stored);
-        // 需要向游戏服务器发送请求
-        Map<String, Object> gameParam = new HashMap<>();
-        gameParam.put("Userid", review.getUserId());
-        gameParam.put("gameCoin", review.getGold());
-        gameParam.put("gold", review.getAmount());
-        gameParam.put("Type",1);
-        SendHttp.sendGame1002(gameParam);
+    @PostMapping("/exchange_WePay_callback")
+    public String exchangeWePayCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5WePayVerification(param,WEPAY_PKEY);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("merTransferId");
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "success";
+        }
+        // 获取订单状态
+        int result = params.getIntValue("tradeResult");
+        if (result==1){
+            if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
+                return "success";
+            }
+            // 回调成功
+            successExcExecuted(exchangeReview);
+        }else if (result == 2 || result==3) {
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            // 兑换失败，发送邮件是在退回的时候进行发送
+        }else {
+            return "success";
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "success";
     }
+
+
 
     // 执行存储过程
     public Object storedProcedure(Map<String,Object> map){
@@ -496,9 +679,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
                     int type = Integer.valueOf(map.get("type").toString());
                     callableStatement.setInt("Type",type);
                     callableStatement.setString("OrderNum","");
-                    if (type==0){
-                        callableStatement.setString("OrderNum",map.get("OrderNum").toString());
-                    }
+                    callableStatement.setString("OrderNum",map.get("OrderNum").toString());
                     callableStatement.executeQuery();
                     return "";
                 }catch (Exception e){
@@ -546,6 +727,104 @@ public class CallbackDockingController extends BaseController implements ConstSh
         storedProcedure(stored);
         // 充值成功需要执行的存储过程，充值兑换记录
         rechargeStored(stored);
+    }
+
+    /**
+     * 兑换需要执行的存储过程
+     * @param review
+     */
+    private void extracted(ExchangeReview review) {
+        HashMap<String, Object> stored = new HashMap<>();
+        stored.put("userId", review.getUserId());
+        stored.put("Gold", review.getAmount());
+        stored.put("GameCoin", review.getGold());
+        stored.put("OrderNum",review.getOrderNumber());
+        stored.put("type",1);
+        storedProcedure(stored);
+        // 需要向游戏服务器发送请求
+        Map<String, Object> gameParam = new HashMap<>();
+        gameParam.put("Userid", review.getUserId());
+        gameParam.put("gameCoin", review.getGold());
+        gameParam.put("gold", review.getAmount());
+        gameParam.put("Type",1);
+        SendHttp.sendGame1002(gameParam);
+    }
+
+
+    /**
+     * 成功需要执行的代码
+     * @param blade
+     * @param orderNum
+     * @param rechargeRecords
+     * @param globalDelayQueue
+     */
+
+    private void successRecExecuted(Blade blade, String orderNum, RechargeRecords rechargeRecords, GlobalDelayQueue globalDelayQueue) {
+        // 充值成功将状态修改为已完成
+        rechargeRecords.setOrderStatus(2);
+        // 执行存储过程
+        extracted(rechargeRecords);
+        // 回调成功,根据超时订单号将订单从延迟列表中取消
+        globalDelayQueue.cancelOrder(orderNum);
+        // 金币变动记录
+        if (rechargeRecords.getIsFirstCharge()==1){
+            RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207, rechargeRecords.getGold());
+        }else {
+            RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5, rechargeRecords.getGold());
+        }
+        // 判断是否首充
+        if (rechargeRecords.getIsFirstCharge()==1){
+            Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
+                    CMap.init().set("IsFirstRecharge",1).set("UserID", rechargeRecords.getUserId()));
+        }
+        // 判断是否用户第一笔成功的充值
+        int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
+                CMap.init().set("userId", rechargeRecords.getUserId()));
+        if (re<1){
+            rechargeRecords.setIsThatTay(1);
+        }
+        // 向游戏服务器发送请求
+        Map<String, Object> gameParam = new HashMap<>();
+        gameParam.put("Userid", rechargeRecords.getUserId());
+        gameParam.put("gameCoin", rechargeRecords.getGold());
+        gameParam.put("gold", rechargeRecords.getTopUpAmount());
+        gameParam.put("Type",0);
+        gameParam.put("IsFirstRecharge",0);
+        // 获取充值成功的邮件
+        Map emailParam = RechargeExchangeCommon.getEmailConf(2);
+        // 普通充值类型
+        emailParam.put("goldType",5);
+        // 判断是否首充
+        if (rechargeRecords.getIsFirstCharge()==1){
+            gameParam.put("IsFirstRecharge",1);
+            // 邮件类型首充
+            emailParam.put("goldType",207);
+        }
+        SendHttp.sendGame1002(gameParam);
+        emailParam.put("gold",0);
+        emailParam.put("toUserid", rechargeRecords.getUserId());
+        SendHttp.sendEmail(emailParam);
+        rechargeRecords.setEndTime(new Date());
+        rechargeRecords.setOrderStatus(2);
+        blade.update(rechargeRecords);
+    }
+
+    /**
+     * 兑换回调成功需要执行
+     * @param exchangeReview
+     */
+    private void successExcExecuted(ExchangeReview exchangeReview) {
+        // 回调成功
+        exchangeReview.setStatus(4);
+        exchangeReview.setEndTime(new Date());
+        // 执行存储过程
+        extracted(exchangeReview);
+        // 兑换成功发送邮件
+        Map emailParam = RechargeExchangeCommon.getEmailConf(4);
+        emailParam.put("gold", 0);
+        emailParam.put("toUserid", exchangeReview.getUserId());
+        emailParam.put("goldType",206);
+        SendHttp.sendEmail(emailParam);
     }
 
 }

@@ -104,7 +104,7 @@ public class ComboTreeController extends BaseController{
 		
 		String name = "";
 		
-		String key = (StrKit.notBlank(treeId) && !Func.equals(treeId, "0")) ? treeId : ((type.indexOf("dict") >= 0) ? "num" : "id");
+		String key = (StrKit.notBlank(treeId) && !Func.equals(treeId, "0")) ? treeId : ((type.contains("dict")) ? "num" : "id");
 
 		String [] arr = val.split(",");
 		for(Map<String, Object> map : list){
@@ -121,13 +121,13 @@ public class ComboTreeController extends BaseController{
 	}
 	
 	private String getTypeName(String type, String source){
-		if(type.indexOf("combotreeUser") >= 0){
+		if(type.contains("combotreeUser")){
 			type = "user";
-		} else if(type.indexOf("combotreeDept") >= 0){
+		} else if(type.contains("combotreeDept")){
 			type = "dept";
-		} else if(type.indexOf("combotreeRole") >= 0){
+		} else if(type.contains("combotreeRole")){
 			type = "role";
-		} else if(type.indexOf("combotree_") >= 0 || type.indexOf("combotreeDict") >= 0){
+		} else if(type.contains("combotree_") || type.contains("combotreeDict")){
 			type = "dict_" + type.replace("combotree_", "").replace("combotreeDict", "");
 		} else {
 			type = "diy_" + source;
@@ -137,7 +137,7 @@ public class ComboTreeController extends BaseController{
 	
 	private String getSql(String type, String source){
 		String sql = "";
-		if (type.indexOf("dict_") >= 0) {
+		if (type.contains("dict_")) {
 			String code = type.replace("dict_", "");
 			sql = "select NUM as \"num\",ID as \"id\",PID as \"pId\",NAME as \"name\",(case when (pId=0 or pId is null) then 'true' else 'false' end) \"open\" from  BLADE_DICT where code= '" + code + "'";;
 		} else if (type.equals("user")) {
@@ -154,7 +154,7 @@ public class ComboTreeController extends BaseController{
 	
 	private IQuery getIntercept(String type) {
 		IQuery intercept = Cst.me().getDefaultQueryFactory();
-		if (type.indexOf("dict") >= 0) {
+		if (type.contains("dict")) {
 			intercept = Cst.me().getDefaultSelectFactory().dictIntercept();
 		} else if (type.equals("user")) {
 			intercept = Cst.me().getDefaultSelectFactory().userIntercept();
