@@ -1,0 +1,159 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{"InsertTime_dategt":"' +getBeforeDate(3) +' 00:00:00","InsertTime_datelt":"' +getBeforeDate(0)+' 23:59:59"}';
+	$(function() {
+		backDom('管理员操作日志','admin_log');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/playerlog/aollist/";//查询列表接口
+		var _colnames = [ "序列", "姓名", "操作时间", "操作IP", "结果", "操作内容" ];
+		var _colmodel = [ { name : "ID", hidden : true }, 
+		                  { name : "OperatorName", sortable:false }, 
+		                  { name : "InsertTime", align : "center", sortable:false }, 
+		                  { name : "OperateIP", align : "center", sortable:false }, 
+		                  { name : "OperateResultName", align : "center", sortable:false }, 
+		                  { name : "Description", sortable:false, width:300 }];
+
+		jQuery(grid_selector).jqGrid({
+			url : grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			jsonReader : {
+				id : "ID"
+			},
+			pager : pager_selector,
+			rowNum:100,
+			postData : {where:_filter,sort: "InsertTime", order: "desc"},
+			multiselect : false,
+			rownumbers : false,
+			height: 'auto'
+		});
+	}
+</script>
+<div class="space-4"></div>
+<div class="space-4"></div>
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 登录名： </label> 
+			<input type="text" id="OperatorName"/> 
+			<!-- 简单查询第二组 -->
+			<label class=""> 日志内容： </label> 
+			<input type="text" id="Description"/> 
+			<!-- 简单查询第三组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="start_time"/>- 
+			<input type="text" id="end_time"/>
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		var OperatorName = $("#OperatorName").val();
+		var Description = $("#Description").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(OperatorName)) {
+			wheres['OperatorName'] = OperatorName;
+		}
+		if(BladeTool.isNotEmpty(Description)) {
+			wheres['Description'] = Description;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['InsertTime_datelt'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['InsertTime_dategt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['InsertTime_datelt'] = getBeforeDate(0)+' 23:59:59';
+				$("#end_time").val(getBeforeDate(0)+' 23:59:59');
+			}
+		}
+		
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+        reloadGrid();
+	}
+	$(function(){
+		$('#start_time').val(getBeforeDate(3)+' 00:00:00');
+		$('#end_time').val(getBeforeDate(0)+' 23:59:59');
+	});
+</script>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){} 
+@}

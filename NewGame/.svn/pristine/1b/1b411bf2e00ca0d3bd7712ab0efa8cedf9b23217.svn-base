@@ -1,0 +1,194 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{"Type":"12","startTime":"' +getBeforeDate(0) +'","endTime":"' +getBeforeDate(0)+'"}';
+	
+	$(function() {
+		backDom('礼物找回记录','player_giftbacklog');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/gblist";//查询列表接口
+		var _colnames = [ "SID","赠送玩家ID","赠送玩家靓号", "赠送玩家昵称", "TID","接收玩家ID","接收玩家靓号", "接收玩家昵称", "金币", "赠送时间", "操作人", "操作时间"];
+		var _colmodel = [ 
+		                  { name : "UserID", sortable:false,classes:"text-33C3F7", hidden:true }, 
+		                  { name : "UserID", sortable:false,classes:"text-33C3F7", formatter:rowShow },
+            			  { name : "send_BeautifulID",sortable:false},
+		                  { name : "NickName", sortable:false,classes:"text-33C3F7", formatter:rowShow }, 
+		                  { name : "TargetUserID", sortable:false,classes:"text-33C3F7", hidden:true }, 
+		                  { name : "TargetUserID", sortable:false,classes:"text-33C3F7", formatter:rowShow },
+            			  { name : "tar_BeautifulID",sortable:false},
+		                  { name : "TargetUserName", sortable:false,classes:"text-33C3F7", formatter:rowShow }, 
+		                  { name : "Gold", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  { name : "SendTime", sortable:false }, 
+		                  { name : "OperatorName", sortable:false }, 
+		                  { name : "InsertTime", sortable:false }];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {where:_filter,sort: "InsertTime", order: "desc"},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:100,
+			height: 'auto',
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='UserID' || options.colModel.name=='NickName') {
+			html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			if(options.colModel.name=='TargetUserID' || options.colModel.name=='TargetUserName') {
+				html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.TargetUserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.TargetUserID+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			return html;
+		}
+	}
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 赠送玩家ID： </label> 
+			<input type="text" id="send_user_info" value="" placeholder=""
+				class="" /> 
+
+			<!-- 简单查询第二组 -->
+			<label class=""> 接收玩家ID： </label> 
+			<input type="text" id="target_user_info" value="" placeholder=""
+				class="" /> 
+			
+			<!-- 简单查询第三组 -->
+			<label class=""> 赠送时间： </label> 
+			<input type="text" id="start_time" value="" class="" />-
+			<input type="text" id="end_time" value="" class="" />
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		var send_user_info = $("#send_user_info").val();
+		var target_user_info = $("#target_user_info").val();
+		var wheres = {};
+		wheres['Type'] = '12';
+		
+		if(BladeTool.isNotEmpty(send_user_info)) {
+			wheres['UserID'] = send_user_info;
+		}
+		if(BladeTool.isNotEmpty(target_user_info)) {
+			wheres['TargetUserID'] = target_user_info;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+	    
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+        reloadGrid();
+	}
+	$(function(){
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+	});
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

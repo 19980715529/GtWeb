@@ -1,0 +1,53 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/roomconfig/update" method="post" class="form-horizontal" role="form">
+		<input type="hidden" name="room.ServerID" value="${room.ServerID!}"/>
+		<input type="hidden" name="room.cheatLowLine" value="${room.cheatLowLine!0}" />
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间ID: </td>
+					<td>${room.ServerID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间名称: </td>
+					<td><input name="room.RoomName" value="${room.RoomName!}"/></td>
+				</tr>
+				<tr>	
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">税率: </td>
+					<td><input name="room.taxRate" value="${room.taxRate!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">税收起征值: </td>
+					<td><input name="room.taxLimitValue" value="${room.taxLimitValue!}"></input></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日增加血池最大值: </td>
+					<td>
+						<input name="room.autoAddBloodDailyMax" value="${room.autoAddBloodDailyMax!}"></input>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当日还剩可加值: </td>
+					<td><input type="text" name="room.autoAddBloodDailyLast" value="${room.autoAddBloodDailyLast!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每次添加的值: </td>
+					<td><input type="text" name="room.autoAddBloodDailyTimesValue" value="${room.autoAddBloodDailyTimesValue}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">自动增加血池值CD: </td>
+					<td>
+						<input name="room.autoAddBloodDailyTimeCDInSec" value="${room.autoAddBloodDailyTimeCDInSec}"></input>
+					</td>
+				</tr>
+				<tr>
+					<!--<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">点控生效线: </td>
+					<td><input type="text" name="room.cheatLowLine" value="${room.cheatLowLine!}" /></td>  -->
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池自动填池线: </td>
+					<td colspan="3">
+						<input type="text" name="room.lessBloodValue" value="${room.lessBloodValue!}" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

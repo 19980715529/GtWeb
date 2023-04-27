@@ -1,0 +1,77 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter = '{"UserID":"${id}","Type":"-1"}';//锁定
+	} else {
+		_filter = '{"Type":"-1"}';
+	}
+
+	$(function() {
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/playerlog/aollist/";//查询列表接口
+		var _colnames = [ "玩家ID", "昵称", "类型", "操作时间", "说明", "操作用户"];
+		var _colmodel = [ {name : "UserID",sortable:false,formatter: genLink}, 
+		                  {name : "NickName",sortable:false,formatter: genLink}, 
+		                  {name : "UserTypeName",sortable:false}, 
+		                  {name : "InsertTime",sortable:false}, 
+		                  {name : "Description",sortable:false,width:300}, 
+		                  {name : "OperatorName",sortable:false}];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {where: _filter, sort: "InsertTime", order: "desc"},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:100,
+			height: 'auto'
+		});
+		
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='UserID' || options.colModel.name=='NickName') {
+			html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			return html;
+		}
+	}
+
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '锁定记录->用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<div class="space-4"></div>
+	<div class="space-4"></div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

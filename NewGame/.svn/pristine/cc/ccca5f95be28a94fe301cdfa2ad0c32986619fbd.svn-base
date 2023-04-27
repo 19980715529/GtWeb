@@ -1,0 +1,38 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+  <div class="col-xs-12 tb-grid">
+    <form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+      <table class="table table-bordered">
+        <tbody>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">id: </td>
+          <td ><input type="text" name="announcement.id" value="${announcement.id}" readonly/></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">侧边栏显示: </td>
+          <td ><input type="text" name="announcement.title" value="${announcement.title}"/></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+          <td>
+            <!--附件类型：1：金币，2：转盘-->
+            <input type="radio" value="1" name="announcement.isOpen" ${announcement.isOpen==1?"checked":""}>开启</input>
+            <input type="radio" value="0" name="announcement.isOpen" ${announcement.isOpen==0?"checked":""}>关闭</input>
+          </td>
+
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告内容: </td>
+          <td colspan="3">
+            <textarea name="announcement.content" cols="90">${announcement.content}</textarea>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
+</div>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确定修改",btn_close:"关闭"}) {}
+@}

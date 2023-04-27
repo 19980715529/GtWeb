@@ -1,0 +1,146 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('邮件管理','emailconf');
+        initGrid();
+    });
+
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["id","活动id", "子活动id","活动名称","累充金额","是否开启","活动奖励","奖励类型"];
+        var _colmodel=[
+            {name:"id",sortable: false,hidden:true},
+            {name:"ActiveID",sortable: false},
+            {name:"SubActiveID", sortable:false},
+            {name:"ActiveName", sortable:false},
+            {name:"Param1", sortable:false},
+            {name:"IsOpen", sortable:false,formatter:rowText},
+            {name:"Reward", sortable:false},
+            {name:"RewardType", sortable:false,formatter:rowShow}
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {},
+            rowNum:100,
+            height: 'auto'
+        });
+    }
+    function rowShow(cellvalue,options,rowObject) {
+        var html = "";
+        if(options.colModel.name ==='RewardType') {
+            if(cellvalue == 1){
+                html = "金币";
+            }else if (cellvalue == 2){
+                html = "转盘奖励";
+            }
+        }
+        return html;
+    }
+    function rowText(cellvalue,options,rowObject) {
+        var html = "";
+        if(options.colModel.name ==='IsOpen') {
+            if(cellvalue == 1){
+                html = "开启";
+            }else if (cellvalue == 0){
+                html = "关闭";
+            }
+        }
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <!--表单-->
+        <form>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="exampleInputPassword1">发送对象</label><br>
+                    <input type="text" class="form-control" id="inlineRadio1" placeholder="发送对象">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="exampleInputPassword1">发送到id</label>
+                    <input type="text" class="form-control" id="exampleInputPassword1" placeholder="发送到id">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="emailTitle">邮件标题</label>
+                    <input type="text" class="form-control" id="emailTitle" placeholder="邮件标题">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="emailType">邮件类型</label>
+                    <select class="form-control" id="emailType">
+<!--                        0:充值，1:兑换，3:退回，4:活动，5:测试-->
+                        <option value="0">充值</option>
+                        <option value="1">兑换</option>
+                        <option value="2">退回</option>
+                        <option value="3">活动</option>
+                        <option value="4">测试</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-12 tb-grid">
+                    <label for="emailContent">邮件内容</label>
+<!--                    <input type="text" class="form-control"  placeholder="welcome GT game">-->
+                    <textarea class="form-control" id="emailContent" rows="3">welcome GT game</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="sender">发送人</label>
+                    <input type="text" id="sender" class="form-control"  placeholder="welcome GT game">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="attachment">附件类型</label>
+                    <select class="form-control" id="attachment">
+                        <!--附件类型：1：金币，2：转盘-->
+                        <option value="1">金币</option>
+                        <option value="2">转盘</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-xs-6 tb-grid">
+                    <label for="amount">填写数量</label>
+                    <input type="text" id="amount" class="form-control"  placeholder="">
+                </div>
+            </div>
+            <div class="col-xs-12 tb-grid">
+                <button type="button" class="btn btn-default">保存为模板</button>
+                <button type="button" class="btn btn-default">取消</button>
+                <button type="button" class="btn btn-default">发送</button>
+            </div>
+        </form>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script>
+    $(function(){
+        $("#gotoSearch").bind("click", function () {
+            reloadGrid();
+        });
+    });
+</script>
+@include("/common/_listscript.html"){}
+<link rel="stylesheet" href="${ctxPath}/static/zTree/css/zTreeStyle/zTreeStyle.css" />
+<script src="${ctxPath}/static/zTree/js/jquery.ztree.core.js" type="text/javascript" ></script>
+@}

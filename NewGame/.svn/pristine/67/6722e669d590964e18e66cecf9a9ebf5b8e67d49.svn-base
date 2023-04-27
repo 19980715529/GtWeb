@@ -1,0 +1,73 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/emailrecords/send" method="post" class="form-horizontal" role="form">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">邮件标题: </td>
+                    <td ><input type="text" name="emailrecords.title" value="${emailmodel.title}"/></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">发件人: </td>
+                    <td>
+                        <select id="sender" name="emailrecords.senderId" value="${emailmodel.senderId}"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">发送到id: </td>
+                    <td ><input type="text" name="emailrecords.userId" value=""/></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">邮件类型: </td>
+                    <td >
+                        <select type="text" name="emailrecords.emailType">
+                            <option value="">请选择</option>
+                            <option value="5">充值</option>
+                            <option value="206">兑换成功</option>
+                            <option value="211">兑换退回</option>
+                            <option value="209">活动</option>
+                            <option value="210">测试</option>
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数量: </td>
+                    <td><input type="text" name="emailrecords.amount" value="${emailmodel.amount}"/></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">附件类型: </td>
+                    <td>
+                        <!--附件类型：1：金币，2：转盘-->
+                        <input type="radio" value="1" name="emailrecords.attachment" ${emailmodel.attachment==1?"checked":""}>金币</input>
+                        <input type="radio" value="2" name="emailrecords.attachment" ${emailmodel.attachment==2?"checked":""}>转盘</input>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">邮件内容: </td>
+                    <td colspan="3">
+                        <textarea name="emailrecords.content" cols="90">${emailmodel.content}</textarea>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var ctx = "${ctxPath}";
+    $(function (){
+        getSenders()
+    })
+    function getSenders() {
+        new Ajax( ctx+ "/${code}/senders", function (data) {
+            if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data;
+                var html = '';
+                for (var i = 0; i < type.length; i++) {
+                    html += '<option value="' + type[i]['id']+'">' + type[i]['sender'] + '</option>';
+                }
+                $("#sender").html(html);
+            }
+        }).start();
+    }
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"发送邮件",btn_close:"关闭"}) {}
+@}

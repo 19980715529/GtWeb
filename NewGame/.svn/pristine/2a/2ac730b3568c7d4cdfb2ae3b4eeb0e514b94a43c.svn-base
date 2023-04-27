@@ -1,0 +1,224 @@
+@layout("/common/_container.html"){
+<style>
+#gview_grid-table {
+	margin-bottom: 38px;
+}
+</style>
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '';
+
+	$(function() {
+		backDom('兑换码兑换记录','player_exchange');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = [ "序号","玩家ID", "玩家昵称","兑换码",  "兑换金币", "兑换奖券","兑换时间","生成时间","VIPID","批次"];
+		var _colmodel = [
+		                  {name : "Exchange_Id",hidden:true},
+		                  {name : "User_Id",sortable:false,formatter:genLink},
+		                  {name : "NickName",sortable:false,formatter:genLink},
+		                  {name : "ExchangeCode",sortable:false},
+		                  {name : "GoldAmount",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "ModelAmount",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "ExchangeTime",sortable:true},
+		                  {name : "MakeTime",sortable:false},
+                          {name : "VIPID",sortable:false},
+			              {name : "ExchangeBatch",sortable:false},
+						];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			/*postData : {where: _filter,sort: "MakeTime", order: "desc"},*/
+			postData :{where : _filter},
+			rownumbers : false,
+			rowNum:100,
+            sortname:"ExchangeTime",
+            sortorder:"desc",
+			height: 'auto'
+		});
+
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='User_Id' || options.colModel.name=='NickName') {
+				html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.User_Id +'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.User_Id+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			return html;
+		}
+	}
+
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 玩家ID： </label>
+			<input type="text" id="UserID" value="" placeholder="请输入用户ID查询数据"
+				class="" />
+			<!-- 简单查询第一组 -->
+			<label class=""> 兑换码： </label>
+			<input type="text" id="ExchangeCode" value="" placeholder="请输入兑换码"
+				class="" />
+
+			<!-- 简单查询第三组 -->
+			<label class=""> 时间： </label>
+			<input type="text" id="start_time" value="" class="" />
+			-
+			<input type="text" id="end_time" value="" class="" />
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+				<!--<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>-->
+			</label>
+		</div>
+	</form>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+
+	function goSearch() {
+		var UserID = $("#UserID").val();
+		var ExchangeCode = $("#ExchangeCode").val();
+		var wheres = {};
+
+		wheres['UserID'] = UserID;
+		wheres['ExchangeCode'] = ExchangeCode;
+
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime_lt'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime_gt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime_lt'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+		
+		if(BladeTool.isNotEmpty(ExchangeCode) && checkCode(ExchangeCode)) {
+			return;
+		}
+
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+		btn_stage.bind(toolbar);
+        reloadGrid();
+	}
+	
+	function checkCode(code) {
+	    /* var ajax = new Ajax(BladeApp.ctxPath + "/exchange/checkCode?code="+code,async:false, function (data) {
+	        if (data.code === 0) {
+	        	return true;
+	        } else {
+	        	layer_alert(data.message, "warn");
+	        }
+	    });
+	    ajax.start(); */
+	    var flag = false;
+	    $.ajax({
+	    	url : BladeApp.ctxPath + "/exchange/checkCode?code="+code,
+	    	type : 'get',
+	    	async: false,//使用同步的方式,true为异步方式
+	    	data : {'code':code},//这里使用json对象
+	    	success : function(data){
+	    		data = JSON.parse(data);
+	    		if (data.code === 0) {
+	    			flag = false;
+		        } else {
+		        	layer_alert(data.message, "warn");
+		        	flag = true;
+		        }
+	    	},
+	    	fail:function(){
+	    		flag = true;
+	    	}
+	    	});
+	    return flag;
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

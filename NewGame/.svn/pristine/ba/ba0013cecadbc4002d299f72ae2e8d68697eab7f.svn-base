@@ -1,0 +1,107 @@
+@layout("/common/_container.html"){
+<style>
+	td table td {
+		padding: 2px 5px;
+	}
+</style>
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员名称: </td>
+					<td colspan="3"><input name="viptype.MemberName" value=""/></td>
+				</tr>
+				<tr>	
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员权限: </td>
+					<td colspan="3">
+						<table>
+							<tr>
+								<td><input type="checkbox" name="viptype.UserRight" value="1" />禁止进行游戏</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="2" />禁止旁观游戏</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="4" />禁止发送私聊</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="8" />禁止大厅聊天</td>
+							</tr>
+							<tr>
+								<td><input type="checkbox" name="viptype.UserRight" value="16" />禁止游戏聊天</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="64" />禁止上榜</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="128" />禁止交易</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="32" />禁止发送小喇叭</td>
+							</tr>
+							<tr>
+								<td><input type="checkbox" name="viptype.UserRight" value="256" />游戏双倍积分</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="512" />游戏踢出用户</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="1024" />能进入VIP房间</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="268435456" />游戏比赛用户</td>
+							</tr>
+							<tr>
+								<td><input type="checkbox" name="viptype.UserRight" value="2048" />赠送礼物功能</td>
+								<td><input type="checkbox" name="viptype.UserRight" value="4096" />上线公告功能</td>
+								<td colspan="2"></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">任务奖励: </td>
+					<td><input name="viptype.TaskRate" value="0" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商城折扣: </td>
+					<td><input name="viptype.ShopRate" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">银行优惠: </td>
+					<td><input name="viptype.InsureRate" value="0" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日赠送: </td>
+					<td><input name="viptype.DayPresent" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日登陆礼包: </td>
+					<td><input name="viptype.DayGiftID" value="0" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td><input name="viptype.CollectNote" value="" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">拥有金币: </td>
+					<td><input name="viptype.ScoreCount" value="0"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加在线奖励: </td>
+					<td><input name="viptype.OnlineReward" value="0" />%</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加救济金奖励: </td>
+					<td><input name="viptype.Relieffund" value="0"/>%</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加签到奖励: </td>
+					<td><input name="viptype.Sign" value="0" />%</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加膜拜奖励: </td>
+					<td colspan="3"><input name="viptype.Visiting" value="0" />%</td>
+				</tr>
+				<!-- 
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否增加赠送礼物功能: </td>
+					<td>
+						<input name="viptype.Gift" type="radio" value="1"/>是
+						<input name="viptype.Gift" type="radio" value="0" checked="checked"/>否
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否增加上线公告功能: </td>
+					<td>
+						<input name="viptype.Notice" type="radio" value="1"/>是
+						<input name="viptype.Notice" type="radio" value="0" checked="checked" />否
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否增加小喇叭功能: </td>
+					<td>
+						<input name="viptype.LittleLama" type="radio" value="1"/>是
+						<input name="viptype.LittleLama" type="radio" value="0" checked="checked" />否
+					</td>
+				</tr>
+				 -->
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

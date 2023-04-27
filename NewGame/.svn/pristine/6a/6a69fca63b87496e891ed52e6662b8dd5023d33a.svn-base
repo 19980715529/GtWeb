@@ -1,0 +1,141 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
+					<td>${clientpos.clientType!}
+						<input name="clientpos.clientType" value="${clientpos.clientType!}" type="hidden"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos1: </td>
+					<td><input name="clientpos.pos1" value="${clientpos.pos1!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos2: </td>
+					<td><input name="clientpos.pos2" value="${clientpos.pos2!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos3: </td>
+					<td><input name="clientpos.pos3" value="${clientpos.pos3!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos4: </td>
+					<td><input name="clientpos.pos4" value="${clientpos.pos4!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos5: </td>
+					<td><input name="clientpos.pos5" value="${clientpos.pos5!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos6: </td>
+					<td><input name="clientpos.pos6" value="${clientpos.pos6!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos7: </td>
+					<td><input name="clientpos.pos7" value="${clientpos.pos7!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos8: </td>
+					<td><input name="clientpos.pos8" value="${clientpos.pos8!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos9: </td>
+					<td><input name="clientpos.pos9" value="${clientpos.pos9!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos10: </td>
+					<td><input name="clientpos.pos10" value="${clientpos.pos10!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos11: </td>
+					<td><input name="clientpos.pos11" value="${clientpos.pos11!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos12: </td>
+					<td><input name="clientpos.pos12" value="${clientpos.pos12!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos13: </td>
+					<td><input name="clientpos.pos13" value="${clientpos.pos13!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos14: </td>
+					<td><input name="clientpos.pos14" value="${clientpos.pos14!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos15: </td>
+					<td><input name="clientpos.pos15" value="${clientpos.pos15!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos16: </td>
+					<td><input name="clientpos.pos16" value="${clientpos.pos16!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos17: </td>
+					<td><input name="clientpos.pos17" value="${clientpos.pos17!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos18: </td>
+					<td><input name="clientpos.pos18" value="${clientpos.pos18!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos19: </td>
+					<td><input name="clientpos.pos19" value="${clientpos.pos19!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos20: </td>
+					<td><input name="clientpos.pos20" value="${clientpos.pos20!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos21: </td>
+					<td><input name="clientpos.pos21" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos22: </td>
+					<td><input name="clientpos.pos22" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos23: </td>
+					<td><input name="clientpos.pos23" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos24: </td>
+					<td><input name="clientpos.pos24" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos25: </td>
+					<td><input name="clientpos.pos25" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos26: </td>
+					<td><input name="clientpos.pos26" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos27: </td>
+					<td><input name="clientpos.pos27" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos28: </td>
+					<td><input name="clientpos.pos28" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos29: </td>
+					<td><input name="clientpos.pos29" value="0" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">pos30: </td>
+					<td><input name="clientpos.pos30" value="0" /></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

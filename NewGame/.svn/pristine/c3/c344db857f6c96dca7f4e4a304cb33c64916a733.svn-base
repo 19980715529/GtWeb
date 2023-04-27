@@ -1,0 +1,39 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品设备: </td>
+					<td>
+						@if(globalappinfo.type_id == 1){
+						苹果产品
+						@} else {
+						安卓产品
+						@}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品编号: </td>
+					<td>${globalappinfo.IOS_Product_Id!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">产品价格: </td>
+					<td>${globalappinfo.PayRMB!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送游戏豆: </td>
+					<td>${globalappinfo.Gold!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">平台类型: </td>
+					<td>${globalappinfo.AccountTypeName!}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

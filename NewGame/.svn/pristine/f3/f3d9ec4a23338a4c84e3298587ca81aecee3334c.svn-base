@@ -1,0 +1,153 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "";
+
+	backDom('平台汇总明细','platform_summary_detail');
+</script>
+
+<!-- 配置grid -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">金币总量</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">金币奖励统计</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">转盘奖励统计</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">登录情况</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">平台总金币 </td>
+					<td>${total.totalscore!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">转盘活动产出金币总量 </td>
+					<td>${total.turntablegold!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">领取转盘总次数</td>
+					<td>${total.onlinerewards!0+total.dailyattendances!0+total.coderebates!0+total.onlinecount!0+total.dailycount!0+total.codecount!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">总登录人数</td>
+					<td>${total.czUserLogin!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">平台当日输赢 </td>
+					<td>${total.xtsy!0}</td>、
+
+					<td style="vertical-align: middle !important;text-align:right;">充值返利金币总量</td>
+					<td>${total.czcoderebategold!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">在线奖领取励转盘次数</td>
+					<td>${total.onlinerewards!0+total.onlinecount!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">今日登录人数</td>
+					<td>${total.DLoginUserCount!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">当日赠送金币 </td>
+					<td>${total.turntablegold!0+total.czcoderebategold!0+total.bindmobilerewards!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">绑定手机金币总量</td>
+					<td>${total.bindmobilerewards!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">每日签到领取转盘次数</td>
+					<td>${total.dailyattendances!0+total.dailycount!0}</td>
+
+					<td colspan="2" rowspan="6"></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">当日充值获得金币 </td>
+					<td>${total.czscore!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">在线奖励金币 </td>
+					<td>${total.onlinegoldbonus!0}</td>
+
+					<td style="vertical-align: middle !important;text-align:right;">打码返利领取转盘次数 </td>
+					<td>${total.coderebates!0+total.codecount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" rowspan="1"></td>
+					<td style="vertical-align: middle !important;text-align:right;">每日签到金币</td>
+					<td>${total.dailygoldbonus!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">使用转盘总次数</td>
+					<td>${total.onlinecount!0+total.dailycount!0+total.codecount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" rowspan="1"></td>
+					<td style="vertical-align: middle !important;text-align:right;">打码返利金币</td>
+					<td>${total.codegoldbonus!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">在线奖励转盘使用次数</td>
+					<td>${total.onlinecount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" rowspan="1"></td>
+					<td colspan="2" rowspan="1"></td>
+					<td style="vertical-align: middle !important;text-align:right;">每日签到转盘使用次数</td>
+					<td>${total.dailycount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" rowspan="1"></td>
+					<td colspan="2" rowspan="1"></td>
+					<td style="vertical-align: middle !important;text-align:right;">打码返利转盘使用次数</td>
+					<td>${total.codecount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">用户注册</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">充值情况</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">兑换情况</td>
+					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">在线情况</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">总注册</td>
+					<td>${total.totalreg!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">总充值金额</td>
+					<td>${total.totalmoney!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">总兑换金额</td>
+					<td>${total.totalExchangeMoney!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">当日最高在线</td>
+					<td>${total.maxonline!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">安卓</td>
+					<td>${total.andRegister!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">总充值人次</td>
+					<td>${total.totalRechargeUser!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">总兑换人次</td>
+					<td>${total.totalExchangeUser!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">当前在线</td>
+					<td>${total.OnlineUserCount!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">IOS</td>
+					<td>${total.iosRegister!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">今日充值金额</td>
+					<td>${total.todaymoney!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">今日兑换金额</td>
+					<td>${total.todayExchangeMoney!0}</td>
+					<td colspan="2" rowspan="4"></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">今日总注册</td>
+					<td>${total.todayreg!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">今日充值人次</td>
+					<td>${total.todayRechargeUser!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">今日兑换人次</td>
+					<td>${total.todayExchangeUser!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">今日安卓注册</td>
+					<td>${total.anddRegiste!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">充提差</td>
+					<td>${total.totalmoney!0-total.totalExchangeMoney!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">充提差</td>
+					<td>${total.totalmoney!0-total.totalExchangeMoney!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">今日IOS注册</td>
+					<td>${total.iosdRegister!0}</td>
+					<td colspan="2" rowspan="1"></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

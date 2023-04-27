@@ -1,0 +1,43 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充值活动开启时间: </td>
+					<td>${rechargeactivity.begintime!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充值活动结束时间: </td>
+					<td>${rechargeactivity.endtime!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">额外赠送金币: </td>
+					<td>${rechargeactivity.extragold!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">额外赠送奖券: </td>
+					<td>${rechargeactivity.extraticket!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">活动期间可购买次数: </td>
+					<td>${rechargeactivity.buytimes!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
+					<td>${rechargeactivity.clientType!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;">充值产品编号 </td>
+					<td>${rechargeactivity.pid!0}</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

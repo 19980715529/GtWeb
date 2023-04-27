@@ -1,0 +1,168 @@
+.text-red {
+	color: red
+}
+.text-blue {
+	color: blue
+}
+.text-green {
+	color: green
+}
+.text-white {
+	color: white
+}
+.text-33C3F7 {
+	color: #33C3F7
+}
+.text-EC9F9E {
+	color: #EC9F9E;
+}
+.text-699F69 {
+	color: #699F69;
+}
+.text-E1AF66 {
+	color: #E1AF66;
+}
+.text-0F5AC4 {
+	color: #0F5AC4;
+}
+.text-white {
+	color: white;
+}
+.bg-86D1EA {
+	background-color: #86D1EA;
+}
+.bg-0F5AC4 {
+	background-color: #0F5AC4;
+}
+.bg-ED8377 {
+	background-color: #ED8377;
+}
+.bg-076100 {
+	background-color: #076100;
+}
+.bg-FFAA00 {
+	background-color: #FFAA00;
+}
+.bg-0f5ac4 {
+	background-color: #0f5ac4;
+}
+.bg-F9F9F9 {
+	background-color: #F9F9F9;
+}
+.bg-f3f1f1 {
+	background-color: #f3f1f1;
+}
+.bg-007EFF {
+	background-color: #007EFF!important;
+}
+.bg-eeeeee {
+	background-color: #f1f1f1;
+}
+.bg-F5F5F5 {
+	background-color: #F5F5F5;
+}
+/*在线列表，作弊率（负显示绿色，正显示灰色,整条数据背景显示灰色）*/
+.bg-b0f30b {
+	background-color: #E4EFC9!important;
+}
+.bg-d3d4d1 {
+	background-color: #d3d4d1!important;
+}
+.total-block {
+	padding: 10px 0 10px 0;
+    border: 1px solid #e4e6e9;
+}
+.t-caption {
+    font-size: 16px;
+}
+.text-left {
+	text-align: left;
+}
+.text-center {
+	text-align: center;
+}
+.text-right {
+	text-align: right;
+}
+.no-border {
+	border: none!important;
+}
+/*排序字段样式*/
+.sort-cols {
+	color: blue;
+}
+.text-padding {
+	padding: 3px;
+}
+.margin-space {
+	margin: 10px 5px 5px 0;
+}
+
+.statistics-search {
+	text-align: right;
+    margin-right: 13px;
+}
+
+/* tab panel 不显示Echarts  图表问题   */
+/* bootstrap hack: fix content width inside hidden tabs */
+.tab-content > .tab-pane,
+.pill-content > .pill-pane {
+    display: block;     /* undo display:none          */
+    height: 0;          /* height:0 is also invisible */
+    overflow-y: hidden; /* no-overflow                */
+}
+.tab-content > .active,
+.pill-content > .active {
+    height: auto;       /* let the content decide it  */
+} /* bootstrap hack end */
+
+th, #grid-table td {
+	text-align: center
+}
+.ui-jqgrid tr.jqgrow td {
+white-space: normal !important;
+height:auto;
+}
+.ui-jqgrid .ui-jqgrid-htable, .ui-jqgrid-btable {
+    width: 1320px!important;
+}
+@media (max-width: 767px) {
+    .ui-jqgrid .ui-jqgrid-htable, .ui-jqgrid-btable {
+    width: auto !important;
+	}
+}
+.ui-jqgrid .ui-jqgrid-htable th {
+white-space: normal !important;
+}
+.ui-jqgrid .ui-jqgrid-htable th div {
+    height: auto!important;
+}
+.db-btn td {
+	padding-right: 20px;
+}
+.db-btn td button,.db-btn td a {
+	width: 170px;
+	height: 32px;
+}
+.tablediv .ui-jqgrid-htable,.tablediv .ui-jqgrid-btable {
+    width: 100% !important;
+}
+.tablediv .ui-jqgrid-hbox {
+    padding-right: 0!important;
+}
+#grid-pager{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+}
+.btn.btn-search {
+	background-color: #3B95CA !important;
+	margin-right: 5px;
+	color: white!important;
+}
+.hide{
+	display: none;
+}
+#grid-table{
+	margin-bottom: 50px;
+}

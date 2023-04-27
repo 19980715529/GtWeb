@@ -1,0 +1,69 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+                    <td ><select id="name" name="gameconf.gameId"></select></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+                    <td><input type="text" name="gameconf.sort" value=""/></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+                    <td>
+                        <input type="radio" name="gameconf.isOpen" value="0">关闭</input>&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="gameconf.isOpen" value="1">开启</input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">界面状态: </td>
+                    <td>
+                        <input type="radio" name="gameconf.state" value="0"/>无&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="gameconf.state" value="1"/>new&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="gameconf.state" value="2"/>hot&nbsp;&nbsp;&nbsp;
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别: </td>
+                    <td>
+                        <select name="gameconf.type" value="">
+                            <option value="">请选择游戏类别</option>
+                            <option value="slots">slots</option>
+                            <option value="poker">poker</option>
+                            <option value="fishing">fishing</option>
+                        </select>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别中排序: </td>
+                    <td>
+                        <input type="text" name="gameconf.typeSort" value=""/>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var ctx = "${ctxPath}";
+    $(function (){
+        getGame()
+    })
+    function getGame() {
+        new Ajax( ctx+ "/gameconf/findGame", function (data) {
+            if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data;
+                var html = '';
+                for (var i = 0; i < type.length; i++) {
+                    html += '<option value="' + type[i]['KindID']+'">' + type[i]['KindName'] + '</option>';
+                }
+                $("#name").html(html);
+            }
+        }).start();
+    }
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

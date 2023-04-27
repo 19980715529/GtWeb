@@ -1,0 +1,99 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr class="bg-F5F5F5"><td colspan="4">基本信息</td></tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员卡类型: </td>
+					<td>
+						<select id="CardTypeID" name="livcard.CardTypeID"></select>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">生成数量: </td>
+					<td><input name="livcard.BuildCount"  value="0"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">价格: </td>
+					<td>
+						<input name="livcard.CardPrice" value="0"/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡游戏豆: </td>
+					<td><input name="livcard.Currency" value="0"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">实卡游戏币: </td>
+					<td><input name="livcard.Gold" value="0"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">使用范围: </td>
+					<td>
+						<select name="livcard.UseRange">
+							<option value="0">全部用户</option>
+							<option value="1">新注册用户</option>
+							<option value="2">第一次充值用户</option>
+						</select> 
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">销售商: </td>
+					<td><input name="livcard.SalesPerson" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">有效日期: </td>
+					<td><input name="livcard.ValidDate" id="ValidDate"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td colspan="3"><input name="livcard.NoteInfo" value="" id="NoteInfo" class="form-control"/></td>
+				</tr>
+				<tr class="bg-F5F5F5"><td colspan="4">卡号规则</td></tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">开始字符: </td>
+					<td>
+						<input name="livcard.prefix" value="P"/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">卡号长度: </td>
+					<td><input name="livcard.serialLength" value="11"/></td>
+				</tr>
+				<tr class="bg-F5F5F5"><td colspan="4">卡密规则</td></tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">密码字符类型: </td>
+					<td>
+						<input name="livcard.passType" value="0" type="checkbox"/>数字
+						<input name="livcard.passType" value="1" type="checkbox"/>含小写字母
+						<input name="livcard.passType" value="2" type="checkbox"/>含大写字母
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">密码长度: </td>
+					<td><input name="livcard.passLength" value="8"/>密码长度必须大于等于8小于33</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#ValidDate',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	$(function() {
+		$('#NoteInfo').val('管理员【${shiro.getUser().name}】于'+getBeforeDate(0)+'生成');
+		new Ajax(BladeApp.ctxPath + "/livcard/livcardconfig/getGlobalLivcard", function (data) {
+	        console.log(data);
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var html = '<option value="">请选择</option>';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['CardTypeID'] + '">' + type[i]['CardName'] + '</option>';
+				}
+	        	$("#CardTypeID").html(html);
+	        }
+	 }).start();
+	});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"保存"}) {}
+@}

@@ -1,0 +1,230 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+
+	$(function() {
+		initGrid();
+		initMenuBtn("btns", "${code}");
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = [ "玩家ID", "昵称", "管理员", "时间", "类型", "说明", "金币数"];
+		var _colmodel = [ {
+			name : "userid",
+			index : "userid",
+			width : 100, sortable:false
+		}, {
+			name : "nickname",
+			index : "nickname",
+			width : 100, sortable:false
+		}, {
+			name : "adminname",
+			index : "adminname",
+			width : 100, sortable:false
+		}, {
+			name : "createtime",
+			index : "createtime",
+			width : 80, sortable:false
+		}, {
+			name : "operatetype",
+			index : "operatetype",
+			width : 100, sortable:false
+		}, {
+			name : "description",
+			index : "description",
+			width : 100, sortable:false
+		}, {
+			name : "coinnum",
+			index : "coinnum",
+			width : 80,
+			formatter:rowShow, sortable:false
+		} ];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			jsonReader : {
+				id : "id"
+			},
+			pager : pager_selector,
+			postData : {sort: "createtime", order: "desc"},
+			multiselect : false,
+			rownumbers : false,
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				totalcoin += rowdata['coinnum'];
+			},
+			gridComplete:function() {
+				computeTotal(totalcoin);
+				totalcoin = 0;
+			}
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			if(rowObject.numtype == 1) {
+				html = '<span class="text-red">增加' + rowObject.coinnum + '</span>';
+			} else {
+				html = '<span class="text-blue">扣除' + rowObject.coinnum + '</span>';
+			}
+			return html;
+		}
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 用户： </label> 
+			<select class="" id="user_type">
+				<option value="">请选择</option>
+				<option value="userid">玩家ID</option>
+				<option value="nickname">玩家名称</option>
+			</select> 
+			<input type="text" id="user_info" value="" placeholder=""
+				class="" /> 
+			<!-- 简单查询第二组 -->
+			<label class=""> 管理员： </label> 
+			<input type="text"
+				id="admin_name" value="" placeholder="" class="" />
+			<!-- 简单查询第三组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="start_time" value="" class="" />- 
+			<input type="text" id="end_time" value="" class="" />
+			<!-- 简单查询第四组 -->
+			<label class=""> 辅助类型： </label> 
+			<select class="" id="assist_type">
+				<option value="">请选择</option>
+				<option value="系统bug补偿">系统bug补偿</option>
+				<option value="活动赠送">活动赠送</option>
+				<option value="盗号问题">盗号问题</option>
+				<option value="其他">其他</option>
+			</select>
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+	<div class="total-block">
+	金币总数：<span class="" id="total"></span>
+	</div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		var user_type = $("#user_type").val();
+		var user_info = $("#user_info").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(user_type) && BladeTool.isEmpty(user_info)) {
+			layer_alert('请输入' + $("#user_type").text() + '!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(user_info) && BladeTool.isEmpty(user_type)) {
+			layer_alert('请选择搜索用户类型!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(user_info) && BladeTool.isNotEmpty(user_type)) {
+			wheres[user_type] = user_info;
+		}
+		
+		var admin_name = $("#admin_name").val();
+		if(BladeTool.isNotEmpty(admin_name)) {
+			wheres['adminname'] = admin_name;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+	    if(start_time > end_time) {
+	    	layer_alert('开始时间不能大于结束时间!', "warn");
+	    	return;
+	    }
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['createtime_dategt'] = start_time;
+		}
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['createtime_datelt'] = end_time;
+		}
+		
+		var assist_type = $("#assist_type").val();
+		if(BladeTool.isNotEmpty(assist_type)) {
+			wheres['operatetype'] = assist_type;
+		}
+	    
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+		btn_stage.bind(toolbar);
+        reloadGrid();
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

@@ -1,0 +1,61 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('包配置','accounttypename');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "<span class='sort-cols'>ID</span>","包名称","副标题","皮类型","分类1","分类2","刷榜次数","更新包次数","审核状态","榜单状态","上架时间"];
+		var _colmodel=[   
+		                  {name:"clientType", index:"clientType"},
+		                  {name:"name", sortable:false},
+		                  {name:"subName", sortable:false},
+		                  {name:"ABCD", sortable:false},
+		                  {name:"lay1", sortable:false},
+		                  {name:"lay2", sortable:false},
+		                  {name:"rankTimes", sortable:false},
+		                  {name:"updateTimes", sortable:false},
+		                  {name:"checkStausName", sortable:false},
+		                  {name:"rankStausName", sortable:false},
+						  {name:"okTime", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"clientType"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"包ID",index:"clientType",type:"text"},
+			@			  {name:"包名称",index:"name",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	@include("/common/_listscript.html"){}
+@}	

@@ -1,0 +1,227 @@
+@layout("/common/_container.html"){
+<style>
+#gview_grid-table {
+	margin-bottom: 38px;
+}
+</style>
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{}';
+
+	$(function() {
+		backDom('至尊VIP交易记录','vip_trade');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = [ "玩家ID","玩家昵称","玩家账号", "总买分", "总卖分","最后登录时间"];
+		var _colmodel = [ 
+		                  {name : "UserID",sortable:false,formatter:genLink}, 
+		                  {name : "NickName",sortable:false,formatter:genLink}, 
+		                  {name : "Accounts",sortable:false}, 
+		                  {name : "BuyScore",index:"BuyScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "SellScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "LastLogonDate",sortable:false}];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			jsonReader:{id:"id"},
+			pager : pager_selector,
+			postData : {where: _filter},
+			rownumbers : false,
+			rowNum:100,
+			height: 'auto',
+			sortname:"BuyScore",
+			sortorder:"desc",
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+			},
+			beforeSelectRow: function(rowid, e) { 
+			},
+			gridComplete:function() {
+			}
+		});
+		
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='UserID' || options.colModel.name=='NickName') {
+			html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			}
+			return html;
+		}
+	}
+
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 玩家ID： </label> 
+			<input type="text" id="UserID" placeholder="请输入用户ID查询数据"
+				class="" /> 
+			
+			<!-- 简单查询第三组 -->
+			<label class=""> 时间： </label> 
+			<input type="text" id="start_time" value="" class="" />
+			- 
+			<input type="text" id="end_time" value="" class="" />
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+	<div class="welljq well-sm" id="btns">
+		<button class="btn btn-info" type="button" onclick="goDown()">
+			<i class="ace-icon fa fa-check bigger-110"></i>
+			导出Excel
+		</button>
+	</div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script src="${ctxPath}/static/search/js/excel.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		var UserID = $("#UserID").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(UserID)) {
+			wheres['UserID'] = UserID;
+		}else{
+			wheres['UserID'] = '';
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime_lt'] = end_time;
+		}else{
+			wheres['endTime_lt'] = '';
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime_gt'] = start_time;
+		}else{
+			wheres['startTime_gt'] = '';
+		}
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+        reloadGrid();
+	}
+	function goDown(){
+		var ServerId = $('#serverid').val();
+		var start_time = $('#start_time').val();
+		var end_time = $('#end_time').val();
+		var _colnames=[ "玩家ID","玩家昵称","玩家账号","总买分","总卖分","最后登录时间"];
+		var _colmodel=[{name:"UserID",width:50},{name:"NickName",width:50},{name:"Accounts",width:50},{name:"BuyScore",width:50},{name:"SellScore",width:50},{name:"LastLogonDate",width:50}];
+		var wheres = {};
+		
+		var UserID = $("#UserID").val();
+		if(BladeTool.isNotEmpty(UserID)) {
+			wheres['UserID'] = UserID;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime_lt'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime_gt'] = start_time;
+		}
+		
+		var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+
+		var postdata = {where:'{"UserID":"'+wheres['UserID']+'","startTime_gt":"'+wheres['startTime_gt']+'","endTime_lt":"'+wheres['endTime_lt']+'"}'};
+		console.log(postdata);
+		alert("queidng")
+		var code = 'serverexcel';
+		var source = 'vip.svip_list';
+    	downExcel(_colnames,_colmodel,source,postdata,code);
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

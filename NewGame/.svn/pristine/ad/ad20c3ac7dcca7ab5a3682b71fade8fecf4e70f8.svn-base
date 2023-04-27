@@ -1,0 +1,16 @@
+list
+===
+	  select clientType,name,IsWhiteListEnabled,ABCD,subName,hotWord,link
+	  ,lay1,lay2,rankTimes,hotTimes,moneyHotWords,rankStaus,checkStaus
+	  ,okTime,[desc],rankResultLevel,updateTimes,asoLink,
+	  (case when rankStaus=0 then '进入榜单' when rankStaus=1 then '移除榜单' when rankStaus=2 then '下架' else '未上架' end) rankStausName 
+	  ,(case when checkStaus=0 then '准备上传' when checkStaus=1 then '上传' when checkStaus=2 then '等待审核' when checkStaus=3 then '正在审核' when checkStaus=4 then '退回' when checkStaus=5 then '审核通过' else '更新包' end) checkStausName 
+	  ,(case when IsWhiteListEnabled=1 then '是' else '否' end) IsWhiteListEnabledName
+	  FROM [QPGameUserDB].[dbo].[AccountTypeName]
+	  where 1=1
+	  @if(!isEmpty(name)){
+	  and [name] like '%'+#{name}+'%'
+	  @}
+	  @if(!isEmpty(clientType)){
+	  and clientType=#{clientType}
+	  @}

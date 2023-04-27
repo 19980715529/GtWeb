@@ -1,0 +1,75 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr><td colspan="2">签到奖励游戏币设置</td></tr>
+				@for(x in signinconfig){
+					@if(x.Day_Id == 1){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第一天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID1" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold1" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 2){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第二天奖励: </td>
+						<td>
+							<input type="hidden" name="signinconfig.DayID2" value="${x.Day_Id!}"/>
+							<input name="signinconfig.RewardGold2" value="${x.Amount!}"/>游戏币
+						</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 3){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第三天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID3" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold3" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 4){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第四天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID4" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold4" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 5){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第五天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID5" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold5" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 6){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第六天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID6" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold6" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+					@if(x.Day_Id == 7){
+					<tr>
+						<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">第七天奖励: </td>
+						<td>
+						<input type="hidden" name="signinconfig.DayID7" value="${x.Day_Id!}"/>
+						<input name="signinconfig.RewardGold7" value="${x.Amount!}"/>游戏币</td>
+					</tr>
+					@}
+				@}
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"保存"}) {}
+@}

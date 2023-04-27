@@ -1,0 +1,99 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('邮件记录','emailrecords');
+        initGrid();
+    });
+
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["id","发送时间","邮件标题", "邮件内容","邮件类型","发件人","收件人","发送范围","操作发件人","附件","数量"];
+        var _colmodel=[
+            {name:"id",sortable: false,hidden:true},
+            {name:"sendTime", sortable:false},
+            {name:"title",sortable: false},
+            {name:"content", sortable:false},
+            {name:"emailType", sortable:false,formatter:rowShow},
+            {name:"emailSender", sortable:false},
+            {name:"userId", sortable:false,formatter:genLink},
+            {name:"range", sortable:false},
+            {name:"sender", sortable:false},
+            {name:"attachment", sortable:false,formatter:rowText},
+            {name:"amount", sortable:false}
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {},
+            multiselect : false,
+            rowNum:100,
+            height: 'auto'
+        });
+    }
+    function rowShow(cellvalue,options,rowObject) {
+        var html = "";
+        // 0:充值，1:兑换，2:退回，3:活动，4:测试
+        if(options.colModel.name ==='emailType') {
+            if(cellvalue == 0){
+                html = "充值";
+            }else if (cellvalue == 1){
+                html = "兑换";
+            }else if (cellvalue == 2){
+                html = "退回";
+            }else if (cellvalue == 3){
+                html = "活动";
+            }else if (cellvalue == 4){
+                html = "测试";
+            }
+        }
+        return html;
+    }
+    function rowText(cellvalue,options,rowObject) {
+        var html = "";
+        //
+        if(options.colModel.name ==='attachment') {
+            if(cellvalue == 1){
+                html = "金币";
+            }else if (cellvalue == 2){
+                html = "转盘";
+            }
+        }
+        return html;
+    }
+    function genLink(cellvalue, options, rowObject) {
+        var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.userId+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.userId+'"><strong>' + cellvalue + '</strong></a>';
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <button class="btn btn-sx btn-white btn-search hide" id="gotoSearch">查询</button>
+        <!-- 按钮组 -->
+<!--        <div class="welljq well-sm" id="btns"></div>-->
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script>
+    $(function(){
+        $("#gotoSearch").bind("click", function () {
+            reloadGrid();
+        });
+    });
+</script>
+@include("/common/_listscript.html"){}
+<link rel="stylesheet" href="${ctxPath}/static/zTree/css/zTreeStyle/zTreeStyle.css" />
+<script src="${ctxPath}/static/zTree/js/jquery.ztree.core.js" type="text/javascript" ></script>
+@}

@@ -1,0 +1,63 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+					<td><input type="text" name="gamemobilekind.KindName" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">模板名称: </td>
+					<td><input type="text" name="gamemobilekind.ModuleName" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">模板版本号: </td>
+					<td><input type="text" name="gamemobilekind.ClientVersion" value="0.0.0.0"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">资源版本号: </td>
+					<td><input type="text" name="gamemobilekind.ResVersion" value="0"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td><input type="text" name="gamemobilekind.SortID" value="0"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏归属: </td>
+					<td>
+						<input type="checkbox" name="gamemobilekind.KindMark" value="1"/>IOS
+						<input type="checkbox" name="gamemobilekind.KindMark" value="2"/>Android
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">禁用状态: </td>
+					<td>
+						<input type="radio" name="gamemobilekind.Nullity" value="0" checked="checked"/>启用
+						<input type="radio" name="gamemobilekind.Nullity" value="1"/>禁用
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类型: </td>
+					<td>
+						<select name="gamemobilekind.TypeID" id="TypeID"></select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		new Ajax("${ctxPath}/gametype/getGameTypeItem", function (data) {
+	        console.log(data);
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var html = '';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['TypeID'] + '">' + type[i]['TypeName'] + '</option>';
+				}
+	        	$("#TypeID").html(html);
+	        }
+	 }).start();
+	});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

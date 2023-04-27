@@ -1,0 +1,86 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "会员ID","会员名称","会员权限","拥有金币","银行优惠(%)","在线奖励加成(%)","救济金奖励加成(%)","签到奖励加成(%)","膜拜奖励加成(%)","创建时间"];
+		var _colmodel=[   {name:"MemberOrder", sortable:false,hidden:true},
+		                  {name:"MemberName", sortable:false},
+		                  {name:"UserRight", sortable:false,formatter:genLink},
+		                  {name:"ScoreCount", sortable:false,formatter:'integer', formatoptions:{thousandsSeparator: ',',defaulValue:'0'}},
+		                  {name:"InsureRate", sortable:false},
+		                  {name:"OnlineReward", sortable:false},
+		                  {name:"Relieffund", sortable:false},
+		                  {name:"Sign", sortable:false},
+		                  {name:"Visiting", sortable:false},
+						  {name:"CollectDate", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"MemberOrder"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto',
+			beforeSelectRow: function(rowid, e) { 
+			   //return $(e.target).is('input[type=checkbox]');
+				if(e.type == 'click'){
+		              i = $.jgrid.getCellIndex($(e.target).closest('td')[0]),  
+		              cm = jQuery("#grid-table").jqGrid('getGridParam', 'colModel');  
+		              return (cm[i].name != 'UserRight'); //当点击的单元格的名字为cb时，才触发选择行事件
+		          }
+		          return false; 
+			}
+		});
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='UserRight') {
+				html = '<a class="text-33C3F7" onclick="goLayer(' + rowObject.MemberOrder + ')" href="#"><strong>查看</strong></a>';
+			}
+			return html;
+		}
+	}
+	function goLayer(id) {
+		layer.open({
+    	    type: 2,
+    	    title: 'VIP权益',
+    	    area: ['800px', '520px'],
+    	    fix: false, //不固定
+    	    maxmin: true,
+    	    content: ctx + '/${code}/vipRight/' + id
+    	});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"会员ID",index:"MemberOrder",type:"text"},
+			@			  {name:"会员名称",index:"MemberName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

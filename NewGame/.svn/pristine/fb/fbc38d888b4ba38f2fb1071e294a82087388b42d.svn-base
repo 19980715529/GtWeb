@@ -1,0 +1,49 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/updateRecharge" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">玩家ID: </td>
+					<td>${player.UserID}
+						<input name="order.User_Id" value="${player.UserID}" type="hidden"/>
+						<input name="order.BuyType_Id" value="3" type="hidden"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当前拥有金币: </td>
+					<td>${player.Score!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充值金额: </td>
+					<td>
+						<select id="RechargeType" name="webid"></select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+<script>
+	$(function() {
+		// 获取账户类型
+		new Ajax(BladeApp.ctxPath + "/recharge/getRechargeList", function (data) {
+	        console.log(data);
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var html = '<option value="">请选择</option>';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['rid'] + '">' + type[i]['buymoney'] + '</option>';
+				}
+	        	$("#RechargeType").html(html);
+	        }
+	    }).start();
+	});
+	var isAutoFlushTab = true;
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确定充值",btn_close:"关闭"}) {}
+@}

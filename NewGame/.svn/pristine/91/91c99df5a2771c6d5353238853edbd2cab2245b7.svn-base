@@ -1,0 +1,108 @@
+@layout("/common/_container.html"){
+
+<script type="text/javascript">
+    var ctx = "${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var _filter = '{}';
+
+    $(function () {
+        backDom('库存靓号', 'player_beautifulID');
+        initGrid();
+        initMenuBtn("btns", "${code}");
+    });
+
+    function initGrid() {
+        var grid_url = ctx + "/${code}/blist";//查询列表接口
+        var _colnames = ["id","库存靓号", "原用户ID"];
+        var  _colmodel = [   { name : "id", sortable:false, hidden:true  },
+            {name: "BeautifulID", sortable: false},
+            {name: "UserID", sortable: false},
+        ];
+        var totalcoin = 0;
+        jQuery(grid_selector).jqGrid({
+            url: grid_url,
+            shrinkToFit: true,//适用于较少字段,响应式
+            colNames: _colnames,
+            colModel: _colmodel,
+            pager: pager_selector,
+            postData: {where: _filter},
+            multiselect: false,
+            rownumbers: false,
+            rowNum: 100,
+            jsonReader: {},
+            afterInsertRow: function (rowid, rowdata, rowelem) {
+            },
+            gridComplete: function () {
+            }
+        });
+
+        function genLink(cellvalue, options, rowObject) {
+            var html = '';
+            if (options.colModel.name == 'NowHasID' || options.colModel.name == 'NickName') {
+                html = '<a name="' + ctx + '/player/detailinfo/' + rowObject.NowHasID + '" title="玩家详情" class="text-33C3F7 iframeurl" href="' + ctx + '/player/detailinfo/' + rowObject.NowHasID + '"><strong>' + cellvalue + '</strong></a>';
+            }
+            return html;
+        }
+    }
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+    <form data-url="" method="post" class="" role="form">
+        <!-- 配置查询 -->
+        <div class="">
+            <!-- 简单查询第一组 -->
+            <label class=""> 靓号ID： </label>
+            <input type="text" id="UserID" value="" placeholder=""
+                   class=""/>
+
+            <!-- 简单查询按钮 -->
+            <label class="">
+                <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+            </label>
+        </div>
+    </form>
+    <!-- 按钮组 -->
+    <!-- <div class="welljq well-sm" id="btns">-->
+</div>
+<!-- grid -->
+<table id="grid-table"></table>
+<!-- 分页 -->
+<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+    function goSearch() {
+        var UserID = $("#UserID").val();
+        var wheres = {};
+        if (BladeTool.isNotEmpty(UserID)) {
+            wheres['UserID'] = UserID;
+        }
+        var where = "";
+
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+        $(grid_selector).jqGrid("setGridParam", {
+            url:ctx + "/${code}/blist",
+            datatype: "json",
+            postData: {
+                where:where
+            },
+            page: 1
+        }).trigger("reloadGrid");
+    }
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

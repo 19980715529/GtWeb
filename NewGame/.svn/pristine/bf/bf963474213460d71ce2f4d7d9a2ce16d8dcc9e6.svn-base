@@ -1,0 +1,621 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '';
+	if(BladeTool.isNotEmpty('${where}')) {
+		_filter = '${where}';
+	}
+
+	$(function() {
+		backDom('搜索玩家','search_play_user');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/list";//查询列表接口
+		var _colnames = ["UserID", "玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "登录时间", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>",
+			"<span class=\"text-blue\">金币</span>","银行金币", "接收金币", "赠送金币", "奖券", "充值金额", "充值次数", "首选游戏", "游戏状态", "类型", "账号状态","作弊率",
+			"<span class=\"text-blue\">最后作弊完成时间</span>"];
+		var _colmodel = [ 
+		                  {name : "UserID",sortable:false,hidden:true}, 
+		                  {name : "UserID",sortable:false, formatter:genLink}, 
+		                  {name : "NickName",sortable:false, formatter:genLink}, 
+		                  {name : "RegisterDate",index : "RegisterDate"}, 
+		                  {name : "LastLogonDate",sortable:false}, 
+		                  {name : "TotalWaste",index : "TotalWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "DayWaste",index : "DayWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "Score",index : "Score", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "InsureScore",index : "InsureScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "RcvScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "SendScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "UserMedal",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "RechargeNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+						// 充值次数
+		                  {name : "RechargeCountNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "FirstEnterKindName",sortable:false}, 
+						  {name : "OnlineServerName",sortable:false}, 
+						  {name : "TypeName",sortable:false, formatter:rowShow}, 
+						  {name : "NullityName",sortable:false},
+						  {name : "CheatRate",hidden:true},
+						  {name : "lastEndCheatTime",index : "lastEndCheatTime"}
+						  ];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			//autowidth: true,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			jsonReader:{id:"UserID"},
+			postData : {where:_filter},
+			multiselect : true,
+			rownumbers : false,
+			rowNum:100,
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				if(BladeTool.isNotEmpty(rowdata['CheatRate'])) {
+					if(rowdata['CheatRate']>0) {
+						$('#'+rowid).addClass('bg-d3d4d1');
+					} else if(rowdata['CheatRate']<0) {
+						$('#'+rowid).addClass('bg-b0f30b');
+					}
+				}
+				if(BladeTool.isNotEmpty(rowdata['TotalWaste']) && rowdata['TotalWaste']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_TotalWaste]').addClass('text-red');
+				}
+				if(BladeTool.isNotEmpty(rowdata['DayWaste']) && rowdata['DayWaste']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_DayWaste]').addClass('text-red');
+				}
+			}
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='TypeName') {
+				html = rowObject.TypeName+rowObject.isInnerMemberName;
+			}
+			return html;
+		}
+		function genLink(cellvalue, options, rowObject) {
+			var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			return html;
+		}
+	}
+	
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: 'fa',
+	        close: true
+	    });
+	}
+</script>
+
+<!-- PAGE CONTENT BEGINS -->
+	<form data-url="" method="post" class="form-horizontal" role="form">
+		<div class="space-4"></div>
+		<!-- #section:elements.form -->
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 用户信息: </label>
+			<div class="col-sm-4">
+				<select id="UserType">
+					<option value="UserID">玩家ID</option>
+					<option value="BeautifulID">玩家靓号</option>
+					<option value="Accounts">玩家账号</option>
+					<option value="NickName">玩家昵称</option>
+					<option value="tipsName">玩家备注</option>
+				</select>
+				<input type="text" id="UserInfo" value="" class="" />
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 注册时间： </label>
+			<div class="col-sm-4">
+				<input type="text" id="regist_start_time" value=""/>
+				-
+				<input type="text" id="regist_end_time" value=""/>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 最后登录时间： </label>
+			<div class="col-sm-4">
+				<input type="text" id="login_start_time" value=""/>
+				-
+				<input type="text" id="login_end_time" value=""/>
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 用户金币： </label>
+			<div class="col-sm-4">
+				<input type="text" id="coin_start" value=""/>-
+				<input type="text" id="coin_end" value=""/>
+			</div>
+		</div>
+	
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 最后退出时间： </label>
+			<div class="col-sm-4">
+				<input type="text" id="logout_start_time" value=""/>
+				-
+				<input type="text" id="logout_end_time" value=""/>
+			</div>
+			
+			<label class="col-sm-1 control-label no-padding-right" > 首选游戏： </label>
+			<div class="col-sm-4">
+				<select id="kindid"></select>
+			</div>
+		</div>
+		
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 充提差： </label>
+			<div class="col-sm-4">
+				<input type="text" id="recv_start" value=""/>-
+				<input type="text" id="recv_end" value=""/>
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 兑换金额： </label>
+			<div class="col-sm-4">
+				<input type="text" id="send_start" value=""/>-
+				<input type="text" id="send_end" value=""/>
+			</div>
+		</div>
+		
+		<div class="form-group">
+<!--			<label class="col-sm-1 control-label no-padding-right" > 金币赠送差(接收-赠送)： </label>-->
+<!--			<div class="col-sm-4">-->
+<!--				<input type="text" id="rs_start" value=""/>- -->
+<!--				<input type="text" id="rs_end" value=""/>-->
+<!--			</div>-->
+		
+			<label class="col-sm-1 control-label no-padding-right" > 充值金额： </label>
+			<div class="col-sm-4">
+				<input type="text" id="recharge_start" value=""/>-
+				<input type="text" id="recharge_end" value=""/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 奖励金币(转盘,活动)： </label>
+			<div class="col-sm-4">
+				<input type="text" id="coupon_start" value=""/>-
+				<input type="text" id="coupon_end" value=""/>
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 总输赢： </label>
+			<div class="col-sm-4">
+				<input type="text" id="win_start" value=""/>-
+				<input type="text" id="win_end" value=""/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 密保手机： </label>
+			<div class="col-sm-4">
+				<input type="text" id="secret_mobile" value=""/>
+			</div>
+	
+			<label class="col-sm-1 control-label no-padding-right" > 登录IP或注册IP： </label>
+			<div class="col-sm-4">
+				<input type="text" id="ip" value=""/>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 登录机器码： </label>
+			<div class="col-sm-4">
+				<input type="text" id="login_machine" value=""/>
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 账户状态： </label>
+			<div class="col-sm-4">
+				<select id="Nullity">
+					<option value="">请选择</option>
+					<option value="0">正常状态</option>
+					<option value="1">锁定状态(不能登录)</option>
+					<option value="2">禁止交易(赠送礼品)</option>
+					<option value="3">禁止上榜</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" > 账户类型： </label>
+			<div class="col-sm-4">
+				<select id="MemberType">
+					<option value="">请选择</option>
+					<option value="0">普通用户</option>
+					<option value="1">VIP1</option>
+					<option value="2">VIP2</option>
+					<option value="3">VIP3</option>
+					<option value="4">VIP4</option>
+					<option value="5">VIP5</option>
+					<option value="6">VIP6</option>
+					<option value="-1">所有VIP</option>
+					<option value="-2">至尊VIP</option>
+				</select>
+			</div>
+		
+			<label class="col-sm-1 control-label no-padding-right" > 游戏平台： </label>
+			<div class="col-sm-4">
+				<select id="ptypeid"></select>
+			</div>
+		</div>
+		<div class="form-group">
+			<label class="col-sm-1 control-label no-padding-right" >是否绑定手机： </label>
+			<div class="col-sm-4">
+				<select id="isBindMobile">
+					<option value="">请选择</option>
+					<option value="1">是</option>
+					<option value="0">否</option>
+				</select>
+			</div>
+			
+			<label class="col-sm-1 control-label no-padding-right" > 银行金币： </label>
+			<div class="col-sm-4">
+				<input type="text" id="bank_coin_start" value=""/>-
+				<input type="text" id="bank_coin_end" value=""/>
+			</div>
+		</div>
+	
+		<script src="${ctxPath}/static/laydate/laydate.js"></script>	
+		<div class="space-4"></div>
+		<!-- 按钮 -->
+		<div class="clearfix form-actions center" style="margin-top:15px;margin-bottom:5px;">
+			<div class="col-md-offset-1 col-md-10">
+			  	<button class="btn btn-info" type="button" id="btn_save">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					搜索
+				</button>
+			  	<button class="btn btn-info" type="button" id="btn_trade">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					批量锁定交易
+				</button>
+			  	<button class="btn btn-info" type="button" id="btn_lock">
+					<i class="ace-icon fa fa-check bigger-110"></i>
+					批量锁定账号
+				</button>
+			</div>
+		</div>
+</form>	
+<!-- 配置grid -->
+<div class="row">
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+	var arr = new Array('regist_start_time','regist_end_time','login_start_time','login_end_time','logout_start_time','logout_end_time');
+	for (var i = 0; i < arr.length; i++) {
+		laydate({
+			elem : '#' + arr[i],
+			format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+			//festival: true, //显示节日
+			istime: true,
+			choose : function(datas) { //选择日期完毕的回调
+			}
+		});
+	}
+	
+	$(function() {
+		// 获取账户类型
+		/*new Ajax(BladeApp.ctxPath + "/config/getMemberType", function (data) {
+		        console.log(data);
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="">请选择</option>';
+		        	for (var i = 0; i < type.length; i++) {
+						html += '<option value="' + type[i]['TypeID'] + '">' + type[i]['TypeName'] + '</option>';
+					}
+		        	$("#MemberType").html(html);
+		        }
+		    }).start();*/
+		// 获取平台列表
+		new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+	        console.log(data);
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var html = '<option value="">请选择</option>';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+				}
+	        	$("#ptypeid").html(html);
+	        }
+	 	}).start();
+		// 获取游戏列表
+		new Ajax("${ctxPath}/gamekind/getGameKindItem", function (data) {
+	        console.log(data);
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var html = '<option value="">请选择</option><option value="0">无</option>';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['KindID'] + '">' + type[i]['KindName'] + '</option>';
+				}
+	        	$("#kindid").html(html);
+	        }
+	 	}).start();
+	
+		$('#btn_save').click(function(){
+			//layer_alert('开始搜索...','warn');
+			
+			var UserType = $("#UserType").val();
+			var UserInfo = $("#UserInfo").val();
+			var wheres = {};
+			
+			/*if(BladeTool.isNotEmpty(UserType) && BladeTool.isEmpty(UserInfo)) {
+				layer_alert('请输入玩家信息!', "warn");
+		    	return;
+			} else if(BladeTool.isEmpty(UserType) && BladeTool.isNotEmpty(UserInfo)) {
+				layer_alert('请选择玩家信息!', "warn");
+		    	return;
+			} else*/ 
+			if(BladeTool.isNotEmpty(UserInfo)) {
+				wheres[UserType] = UserInfo;
+			}
+			
+			// 注册时间范围
+			var regist_start_time = $("#regist_start_time").val();
+			var regist_end_time = $("#regist_end_time").val();
+			if(BladeTool.isNotEmpty(regist_end_time) && BladeTool.isEmpty(regist_start_time)) {
+				layer_alert('请输入开始注册时间!', "warn");
+		    	return;
+			} else if(BladeTool.isNotEmpty(regist_end_time)) {
+				wheres['EndRegistTime'] = regist_end_time;
+			}
+			if(BladeTool.isNotEmpty(regist_start_time)) {
+				wheres['StartRegistTime'] = regist_start_time;
+				if(BladeTool.isEmpty(regist_end_time)) {
+					wheres['EndRegistTime'] = getBeforeDate(0)+' 23:59:59';
+					$("#regist_end_time").val(getBeforeDate(0)+' 23:59:59');
+				}
+			}
+			// 登录时间范围
+			var login_start_time = $("#login_start_time").val();
+			var login_end_time = $("#login_end_time").val();
+			if(BladeTool.isNotEmpty(login_end_time) && BladeTool.isEmpty(login_start_time)) {
+				layer_alert('请输入开始注册时间!', "warn");
+		    	return;
+			} else if(BladeTool.isNotEmpty(login_end_time)) {
+				wheres['EndLoginTime'] = login_end_time;
+			}
+			if(BladeTool.isNotEmpty(login_start_time)) {
+				wheres['StartLoginTime'] = login_start_time;
+				if(BladeTool.isEmpty(login_end_time)) {
+					wheres['EndLoginTime'] = getBeforeDate(0)+' 23:59:59';
+					$("#login_end_time").val(getBeforeDate(0)+' 23:59:59');
+				}
+			}
+
+			// 退出时间范围
+			var logout_start_time = $("#logout_start_time").val();
+			var logout_end_time = $("#logout_end_time").val();
+			if(BladeTool.isNotEmpty(logout_end_time) && BladeTool.isEmpty(logout_start_time)) {
+				layer_alert('请输入开始注册时间!', "warn");
+		    	return;
+			} else if(BladeTool.isNotEmpty(logout_end_time)) {
+				wheres['EndLogoutTime'] = logout_end_time;
+			}
+			if(BladeTool.isNotEmpty(logout_start_time)) {
+				wheres['StartLogoutTime'] = logout_start_time;
+				if(BladeTool.isEmpty(logout_end_time)) {
+					wheres['EndLogoutTime'] = getBeforeDate(0)+' 23:59:59';
+					$("#logout_end_time").val(getBeforeDate(0)+' 23:59:59');
+				}
+			}
+			
+			// 金币范围
+			var coin_start = $("#coin_start").val();
+			var coin_end = $("#coin_end").val();
+			if(BladeTool.isNotEmpty(coin_start)) {
+				wheres['CoinStart'] = coin_start;
+			}
+			if(BladeTool.isNotEmpty(coin_end)) {
+				wheres['CoinEnd'] = coin_end;
+			}
+
+			// 银行金币范围
+			var bank_coin_start = $("#bank_coin_start").val();
+			var bank_coin_end = $("#bank_coin_end").val();
+			if(BladeTool.isNotEmpty(bank_coin_start)) {
+				wheres['BankCoinStart'] = bank_coin_start;
+			}
+			if(BladeTool.isNotEmpty(bank_coin_end)) {
+				wheres['BankCoinEnd'] = bank_coin_end;
+			}
+			
+			// 接收范围
+			var recv_start = $("#recv_start").val();
+			var recv_end = $("#recv_end").val();
+			if(BladeTool.isNotEmpty(recv_start)) {
+				wheres['RcvScoreStart'] = recv_start;
+			}
+			if(BladeTool.isNotEmpty(recv_end)) {
+				wheres['RcvScoreEnd'] = recv_end;
+			}
+			// 赠送范围
+			var send_start = $("#send_start").val();
+			var send_end = $("#send_end").val();
+			if(BladeTool.isNotEmpty(send_start)) {
+				wheres['SendScoreStart'] = send_start;
+			}
+			if(BladeTool.isNotEmpty(send_end)) {
+				wheres['SendScoreEnd'] = send_end;
+			}
+			// 赠送差值范围
+			var rs_start = $("#rs_start").val();
+			var rs_end = $("#rs_end").val();
+			if(BladeTool.isNotEmpty(rs_start)) {
+				wheres['RSStart'] = rs_start;
+			}
+			if(BladeTool.isNotEmpty(rs_end)) {
+				wheres['RSEnd'] = rs_end;
+			}
+			// 充值范围
+			var recharge_start = $("#recharge_start").val();
+			var recharge_end = $("#recharge_end").val();
+			if(BladeTool.isNotEmpty(recharge_start)) {
+				wheres['RechargeStart'] = recharge_start;
+			}
+			if(BladeTool.isNotEmpty(recharge_end)) {
+				wheres['RechargeEnd'] = recharge_end;
+			}
+			// 奖券范围
+			var coupon_start = $("#coupon_start").val();
+			var coupon_end = $("#coupon_end").val();
+			if(BladeTool.isNotEmpty(coupon_start)) {
+				wheres['CouponStart'] = coupon_start;
+			}
+			if(BladeTool.isNotEmpty(coupon_end)) {
+				wheres['CouponEnd'] = coupon_end;
+			}
+			// 输赢范围
+			var win_start = $("#win_start").val();
+			var win_end = $("#win_end").val();
+			if(BladeTool.isNotEmpty(win_start)) {
+				wheres['WinStart'] = win_start;
+			}
+			if(BladeTool.isNotEmpty(win_end)) {
+				wheres['WinEnd'] = win_end;
+			}
+			// 密保手机
+			var secret_mobile = $("#secret_mobile").val();
+			if(BladeTool.isNotEmpty(secret_mobile)) {
+				wheres['SecretMobilePhone'] = secret_mobile;
+			}
+			// 登录IP或注册IP
+			var ip = $("#ip").val();
+			if(BladeTool.isNotEmpty(ip)) {
+				wheres['ip'] = ip;
+			}
+			// 登录机器码
+			var login_machine = $("#login_machine").val();
+			if(BladeTool.isNotEmpty(login_machine)) {
+				wheres['LastLogonMachine'] = login_machine;
+			}
+			// 账户状态：0-正常；1-禁止
+			var Nullity = $("#Nullity").val();
+			if(BladeTool.isNotEmpty(Nullity)) {
+				wheres['Nullity'] = Nullity;
+			}
+			// 账户类型
+			var MemberType = $("#MemberType").val();
+			if(BladeTool.isNotEmpty(MemberType)) {
+				wheres['MemberTypeID'] = MemberType;
+			}
+			// 平台类型
+			var PlatformID = $("#ptypeid").val();
+			if(BladeTool.isNotEmpty(PlatformID)) {
+				wheres['PlatformID'] = PlatformID;
+			}
+			// 游戏类型
+			var KindID = $("#kindid").val();
+			if(BladeTool.isNotEmpty(KindID)) {
+				wheres['KindID'] = KindID;
+			}
+			// 是否绑定手机
+			var isBindMobile = $("#isBindMobile").val();
+			if(BladeTool.isNotEmpty(isBindMobile)) {
+				wheres['isBindMobile'] = isBindMobile;
+			}
+			
+		    if(getJsonLength(wheres) <= 0) {
+		    	layer_alert('请至少输入一个查询条件!', "warn");
+		    	return;
+		    }
+		    var filter = "";
+	        if (typeof (_filter) != "undefined") {
+	            filter = _filter;
+	        }
+	        var where = (BladeTool.isEmpty(filter)) ? "{" : filter.replace("}", ",");
+			
+			$.each(wheres, function(key, value) {
+				if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+					where += "\"" + key + "\":\"" + value + "\"" + ",";
+				}
+			});
+			
+			if (BladeTool.isNotEmpty(where)) {
+				where = where.substring(0, where.length - 1);
+				where += '}';
+			}
+	        
+			where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+			isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+			var pageNum = $jqGrid.getGridParam('page');
+			$jqGrid.jqGrid("setGridParam", {
+				datatype : "json",
+				postData : {
+					where : where
+				},
+				page: (isAutoPage) ? pageNum : 1
+			}).trigger("reloadGrid");
+		});
+		
+		$('#btn_trade').on('click', function(event){
+		   var ids = getGridXls().join(",");
+	       var rows = getGridXls().length;
+	       if (rows == 0) {
+			   $('#cb_grid-table').click();
+			   ids = getGridXls().join(",");
+			   rows = getGridXls().length;
+			   if (rows == 0) {
+	               layer_alert('无操作数据!', "warn");
+	               return;
+			   }
+           }
+	       layer.confirm('确定是否进行此操作？', {
+               icon: 3,
+               btn: ['确定', '取消'] //按钮
+           }, function () {
+               $.post("${ctxPath}/player/searchLockTrade", { ids: ids }, function (data) {
+                   if (data.code === 0) {
+                       layer_alert(data.message, "success");
+                       //searchGrid();
+                       $('#cb_grid-table').click();
+                   }
+                   else {
+                	   layer_alert('操作失败!', "warn");
+                   }
+               }, "json");
+
+           }, function () {
+               //layer.msg('已取消');
+           });
+		});
+		$('#btn_lock').on('click', function(event){
+		   var ids = getGridXls().join(",");
+	       var rows = getGridXls().length;
+	       if (rows == 0) {
+	    	   $('#cb_grid-table').click();
+	    	   ids = getGridXls().join(",");
+			   rows = getGridXls().length;
+			   if (rows == 0) {
+	               layer_alert('无操作数据!', "warn");
+	               return;
+			   }
+           }
+	       layer.confirm('确定是否进行此操作？', {
+               icon: 3,
+               btn: ['确定', '取消'] //按钮
+           }, function () {
+               $.post("${ctxPath}/player/searchLock", { ids: ids }, function (data) {
+                   if (data.code === 0) {
+                       layer_alert(data.message, "success");
+                       $('#cb_grid-table').click();
+                   }
+                   else {
+                	   layer_alert('操作失败!', "warn");
+                   }
+               }, "json");
+
+           }, function () {
+               //layer.msg('已取消');
+           });
+		});
+	});
+	
+</script>
+<!-- 引入列表页所需js -->
+	@include("/common/_listscript.html"){}
+@}

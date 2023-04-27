@@ -1,0 +1,321 @@
+@layout("/common/_container.html"){
+<style>
+#gview_grid-table {
+	margin-bottom: 38px;
+}
+</style>
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{"startTime_gt":"' +getBeforeDate(0) +'","endTime_lt":"' +getBeforeDate(0)+'"';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter += ',"UserID":"${id}"}';
+	} else {
+		_filter += '}';
+	}
+
+	$(function() {
+		backDom('礼物赠送记录','player_giftlog');
+		initGrid();
+        total(_filter);
+		initMenuBtn("btns", "player_giftlog");
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/gllist";//查询列表接口
+		var _colnames = [ "序号","SID","转出玩家ID","转出玩家靓号","转出昵称", "TID","接收玩家ID","接受玩家靓号", "接收昵称", "转出金币","赠送类型", "转出时间","是否领取"];
+		var _colmodel = [
+		                  {name : "id",hidden:true},
+		                  {name : "from_user",sortable:false,hidden:true},
+		                  {name : "from_user",sortable:false,formatter:genLink},
+                          {name : "from_user_BeautifulID",sortable:false},
+		                  {name : "SourceUserNicName",sortable:false,formatter:genLink},
+		                  {name : "to_user",sortable:false,hidden:true},
+		                  {name : "to_user",sortable:false,formatter:genLink},
+                          {name : "to_user_BeautifulID",sortable:false},
+		                  {name : "TargetUserName",sortable:false,formatter:genLink},
+		                  {name : "prop_count",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "SendTypeName",sortable:false},
+		                  {name : "giveTime",sortable:false},
+		                  {name : "isReceive",sortable:false,formatter:genLink}];
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			jsonReader:{id:"id"},
+			pager : pager_selector,
+			postData : {where: _filter,sort: "isReceive asc,giveTime", order: "desc"},
+            multiselect: false,
+			rownumbers : false,
+			rowNum:100,
+			height: 'auto',
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				//totalcoin += rowdata['prop_count'];//当前页的总金币
+				if(rowdata['isReceive'] == 1) {
+					$("#jqg_grid-table_"+rowid).attr("disabled","disabled");//当已领取时不可选
+				}
+                if(BladeTool.isNotEmpty(rowdata['isReceive'])) {
+                    if(rowdata['isReceive'] == 2) {
+                        $('#'+rowid).addClass('bg-d3d4d1');
+                    }
+                }
+			},
+			beforeSelectRow: function(rowid, e) {
+				if(e.type == 'click'){
+				     i = $.jgrid.getCellIndex($(e.target).closest('td')[0]);
+		             cm = jQuery("#grid-table").jqGrid('getGridParam', 'colModel');
+		             return (cm[i].name == 'cb'); //当点击的单元格的名字为cb时，才触发选择行事件
+	            }
+			},
+			gridComplete:function() {
+				/*if(totalcoin < 0) {
+					$("#total").removeClass("text-red").addClass("text-blue");
+				} else {
+					$("#total").removeClass("text-blue").addClass("text-red");
+				}
+				$("#total").text(fmoney(totalcoin,0));
+				totalcoin = 0;*/
+			}
+		});
+
+		function genLink(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='from_user' || options.colModel.name=='SourceUserNicName') {
+			html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.from_user+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.from_user+'"><strong>' + cellvalue + '</strong></a>';
+			} else if(options.colModel.name=='to_user' || options.colModel.name=='TargetUserName') {
+				html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.to_user+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.to_user+'"><strong>' + cellvalue + '</strong></a>';
+			} else if(options.colModel.name=='isReceive') {
+				if(cellvalue == '1') {
+                    html = '<a title="退回" class="text-33C3F7 iframeurl" onclick="backgift(' + rowObject.id + ')" href="#" ><strong>退回</strong></a>';
+				} else if(cellvalue == '0'){
+					html = '未领取';
+				}else{
+                    html = '已撤回';
+				}
+			}
+			return html;
+		}
+	}
+
+	function backgift(id) {
+        layer.confirm('确定退回？<br/><span class="text-red">退回后将不能恢复!</span>', {
+            icon: 3,
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.ajax({
+                url:ctx + '/player/giftblack/' + id,
+                type:'post',
+                dataType:'json',
+                async: false,
+                success:function (data) {
+                    if(data.code === 0){
+                        layer.msg(data.message, {shift: 1});
+                        goSearch();
+                        return false;
+                    }
+                    else{
+                        layer_alert(data.message, "error");
+                        return false;
+                    }
+                },
+                error:function (state,type, err) {
+                    console.log(type);
+                    console.log(err);
+                    console.log(state);
+                }
+            })
+        }, function () {
+            //layer.msg('已取消');
+        });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 玩家ID： </label>
+			<input type="text" id="UserID" value="${id!}" placeholder="请输入用户ID查询数据"
+				class="" />
+			<!-- 简单查询第二组 -->
+			<label class=""> 类型： </label>
+			<select class="" id="UserType">
+				<option value="">请选择</option>
+				<option value="0">赠送者</option>
+				<option value="1">接收者</option>
+			</select>
+
+			<!-- 简单查询第三组 -->
+			<label class=""> 转账时间： </label>
+			<input type="text" id="start_time" value="" class="" />
+			-
+			<input type="text" id="end_time" value="" class="" />
+			<!-- 简单查询第四组 -->
+			<label class=""> 金币数： </label>
+			<input type="text" id="start_coin" value="" placeholder=""
+				class="" />-
+			<input type="text" id="end_coin" value="" placeholder=""
+				class="" />
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+
+	<div class="total-block">
+		总赠送金币：<span class="" id="total" >0</span>
+		总接收金币：<span class="" id="rtotal" >0</span>
+	</div>
+	<div class="welljq well-sm" id="btns"></div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+
+	function goSearch() {
+		var UserID = $("#UserID").val();
+		var UserType = $("#UserType").val();
+		var wheres = {};
+
+		/*if(BladeTool.isEmpty(UserID) && BladeTool.isNotEmpty(UserType)) {
+			layer_alert('请输入玩家ID!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(UserID) && BladeTool.isEmpty(UserType)) {
+			layer_alert('请选择玩家类型!', "warn");
+	    	return;
+		}*/
+		if(BladeTool.isNotEmpty(UserID)) {
+			if(UserType == '0') {
+				wheres['SendUserID'] = UserID;
+			} else if(UserType == '1') {
+				wheres['RcvUserID'] = UserID;
+			} else {
+				wheres['UserID'] = UserID;
+			}
+		}
+
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime_lt'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['startTime_gt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime_lt'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+        var cont = '{"SendUserID":'+wheres['SendUserID']+',"RcvUserID":'+wheres['RcvUserID']+',"UserID":'+wheres['UserID']+',"startTime_gt":"' +wheres['startTime_gt'] +'","endTime_lt":"' +wheres['endTime_lt']+'"}';
+		var start_coin = $("#start_coin").val();
+		var end_coin =  $("#end_coin").val();
+
+		if(BladeTool.isNotEmpty(start_coin)) {
+			start_coin = parseFloat(start_coin);
+			wheres['SwapScore_numgt'] = start_coin;
+		}
+
+		if(BladeTool.isNotEmpty(end_coin)) {
+			end_coin = parseFloat(end_coin);
+			wheres['SwapScore_numlt'] = end_coin;
+		}
+
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+        total(cont);
+	}
+	function total(cont) {
+        $.post(ctx + "/${code}/total", { cont: cont }, function (data) {
+            if (data.code === 0) {
+                $("#total").removeClass("text-blue").addClass("text-red");
+                $("#rtotal").removeClass("text-blue").addClass("text-red");
+                $("#total").text(fmoney(data.data.allcount,0));
+                $("#rtotal").text(fmoney(data.data.receiveCount,0));
+            }else{
+                $("#total").text(0);
+                $("#rtotal").text(0);
+			}
+        }, "json");
+
+    }
+
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+		btn_stage.bind(toolbar);
+        reloadGrid();
+	}
+	$(function(){
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+	});
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

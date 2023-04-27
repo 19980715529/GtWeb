@@ -1,0 +1,354 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '{"createTime":"' +getBeforeDate(0) +'","endTime":"' +getBeforeDate(0)+'"';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter += ',"UserID":"${id}"}';
+	} else {
+		_filter += '}';
+	}
+
+	$(function() {
+		backDom('充值记录','player_rechargelog');
+		initGrid();
+		real_time_data();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/rllist";//查询列表接口
+		var _colnames = [ "发起时间", "订单号","用户ID","昵称","充值金额(PHP)", "获得金币", "订单状态", "包名称", "充值渠道", "充值类型", "完成时间"];
+		var _colmodel = [ { name : "createTime", sortable:false,width:200 },
+		                  { name : "orderNumber", sortable:false},
+		                  { name : "userId", sortable:false,formatter:genLink},
+		                  { name : "nickname", sortable:false,formatter:genLink},
+                          { name : "topUpAmount",sortable:false},
+		                  { name : "gold", sortable:false },
+		                  { name : "orderStatus", sortable:false, formatter: rowShow},
+		                  { name : "packageName", sortable:false},
+		                  { name : "channel", sortable:false},
+		                  { name : "channel_type", sortable:false},
+		                  { name : "endTime", sortable:false }]
+
+		var totalcoin = 0;
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {where: _filter,sort: "createTime", order: "desc"},
+			multiselect : false,
+			rownumbers : true,
+			rowNum: 100,
+			gridComplete:function() {
+				getTotalRecharge(encodeURI(_filter));
+			}
+		});
+		function rowShow(cellvalue, options, rowObject) {
+			var dict_status = {
+				1:"待支付",
+				2:"已完成",
+				3:"已关闭"
+			}
+			var html = '<span class="text-red">' + cellvalue + '</span>';
+			if(options.colModel.name=='orderStatus') {
+				if(cellvalue === 1){
+					html = '<span class="label label-info">' + dict_status[cellvalue] + '</span>';
+				}else if(cellvalue === 2){
+					html = '<span class="label label-success">' + dict_status[cellvalue] + '</span>';
+				}else if (cellvalue === 3) {
+					html = '<span class="label label-default">' + dict_status[cellvalue] + '</span>';
+				}
+			}
+			return html;
+		}
+		function genLink(cellvalue, options, rowObject) {
+			var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.userId+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.userId+'"><strong>' + cellvalue + '</strong></a>';
+			return html;
+		}
+	}
+	
+	function getTotalRecharge(){
+		new Ajax("${ctxPath}/player/getTotalRecharge", function (data) {
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var temp = data.data;
+				$("#totalRecharge").text(temp.currentrecharge.difference);
+	        	$("#totalMoney").text(temp.currentrecharge.money);
+	        	$("#totalUser").text(temp.currentrecharge.count);
+				$("#totalNewMoney").text(temp.newrecharge.money);
+				$("#totalNewUser").text(temp.newrecharge.count);
+
+				$("#totalRecharges").text(temp.recharge.difference);
+				$("#totalMoneys").text(temp.recharge.money);
+				$("#totalUsers").text(temp.recharge.num);
+
+	        }
+	    }).start();
+	}
+	function real_time_data(){
+		new Ajax(ctx + "/exchangerecords/data", function (data) {
+			if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+				var hot_data = data.data;
+				// 获取到的单日数据
+				var current_gird = hot_data['current_gird']
+				var current_girds = hot_data['current_girds']
+				$("#current_totals").append('<span class="red">'+current_girds['current_moneys']+'</span>')
+				$("#ExchangeTotalUser").append('<span class="red">'+current_girds['current_totals']+'</span>')
+				// 获取的汇总数据
+				var gird = hot_data['gird']
+				var girds = hot_data['girds']
+				$("#totals").append('<span class="red">'+girds['moneys']+'</span>')
+				$("#ExchangeTotalUsers").append('<span class="red">'+girds['totals']+'</span>')
+			}
+		}).start();
+	}
+	
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+
+	function showUnLog() {
+		window.top.addTabs({
+	        id: 'recharge_unstatistics',
+	        title: '未统计充值记录',
+	        url: ctx + '/player/rechargeUnstatistics',
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<div class="padding-2">
+			<label class=""> 玩家ID： </label> 
+			<input type="text" id="UserID" value="${id!}" placeholder=""
+				class="" /> 
+			<!-- 简单查询第二组 -->
+			<label class=""> 订单号： </label> 
+			<input type="text" id="OrderID" value="" placeholder="" class="" />
+				
+<!--			 简单查询第三组-->
+			<label class=""> 充值渠道： </label>
+			<select class="" id="ChannelID">
+			</select>
+			
+			<!-- 简单查询第四组 -->
+			<label class=""> 用户类型： </label> 
+			<select class="" id="UserTypeID">
+				<option value="">请选择</option>
+				<option value="0">普通用户</option>
+				<option value="1">当日用户</option>
+			</select>
+			<!-- 简单查询第五组 -->			
+			<label class=""> 充值时间： </label> 
+			<input type="text" id="start_time" value="" class="" readonly="readonly"/>- 
+			<input type="text" id="end_time" value="" class="" readonly="readonly"/>
+			
+<!--			<label class=""> 游戏平台： </label> -->
+<!--			<select id="ptypeid"></select><br />-->
+			</div>
+			<div class="padding-2">
+				<label class=""> 充值金额： </label>
+				<input type="text" id="moneyMin" value="" class="" placeholder="最小区间"/>---
+				<input type="text" id="moneyMax" value="" class="" placeholder="最大区间"/>
+
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+				<!--<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>-->
+				<a name="${ctxPath}/player/rechargeUnstatistics" title="未统计充值记录" class="btn btn-sx btn-white btn-search iframeurl" href="${ctxPath}/player/rechargeUnstatistics"><strong>查看未统计充值记录</strong></a>
+			</label>
+			</div>
+		</div>
+	</form>
+	<!-- 按钮组 -->
+	<div class="total-block" style="background-color: #e2efda">
+		<label>当日数据：</label>
+		充提差：<span class="text-red" id="totalRecharge"></span>,
+		充值：<span class="text-red" id="totalMoney"></span>,
+		充值人数：<span class="text-red" id="totalUser"></span>,
+		新增充值充值：<span class="text-red" id="totalNewMoney"></span>,
+		新增充值人数：<span class="text-red" id="totalNewUser"></span>;&nbsp;&nbsp;&nbsp;
+		通过兑换：<span class="text-red" id="current_totals"></span>,
+		兑换人数：<span class="text-red" id="ExchangeTotalUser"></span>
+	</div>
+	<div class="total-block" style="background-color: #e2efda">
+		<label>汇总数据：</label>
+		充提差：<span class="text-red" id="totalRecharges"></span>,
+		充值：<span class="text-red" id="totalMoneys"></span>,
+		充值人数：<span class="text-red" id="totalUsers"></span>;&nbsp;&nbsp;&nbsp;
+		通过兑换：<span class="text-red" id="totals"></span>,
+		兑换人数：<span class="text-red" id="ExchangeTotalUsers"></span>
+	</div>
+	<!-- grid -->
+	<table id="grid-table"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+    laydate({
+        elem : '#start_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem : '#end_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+	
+	// 获取平台列表
+	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+        	var type = data.rows;
+        	var html = '<option value="">请选择</option>';
+        	for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			}
+        	$("#ptypeid").html(html);
+        }
+ 	}).start();
+	
+	// 获取充值渠道
+	new Ajax(ctx + "/${code}/rechargechannel/list", function (data) {
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data.rows;
+	        	var html = '<option value="">全部</option>';
+	        	for (var i = 0; i < type.length; i++) {
+					html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
+				}
+	        	$("#ChannelID").html(html);
+	        }
+	    }).start();
+	
+	function goSearch() {
+		var UserID = $("#UserID").val();
+		var OrderID = $("#OrderID").val();
+		var ChannelID = $("#ChannelID").val();
+		var UserTypeID = $("#UserTypeID").val(); // 用户类型
+		var moneyMin = $("#moneyMin").val();
+		var moneyMax = $("#moneyMax").val();
+		var wheres = {};
+		if (BladeTool.isNotEmpty(moneyMax) || BladeTool.isNotEmpty(moneyMin)){
+			if (moneyMin<0 || moneyMax<0){
+				layer.alert("充值金额不能小于0", {icon: 2,title:"发生错误"});
+				return;
+			}
+			if (BladeTool.isNotEmpty(moneyMax) && BladeTool.isNotEmpty(moneyMin)){
+				if (moneyMin>=moneyMax){
+					layer.alert("充值金额的最小区间不能大于最大区间", {icon: 2,title:"发生错误"});
+					return;
+				}
+				wheres['moneyMin']=moneyMin;
+				wheres['moneyMax']=moneyMax;
+			}else {
+				if(BladeTool.isNotEmpty(moneyMin)) {
+					wheres['moneyMin']=moneyMin;
+				}
+				if(BladeTool.isNotEmpty(moneyMax)) {
+					wheres['moneyMax']=moneyMax;
+				}
+			}
+		}
+		if(BladeTool.isNotEmpty(UserID)) {
+			wheres['UserID'] = UserID;
+		}
+		if(BladeTool.isNotEmpty(OrderID)) {
+			wheres['OrderID'] = OrderID;
+		}
+		if(BladeTool.isNotEmpty(ChannelID)) {
+			wheres['ChannelID'] = ChannelID;
+		}
+		if(BladeTool.isNotEmpty(UserTypeID)) {
+			wheres['UserTypeID'] = UserTypeID;
+		}
+
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['endTime'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['createTime'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['endTime'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+	    
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1,
+			gridComplete:function() {
+				getTotalRecharge(where);
+			}
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+		$("select").val("");
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+        reloadGrid();
+	}
+	$(function(){
+	 	$('#start_time').val(getBeforeDate(0));
+	 	$('#end_time').val(getBeforeDate(0));
+	 });
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

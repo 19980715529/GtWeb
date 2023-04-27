@@ -1,0 +1,44 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/roomconfig/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间ID: </td>
+					<td><input type="text" name="room.ServerID" value="${room.ServerName!}" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间名称: </td>
+					<td><input type="text" name="room.RoomName" value="${room.ServerName!}" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+					<td>
+						<select name="room.KindID" id="KindID">
+						</select>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		// 获取账户类型
+		new Ajax(BladeApp.ctxPath + "/gamekind/getGameKindItem", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="0">请选择</option>';
+		        	for (var i = 0; i < type.length; i++) {
+						html += '<option value="' + type[i]['KindID'] + '">' + type[i]['KindName'] + '</option>';
+					}
+		        	$("#KindID").html(html);
+		        }
+		 }).start();
+	});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+@}

@@ -1,0 +1,76 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
+					<td colspan="3">${accounttypename.clientType!}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包名: </td>
+					<td>${accounttypename.name!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">副标题: </td>
+					<td>${accounttypename.subName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">热词: </td>
+					<td colspan="3">${accounttypename.hotWord!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">皮类型: </td>
+					<td>${accounttypename.ABCD!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">链接: </td>
+					<td>${accounttypename.link!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">分类1: </td>
+					<td>${accounttypename.lay1!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">分类2: </td>
+					<td>${accounttypename.lay2!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">刷榜次数: </td>
+					<td>${accounttypename.rankTimes!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">热词刷新次数: </td>
+					<td>${accounttypename.hotTimes!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">刷过的热词：排名: </td>
+					<td colspan="3">${accounttypename.moneyHotWords!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">榜单状态: </td>
+					<td>${accounttypename.rankStausName!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">审核状态: </td>
+					<td>${accounttypename.checkStausName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">上架时间: </td>
+					<td>${accounttypename.okTime!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td>${accounttypename.desc!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">刷榜效果评级: </td>
+					<td>${accounttypename.rankResultLevel!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">更新包次数: </td>
+					<td>${accounttypename.updateTimes!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">aso地址: </td>
+					<td>${accounttypename.asoLink!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否是白名单开启: </td>
+					<td>${accounttypename.IsWhiteListEnabledName!}</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

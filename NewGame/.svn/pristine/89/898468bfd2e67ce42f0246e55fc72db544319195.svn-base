@@ -1,0 +1,143 @@
+package com.smallchill.db.config.gameuser.controller;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.alibaba.fastjson.JSON;
+import com.smallchill.common.base.BaseController;
+import com.smallchill.core.annotation.DoControllerLog;
+import com.smallchill.core.annotation.Json;
+import com.smallchill.core.annotation.Permission;
+import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.toolbox.ajax.AjaxResult;
+import com.smallchill.core.toolbox.kit.DateKit;
+import com.smallchill.game.newmodel.gameuserdb.Accounttypename;
+import com.smallchill.game.service.CommonService;
+
+@Controller
+@RequestMapping("/accounttypename")
+public class AccountTypeNameController extends BaseController implements ConstShiro {
+	private static String BASE_PATH = "/db/accounttypename/";
+	private static String CODE = "accounttypename";
+	private static String LIST_SOURCE = "db_accounttypename.list";
+	private static String PREFIX = "accounttypename";
+	
+	@Autowired
+	private CommonService commonService;
+	
+	@DoControllerLog(name="进入包配置列表页面")
+	@RequestMapping("/")
+	@Permission(ADMINISTRATOR)
+	public String index(ModelMap mm) {
+		mm.put("code", CODE);
+		return BASE_PATH + "accounttypename.html";
+	}
+	
+	@Json
+	@RequestMapping(KEY_LIST)
+	@Permission(ADMINISTRATOR)
+	public Object list() {
+		Object gird = paginateBySelf(LIST_SOURCE);
+		return gird;
+	}
+	
+	@RequestMapping(KEY_ADD)
+	@Permission(ADMINISTRATOR)
+	public String add(ModelMap mm) {
+		mm.put("code", CODE);
+		return BASE_PATH + "accounttypename_add.html";
+	}
+	
+	@DoControllerLog(name="新增包信息")
+	@Json
+	@RequestMapping(KEY_SAVE)
+	@Permission(ADMINISTRATOR)
+	public AjaxResult save() {
+		Accounttypename boxItem = mapping(PREFIX, Accounttypename.class);
+		boolean temp = Blade.create(Accounttypename.class).save(boxItem);
+		if (temp) {
+			return success(SAVE_SUCCESS_MSG);
+		} else {
+			return error(SAVE_FAIL_MSG);
+		}
+	}
+	
+	@RequestMapping(KEY_EDIT + "/{id}")
+	@Permission(ADMINISTRATOR)
+	public String edit(@PathVariable Integer id, ModelMap mm) {
+		Accounttypename accounttypename2 = Blade.create(Accounttypename.class).findFirstBy("[clientType]="+id, null);
+		mm.put("accounttypename", JSON.parseObject(JSON.toJSONString(accounttypename2), Map.class));
+		mm.put("code", CODE);
+		return BASE_PATH + "accounttypename_edit.html";
+	}
+	
+	@DoControllerLog(name="修改包信息")
+	@Json
+	@RequestMapping(KEY_UPDATE)
+	@Permission(ADMINISTRATOR)
+	public AjaxResult update() {
+		Accounttypename boxItem = mapping(PREFIX, Accounttypename.class);
+		StringBuilder builder = new StringBuilder();
+		builder.append("name='"+boxItem.getName()+"'");
+		builder.append(",IsWhiteListEnabled="+boxItem.getIswhitelistenabled());
+		builder.append(",ABCD='"+boxItem.getAbcd()+"'");
+		builder.append(",subName='"+boxItem.getSubname()+"'");
+		builder.append(",hotWord='"+boxItem.getHotword()+"'");
+		builder.append(",link='"+boxItem.getLink()+"'");
+		builder.append(",lay1='"+boxItem.getLay1()+"'");
+		builder.append(",lay2='"+boxItem.getLay2()+"'");
+		builder.append(",[rankTimes]="+boxItem.getRanktimes());
+		builder.append(",[hotTimes]="+boxItem.getHottimes());
+		builder.append(",[moneyHotWords]='"+boxItem.getMoneyhotwords()+"'");
+		builder.append(",[rankStaus]="+boxItem.getRankstaus());
+		builder.append(",[checkStaus]="+boxItem.getCheckstaus());
+		if(boxItem.getOktime() != null){
+			builder.append(",[okTime]='"+DateKit.getTime(boxItem.getOktime())+"'");
+		}else{
+			builder.append(",[okTime]='"+DateKit.getTime()+"'");
+		}
+		builder.append(",[desc]='"+boxItem.getDesc()+"'");
+		builder.append(",[rankResultLevel]="+boxItem.getRankresultlevel());
+		builder.append(",[updateTimes]="+boxItem.getUpdatetimes());
+		builder.append(",[asoLink]='"+boxItem.getAsolink()+"'");
+		boolean temp = Blade.create(Accounttypename.class).updateBy(builder.toString(), "[clientType]="+boxItem.getClienttype(), null);
+		if (temp) {
+			return success(UPDATE_SUCCESS_MSG);
+		} else {
+			return error(UPDATE_FAIL_MSG);
+		}
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@RequestMapping(KEY_VIEW + "/{id}")
+	@Permission(ADMINISTRATOR)
+	public String view(@PathVariable Integer id, ModelMap mm) {
+		Map map = new HashMap();
+		map.put("clientType", id);
+		Map bloodpondconfig = commonService.getInfoByOne(LIST_SOURCE, map);
+		mm.put("accounttypename", bloodpondconfig);
+		mm.put("code", CODE);
+		return BASE_PATH + "accounttypename_view.html";
+	}
+	
+	@DoControllerLog(name="删除包信息")
+	@Json
+	@RequestMapping(KEY_REMOVE)
+	@Permission(ADMINISTRATOR)
+	public AjaxResult remove() {
+		String ids = getParameter("ids");
+		boolean temp = Blade.create(Accounttypename.class).deleteByIds(ids) > 0;
+		if (temp) {
+			return success("删除成功!");
+		} else {
+			return error("删除失败!");
+		}
+	}
+}

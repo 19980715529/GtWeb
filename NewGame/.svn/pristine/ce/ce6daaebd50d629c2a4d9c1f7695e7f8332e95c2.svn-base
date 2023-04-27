@@ -1,0 +1,56 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('服务器在线配置','areacount');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "<span class='sort-cols'>区服ID</span>","端口","当前在线人数","刷新时间","是否允许进人"];
+		var _colmodel=[   
+		                  {name:"serverID", index:"serverID"},
+		                  {name:"port", sortable:false},
+		                  {name:"userCount", sortable:false},
+		                  {name:"overDueTime", sortable:false},
+						  {name:"isOpenName", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"serverID"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			sortname:"serverID",
+			sortorder:"desc",
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"区服ID",index:"serverID",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	@include("/common/_listscript.html"){}
+@}	

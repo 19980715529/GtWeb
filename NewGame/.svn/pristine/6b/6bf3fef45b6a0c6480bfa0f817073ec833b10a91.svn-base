@@ -1,0 +1,58 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">键名: </td>
+					<td>
+						<input name="siteconfig.ConfigKey"/>
+						<input name="siteconfig.PlatformID" type="hidden" value="${PlatformID}"/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">名称: </td>
+					<td><input name="siteconfig.ConfigName"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段说明: </td>
+					<td colspan="3">
+						<textarea rows="" cols="" name="siteconfig.ConfigString"></textarea>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段1: </td>
+					<td><input name="siteconfig.Field1" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段2: </td>
+					<td><input name="siteconfig.Field2" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段3: </td>
+					<td><input name="siteconfig.Field3" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段4: </td>
+					<td><input name="siteconfig.Field4" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段5: </td>
+					<td><input name="siteconfig.Field5" /></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段6: </td>
+					<td><input name="siteconfig.Field6" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段7: </td>
+					<td colspan="3"><input name="siteconfig.Field7" /></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">字段8: </td>
+					<td colspan="3">
+						<blade:kindeditor id="Field8" name="siteconfig.Field8" height="200px"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"保存",btn_close:"关闭"}) {}
+@}

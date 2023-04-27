@@ -1,0 +1,33 @@
+@layout("/common/_container.html"){
+<style>
+html,body {
+overflow: hidden;
+/* height:100vh; */
+}
+</style>
+<ul id="myTab" class="nav nav-tabs">
+	<li class="active">
+		<a href="#1" data-toggle="tab">类型1</a>
+	</li>
+	<li><a href="#2" data-toggle="tab">类型2</a></li>
+	<li><a href="#3" data-toggle="tab">类型3</a></li>
+	<li><a href="#4" data-toggle="tab">类型4</a></li>
+	<li><a href="#5" data-toggle="tab">类型5</a></li>
+</ul>
+<iframe id="configinfo" src="${ctxPath}/${code}/p/1" style="border:none;height: 95vh;" width="100%">
+</iframe>
+<script type="text/javascript">
+	$(function(){
+		backDom('保护列表','protectlist');
+		bindMenuBtn();
+	});
+	
+	function bindMenuBtn() {
+		$('.nav-tabs a').on('show.bs.tab', function(event){
+	        //$(event.target.hash).css("height","450px").siblings().css("height","0");
+	        var tabId = event.target.hash.replace('#','');
+	        $("#configinfo").attr("src","${ctxPath}/${code}/p/" + tabId + "/");
+	    });
+	}
+</script>
+@}

@@ -1,0 +1,141 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "ID","账号ID","昵称","至尊VIP数量","总交易税收","交易总次数"];
+		var _colmodel=[   
+		                  {name:"ExtremeUserID", hidden:true},
+		                  {name:"ExtremeGameID", sortable:false,formatter:rowShow},
+		                  {name:"ExtremeNickName", sortable:false,formatter:rowShow},
+		                  {name:"BranchUserCount", sortable:false},
+		                  {name:"TRevenueScore", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:","}},
+		                  {name:"TCount", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:","}}
+						];
+		var obj = {
+				TRevenueScore:0,
+				TCount:0
+		};
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			rownumbers : false,
+			height: 'auto',
+			loadonce: true,
+			jsonReader:{
+				id:"ExtremeUserID",
+				subgrid : { repeatitems: false}
+			},
+            subGrid: true, // set the subGrid property to true to show expand buttons for each row
+			subgridtype: 'json', // set the subgrid type to json
+			subGridRowExpanded: showChildGrid,
+			subGridOptions : {
+				// load the subgrid data only once
+				// and the just show/hide
+				reloadOnExpand :false,
+				// select the row when the expand column is clicked
+				selectOnExpand : false 
+			},
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				if(BladeTool.isNotEmpty(rowdata['TRevenueScore'])) {
+					obj['TRevenueScore'] += rowdata['TRevenueScore'];
+				}
+				if(BladeTool.isNotEmpty(rowdata['TCount'])) {
+					obj['TCount'] += rowdata['TCount'];
+				}
+			},
+			gridComplete:function() {
+				$("#TRevenueScore").text(fmoney(obj['TRevenueScore'],0));
+				$("#TCount").text(fmoney(obj['TCount'],0));
+				obj = {
+						TRevenueScore:0,
+						TCount:0
+				};
+			}
+		});
+	}
+	function rowShow(cellvalue, options, rowObject) {
+		var html = '';
+		if(options.colModel.name=='ExtremeGameID' || options.colModel.name=='ExtremeNickName') {
+			html = '<a class="text-33C3F7" onclick="goNewTab(' + rowObject.ExtremeUserID + ')" href="#"><strong>' + cellvalue + '</strong></a>';
+		}else if(options.colModel.name=='SubGameID' || options.colModel.name=='SubNickName') {
+			html = '<a class="text-33C3F7" onclick="goNewTab(' + rowObject.BranchUserID + ')" href="#"><strong>' + cellvalue + '</strong></a>';
+		}
+		return html;
+	}
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'vip_revenuebill_' + id,
+	        title: '至尊VIP管理->税收交易账单->用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+	function showChildGrid(parentRowID, parentRowKey) {
+    	var childGridID = parentRowID + "_table";
+        var childGridPagerID = parentRowID + "_pager";
+
+        // send the parent row primary key to the server so that we know which grid to show
+        var childGridURL = ctx+"/${code}/subvlist?id="+parentRowKey;
+        //childGridURL = childGridURL + "&parentRowID=" + encodeURIComponent(parentRowKey)
+
+        // add a table and pager HTML elements to the parent grid row - we will render the child grid here
+        $('#' + parentRowID).append('<table id=' + childGridID + '></table><div id=' + childGridPagerID + ' class=scroll></div>');
+
+        $("#" + childGridID).jqGrid({
+            url: childGridURL,
+            mtype: "GET",
+            datatype: "json",
+            page: 1,
+            colModel: [
+                { label: 'ID', name: 'BranchUserID', hidden:true },
+                { label: '下属账号ID', name: 'SubGameID', width: 75, sortable:false,formatter:rowShow },
+                { label: '下属昵称', name: 'SubNickName', width: 100, sortable:false,formatter:rowShow }
+            ],
+			loadonce: true,
+            width: '100%',
+            height: '100%',
+            multiselect : false,
+			rownumbers : false,
+        });
+    }
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"账号ID",index:"ExtremeGameID",type:"text"},
+			@			  {name:"昵称",index:"ExtremeNickName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<div class="total-block">
+				总交易税收：<span class="text-red" id="TRevenueScore">0</span>
+				总接收次数：<span class="text-red" id="TCount">0</span>
+			</div>
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

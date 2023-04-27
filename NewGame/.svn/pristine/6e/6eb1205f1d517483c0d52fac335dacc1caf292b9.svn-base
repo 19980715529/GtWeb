@@ -1,0 +1,158 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+</script>
+
+<div class="row">
+	<div id="myChart" style="height: 400px;"></div>
+</div>
+<script src="${ctxPath}/static/highcharts/highcharts.js"></script>
+<script src="${ctxPath}/static/highcharts/exporting.js"></script>
+<script type="text/javascript">
+	$(function(){
+		var where = '${where}';
+		getData(encodeURI(where));
+	});
+	
+	function getData(where) {
+		$.get('${ctxPath}/${code}/ccchartslist?where='+where, function (data) {
+			var data = JSON.parse(data);
+			var tempdata = data.data;
+			var len = tempdata.length;
+			var bdata = []; // 血池平衡值
+			var tdata = []; // X时间轴
+			for ( var i=0; i<len;i++) {
+				var date = tempdata[i]['LogTime'];
+				if(BladeTool.isEmpty(tempdata[i]['LogTime'])) {
+					date = tempdata[i]['logtime'];
+				}
+				if(BladeTool.isNotEmpty(tempdata[i]['Aftamount'])) {
+					bdata[i] = tempdata[i]['Aftamount'];
+				} else if(BladeTool.isNotEmpty(tempdata[i]['aftamount'])) {
+					bdata[i] = tempdata[i]['aftamount'];
+				} else {
+					bdata[i] = tempdata[i]['amount'];
+				}
+				tdata[i] = date;
+			}
+			genCharts(tdata,bdata);
+		});
+	}
+	
+	function genCharts(xAxisData,balanceData) {
+		// 基于准备好的dom，初始化echarts实例
+		Highcharts.chart('myChart', {
+		    title: {
+		        text: '金币变动曲线图'
+		    },
+
+		    yAxis: {
+		        title: {
+		            text: '金币',
+		            rotation:360
+		        }
+		    },
+		    legend: {
+		        layout: 'vertical',
+		        align: 'right',
+		        verticalAlign: 'middle'
+		    },
+		    
+		    tooltip: {
+		    	shared: true
+		    },
+		    
+		    xAxis: {
+		        categories:xAxisData/*,
+		        labels: {
+		        	formatter: function() {
+		        		// 格式化成月/日，只在第一个刻度显示年份
+            			if(BladeTool.isNotEmpty(this.value)) {
+	            		    var date = new Date(this.value);
+	            		    var texts = [date.getHours(),date.getMinutes()];
+	            		    return texts.join(':');
+            			} else {
+            				return '';
+            			}
+		        	}
+		        }*/
+		    },
+
+		    series: [{
+		        name: '金币变动',
+		        data: balanceData,
+		        color: '#EA5335',
+		        type: 'spline',
+		        marker:{
+		        	enabled:false
+		        }
+		    }],
+		    credits: {  
+		    	  enabled: false  
+		    	}
+
+		});
+	}
+	function genChartsByFish(xAxisData,seriesData,balanceData,cbdata) {
+		// 基于准备好的dom，初始化echarts实例
+		Highcharts.chart('myChart', {
+
+		    title: {
+		        text: '血池变化'
+		    },
+
+		    yAxis: {
+		        title: {
+		            text: '血池',
+		            rotation:360
+		        }
+		    },
+		    legend: {
+		        layout: 'vertical',
+		        align: 'right',
+		        verticalAlign: 'middle'
+		    },
+		    
+		    tooltip: {
+		    	shared: true
+		    },
+		    
+		    xAxis: {
+		        categories:xAxisData,
+		        labels: {
+		        	formatter: function() {
+		        		// 格式化成月/日，只在第一个刻度显示年份
+            			if(BladeTool.isNotEmpty(this.value)) {
+	            		    var date = new Date(this.value);
+	            		    var texts = [date.getHours(),date.getMinutes()];
+	            		    return texts.join(':');
+            			} else {
+            				return '';
+            			}
+		        	}
+		        }
+		    },
+
+		    series: [{
+		        name: '血池平衡',
+		        data: balanceData,
+		        color: '#EA5335',
+		        type: 'spline',
+		        marker:{
+		        	enabled:false
+		        }
+		    }, {
+		        name: '血池',
+		        data: seriesData,
+		        color: '#33C3F7',
+		        type: 'spline'
+		    }],
+		    
+		    credits: {  
+		    	  enabled: false  
+		    	}
+
+		});
+	}
+</script>
+@}

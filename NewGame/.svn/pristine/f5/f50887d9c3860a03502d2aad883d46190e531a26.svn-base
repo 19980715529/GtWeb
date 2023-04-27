@@ -1,0 +1,119 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('角色管理','role');
+		$.jgrid.defaults.width = 780;
+		$.jgrid.defaults.responsive = true;
+		$.jgrid.defaults.styleUI = 'Bootstrap';
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		$(grid_selector).jqGrid({
+			url:grid_url,
+            mtype: "GET",
+            datatype: "json",
+            colModel: [
+                { label: '序列', name: 'id', key: true, width: 75, hidden:true },
+                { label: '角色名称', name: 'name', width: 150, sortable:false },
+                { label: '上级角色', name: 'pname', width: 150, sortable:false }
+            ],
+			loadonce: true,
+            width: 780,
+            height: 250,
+            rowNum: 10,
+			sortname: 'id',
+			jsonReader: {
+				// instruct subgrid to get the data as name:value pair
+				subgrid : { repeatitems: false}
+			},
+            subGrid: true, // set the subGrid property to true to show expand buttons for each row
+			subgridtype: 'json', // set the subgrid type to json
+			subGridRowExpanded: showChildGrid,
+			subGridOptions : {
+				// load the subgrid data only once
+				// and the just show/hide
+				reloadOnExpand :false,
+				// select the row when the expand column is clicked
+				selectOnExpand : false 
+			},
+            pager: "#grid-pager",
+   			rownumbers : false,
+   			beforeSelectRow: function(rowid, e) { 
+				if(e.type == 'click'){
+				     i = $.jgrid.getCellIndex($(e.target).closest('td')[0]),  
+		             cm = jQuery("#grid-table").jqGrid('getGridParam', 'colModel');  
+		             return (cm[i].name == 'cb'); //当点击的单元格的名字为cb时，才触发选择行事件
+	            }
+			},
+			afterInsertRow: function(rowid, rowdata, rowelem) {
+				var urole = ${shiro.getUser().isSysRole};
+				if((urole == false) && (rowdata['id'] == 7)) {
+					$("#jqg_grid-table_"+rowid).attr("disabled","disabled");
+				}
+			}
+        });
+	}
+	// the event handler on expanding parent row receives two parameters
+    // the ID of the grid tow  and the primary key of the row
+    function showChildGrid(parentRowID, parentRowKey) {
+    	var childGridID = parentRowID + "_table";
+        var childGridPagerID = parentRowID + "_pager";
+
+        // send the parent row primary key to the server so that we know which grid to show
+        var childGridURL = ctx+"/user/rulist?id="+parentRowKey;
+        //childGridURL = childGridURL + "&parentRowID=" + encodeURIComponent(parentRowKey)
+
+        // add a table and pager HTML elements to the parent grid row - we will render the child grid here
+        $('#' + parentRowID).append('<table id=' + childGridID + '></table><div id=' + childGridPagerID + ' class=scroll></div>');
+
+        $("#" + childGridID).jqGrid({
+            url: childGridURL,
+            mtype: "GET",
+            datatype: "json",
+            page: 1,
+            colModel: [
+                { label: '账号', name: 'account', width: 75, sortable:false },
+                { label: '创建时间', name: 'createtime', width: 100, sortable:false }
+            ],
+			loadonce: true,
+            width: '100%',
+            height: '100%',
+            multiselect : false,
+			rownumbers : false,
+        });
+    }
+</script>
+
+
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"角色名称",index:"name", type:"text"},
+			@			  {name:"上级角色",index:"toint_pid_equal", type:"selectRole"},
+			@			  {name:"所在部门",index:"toint_deptid_equal", type:"selectDept"},
+			@			  {name:"备注",index:"tips", type:"text"}
+			@		   ];
+			@ include("/common/_function/_search.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	<!-- 引入列表页所需js -->
+	@include("/common/_listscript.html"){}
+@}	

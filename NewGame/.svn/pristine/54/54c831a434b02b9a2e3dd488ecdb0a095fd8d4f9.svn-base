@@ -1,0 +1,252 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx = "${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var grid_data = [ ];
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'"}';
+
+    $(function() {
+        backDom('平台明细记录','platform_detail_log');
+        initGrid();
+    });
+
+
+    function initGrid() {
+        var grid_url = ctx + "/${code}/list";//查询列表接口
+
+        var _colnames = ["id","日期", "新增用户","游客", "注册用户", "活跃人数","充值人数","今日充值金额", "新充值人数", "新增充值总额", "充值总额","今日兑换人数", "今日兑换金额", "充提差", "充值率", "充值ARPU",
+            "转盘金币奖励","充值返利金币奖励","分享代理金币金币奖励","绑定手机奖励","转盘使用次数", "吞吐率", "最高在线","付费登录", "税收", "系统输赢","当日点控值"];
+        var _colmodel = [
+            // 单日数据
+            { name : "id", sortable:false,hidden:true },
+            // 日期
+            { name : "createTime", sortable:false},
+            // 新增用户
+            { name : "newUserCount", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 游客
+            { name : "newUser", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 注册用户
+            { name : "regUser", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0} },
+            // 活跃人数
+            { name : "activeUser", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0} },
+            // 单日充值人数
+            { name : "recNum", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 当日充值金额
+            { name : "recMoney", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 新增充值总额
+            { name : "newRecMoney", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 新充值人数
+            { name : "newRecNum", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 充值总额(php)
+            { name : "recTotalMoney", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 今日兑换人数
+            { name : "excNum", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 今日兑换总额
+            { name : "excMoney", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 充提差
+            { name : "difference", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 充值率
+            { name : "rechargeRate", sortable:false, formatter:"integer", formatoptions:{decimalPlaces: 2,suffix : "%"}  },
+            // 充值ARPU
+            { name : "rechargeArpu", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:2}  },
+            // 转盘金币奖励
+            { name : "turntableAwardCoins", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 充值返利金币奖励
+            { name : "rechargeCoins", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 分享代理奖励金币
+            { name : "ShareRewardCoins", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 绑定手机金币奖励
+            { name : "BindPhoneRewards", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 转盘使用总次数
+            { name : "turntableTotal", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 吞吐率
+            { name : "ttl", sortable:false, formatter:'integer', formatoptions:{decimalPlaces: 2,suffix : "%"}},
+            // 最高在线
+            { name : "maxonline", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 付费登录
+            { name : "payUserNum", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 税收
+            { name : "tax", sortable:false, formatter:"number", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0} },
+            // 系统输赢
+            { name : "sysTotalWin", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
+            // 当日点控值
+            { name : "controlValue", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  }
+        ];
+
+        var objToal = {
+            PayAmountForCurrency: 0,
+            PayTotalAmount: 0,
+            TWaste: 0,
+            TCoupon: 0,
+            VIPRcvGold: 0,
+            VIPSendGold: 0,
+            GameTaxTotal: 0,
+            RS: 0,
+            VIPRS: 0,
+            todayreg: 0,
+            jyUser: 0,
+            jyCount: 0,
+            TSendGold: 0
+        };
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            autowidth: true,
+            shrinkToFit : false,//适用于较少字段,响应式
+            colNames : _colnames,
+            colModel : _colmodel,
+            postData : {where:_filter},
+            //pager : pager_selector,
+            multiselect : false,
+            rownumbers : true,
+            rowNum:-1,
+            afterInsertRow: function(rowid, rowdata, rowelem) {
+
+            },
+            gridComplete:function() {
+                new Ajax("${ctxPath}/${code}/summary", function (data) {
+                    // RecTotalGold,RecTotalMoney,ExcTotalMoney,RE,RewardCoins,totalTaxScores,RegUserNum,zsy
+                    if(data.code == 0) {
+                        var temp = data.data;
+                        $("#RecTotalGold").text(fmoney(temp.RecTotalGold,0));
+                        $("#RecTotalMoney").text(fmoney(temp.RecTotalMoney,0));
+                        $("#ExcTotalMoney").text(fmoney(temp.ExcTotalMoney,0));
+                        $("#RE").text(fmoney(temp.RE,0));
+                        $("#RewardCoins").text(fmoney(temp.RewardCoins,0));
+                        $("#totalTaxScores").text(fmoney(temp.totalTaxScores,0));
+                        $("#RegUserNum").text(fmoney(temp.RegUserNum,0));
+                        $("#zsy").text(fmoney(temp.zsy,0));
+                    }
+                }).start();
+            }
+        });
+    }
+</script>
+
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="" method="post" class="" role="form">
+            <!-- 配置查询 -->
+            <div class="">
+                <!-- 简单查询第一组 -->
+                <label class=""> 时间： </label>
+                <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
+                -
+                <input type="text" id="end_time" value="" class="" />
+
+                <!-- 简单查询按钮 -->
+                <label class="">
+                    <button class="btn btn-sx btn-white" type="button" onclick="search()">查询</button>
+                    <button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+                </label>
+            </div>
+        </form>
+<!--        RecTotalGold,RecTotalMoney,ExcTotalMoney,RE,RewardCoins,totalTaxScores,RegUserNum,zsy-->
+        <div class="total-block">
+            总充值金币：<span class="text-red" id="RecTotalGold"><b>0</b></span>
+            总充值：<span class="text-red" id="RecTotalMoney"><b>0</b></span>
+            总兑换：<span class="text-red" id="ExcTotalMoney"><b>0</b></span>
+            充提差：<span class="text-red" id="RE"><b>0</b></span>
+            系统总输赢：<span class="text-red" id="zsy"><b>0</b></span>
+            总税收：<span class="text-red" id="totalTaxScores"><b>0</b></span>
+            总注册：<span class="text-red" id="RegUserNum"><b>0</b></span>
+            总奖励金币：<span class="text-red" id="RewardCoins"><b>0</b></span>
+        </div>
+
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <!-- <div id="grid-pager"></div>-->
+    </div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+    laydate({
+        elem : '#start_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem : '#end_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+
+    $(function(){
+        $('#start_time').val(getCurrentMonthFirst().format('yyyy-MM-dd'));
+        $('#end_time').val(getBeforeDate(0));
+    });
+
+    function search() {
+        var wheres = {};
+        var start_time = $("#start_time").val();
+        var end_time = $("#end_time").val();
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+            layer_alert('请输入开始时间!', "warn");
+            return;
+        } else if(BladeTool.isNotEmpty(end_time)) {
+            wheres['EndTime'] = end_time;
+        }
+        if(BladeTool.isNotEmpty(start_time)) {
+            wheres['StartTime'] = start_time;
+            if(BladeTool.isEmpty(end_time)) {
+                wheres['EndTime'] = getBeforeDate(1);
+                $("#end_time").val(getBeforeDate(1));
+            }
+        }
+        start_time = $("#start_time").val();
+        end_time = $("#end_time").val();
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isNotEmpty(start_time)) {
+            if(start_time>end_time){
+                layer_alert('开始时间不能大于结束时间!', "warn");
+                return;
+            }
+        }
+
+        var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        //var pageNum = $jqGrid.getGridParam('page');
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                where : where
+            },
+            //page: (isAutoPage) ? pageNum : 1
+        }).trigger("reloadGrid");
+    }
+    function resetForm() {
+        $("input").val("");
+        reloadGrid();
+    }
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

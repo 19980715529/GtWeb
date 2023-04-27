@@ -1,0 +1,984 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx = "${ctxPath}";
+    var grid_selector = "";
+    backDom('玩家详情', '');
+    function isPoneAvailable(poneInput) {
+        var myreg=/^[1][3,4,5,7,8][0-9]{9}$/;
+        if (!myreg.test(poneInput)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <table class="table table-bordered">
+            <caption class="t-caption text-center bg-f3f1f1">玩家<span class="text-33C3F7">【${user.NickName!}】</span>的详细信息
+            </caption>
+            <tbody>
+            <tr>
+                <td colspan="4" class="t-caption text-left bg-f3f1f1">基本信息</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;width:10%" class="bg-f3f1f1">游戏玩家ID:</td>
+                <td style="width:40%" id="userID">${user.UserID!}</td>
+                <td style="vertical-align: middle !important;text-align:right;width:10%" class="bg-f3f1f1">游戏昵称:</td>
+                <td style="width:40%">${user.NickName!}
+                    @if(!isEmpty(user.tipsName)){
+                    <span class="text-red">[${user.tipsName!}]</span>
+                    @{ var ls = whereHandle("{'tipsNames':'"+user.tipsName+"'}");
+                    <a name="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}" title="关联查询"
+                       class="iframeurl" href="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}"><span
+                            class="text-33C3F7">[关联查询]</span></a>
+                    @}
+                    @}
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">最后登录时间:</td>
+                <td style="">${user.LastLogonDate!}</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">最后登录IP:</td>
+                <td style="">${user.LastLogonIP!}
+                    @if(!isEmpty(user.LastLogonIP) && !isEmpty(reLastLogonIP) && (reLastLogonIP==true)){
+                    @{ var ls = whereHandle("{'ip':'"+user.LastLogonIP+"'}"),lswhere = whereHandle("{'LastLogonIP':'"+user.LastLogonIP+"'}");
+                    <a name="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}" title="关联查询" class="iframeurl" href="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}"><span class="text-33C3F7">[关联查询]</span><span class="text-33C3F7">[关联数量:${sumLastLogonIP!}]</span></a>
+                    <a data-type="ip" data-url="${ctxPath}/player/updateRelationTipName/?where=${lswhere}" title="关联备注" class="modifyurl" href="javascript:void(0);"><span class="text-33C3F7">[关联备注]</span></a>
+                    @}
+                    <a data-addtabs="player_relation_lock" data-title="联合锁定" href="#" onclick="goOperateByRelation(this,${user.UserID!},'LastLogonIP','lock','/player/relation')"><span class="text-33C3F7">[关联锁定]</span></a>
+                    <a data-addtabs="player_relation_trade" data-title="联合禁止交易" href="#" onclick="goOperateByRelation(this,${user.UserID!},'LastLogonIP','trade','/player/relation')"><span class="text-33C3F7">[关联禁止交易]</span></a>
+                    @}
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">用户账号:</td>
+                <td style="">
+                    <span id="setAccount" class="text-red">
+                    </span>
+                     @if(shiro.hasPermission('showAccount')){
+                    <script type="text/javascript">
+                    	var phone = '${user.Accounts!}';
+                    	$('#setAccount').text(phone);
+                    </script>
+                    @}
+                    @if(!(shiro.hasPermission('showAccount'))){
+                    <script type="text/javascript">
+                    	var phone = '${user.bindPhone!}';
+                    	if(isPoneAvailable(phone)){
+                    		$('#setAccount').text(phone.substring(0,3)+'****'+phone.substring(7));
+                    	}else {
+                    		$('#setAccount').text(phone);
+                    	}
+                    </script>
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">用户靓号:</td>
+                <td style="">
+                <span class="text-red">${user.BeautifulID!}</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">绑定手机:</td>
+                <td style="">
+                    @if(mobile == true){
+                    <span id="setphone">
+                    </span>
+                    @if(shiro.hasPermission('showAccount')){
+                    <script type="text/javascript">
+                    	var phone = '${user.bindPhone!}';
+                    	$('#setphone').text(phone);
+                    </script>
+                    @}
+                    @if(!(shiro.hasPermission('showAccount'))){
+                    <script type="text/javascript">
+                    	var phone = '${user.bindPhone!}';
+                    	$('#setphone').text(phone.substring(0,3)+'****'+phone.substring(7));
+                    </script>
+                    @}
+                    @if(!isEmpty(reMobile) && (reMobile==true)){
+                    @{ var ls = whereHandle("{'Accounts':'"+user.Accounts+"'}");
+                    <a name="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}" title="关联查询"
+                       class="iframeurl" href="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}"><span
+                            class="text-33C3F7">[关联查询]</span></a>
+                    <a data-type="mobile" data-url="${ctxPath}/player/updateRelationTipName/?where=${ls}" title="关联备注"
+                       class="modifyurl" href="javascript:void(0);"><span class="text-33C3F7">[关联备注]</span></a>
+                    @}
+                    @}
+                    @} else {
+                    <span class="text-red">未绑定手机</span>
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">在线时长:</td>
+                <td style="">${user.TotalOnlineTime!}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">金币:</td>
+                <td style="">
+						<span class="text-red">
+						@if(!isEmpty(user.Score)){
+							@{ var ls = numberHandle(user.Score);
+								${ls}
+							@}
+						@}else{
+							0
+						@}
+						</span>
+                    未领取礼物金币：
+                    <span class="text-red">
+						@if(!isEmpty(user.UnRcvGold)){
+							@{ var ls = numberHandle(user.UnRcvGold);
+								${ls}
+							@}
+						@}else{
+							0
+						@}
+						</span>
+                    银行金币：
+                    <span class="text-red">
+						@if(!isEmpty(user.InsureScore)){
+							@{ var ls = numberHandle(user.InsureScore);
+								${ls}
+							@}
+						@}else{
+							0
+						@}
+						</span>,
+                    领取的奖励数额：
+                    <span class="text-red">
+                        @if(!isEmpty(user.RotaryReward) || !isEmpty(user.CodeReward)){
+                            @{ var rr = numberHandle(user.RotaryReward!0 +user.CodeReward!0);
+                                ${rr}
+                            @}
+                        @}else{
+							0
+						@}
+                    </span>
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">奖券:</td>
+                <td style=""><span class="text-red">${user.UserMedal!'0'}</span></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">充值:</td>
+                <td style="">
+                    充值金额：
+                    <span class="text-red">${user.GMRechargeMoney!0}</span>,
+                    充值成功次数：
+                    <span class="text-red">${user.RechargeCountNum!'0'}</span>,
+                    今日充值金额：
+                    <span class="text-red">
+                        ${user.TodayRechargeMoney!0}
+                    </span>,
+                    充值差：
+                    <span class="text-red">
+                        ${user.GMRechargeMoney!0-user.ExchangeMoney!0}
+                    </span>
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">兑换:</td>
+                <td style="">
+                    兑换金额：
+                    <span class="text-red">
+                    @if(!isEmpty(user.ExchangeMoney)){
+                        @{ var em = numberHandle(user.ExchangeMoney);
+                            ${em}
+                        @}
+                    @}else{
+                        0
+                    @}
+                    </span>,
+                    兑换成功次数：
+                    <span class="text-red">
+                    @if(!isEmpty(user.ExchangeCountNum)){
+                        @{ var en = numberHandle(user.ExchangeCountNum);
+                            ${en}
+                        @}
+                    @}else{
+                        0
+                    @}
+                    </span>，
+                    审核中：
+                    <span class="text-red">
+                    ${user.ExchangeAuditNum!0}
+                    </span>，
+                    可兑换金额：
+                    <span class="text-red">
+                        ${user.money!0}
+                    </span>,
+                    今日兑换：
+                    <span class="text-red">
+                        ${user.TodayExchangeMoney!0}
+                    </span>
+
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">总输赢:</td>
+                <td style="">
+                    <span class="text-red">${user.TotalWaste!0}</span>,
+                    总赢：
+                    <span class="text-red">
+                        ${user.TotalWin!0}
+                    </span>,
+                    总输：
+                    <span class="text-red">
+                        ${user.TotalWaste!0-user.TotalWin!0}
+                    </span>
+                    @if(!isEmpty(user.sendNum)){
+                    @if(user.sendNum!=0){
+                    @{ var ls = whereHandle("{'sendNum':'"+user.sendNum+"'}"),lswhere = whereHandle("{'SendNum':'"+user.sendNum+"'}");
+                    <a href="javascript:void(0)" name="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}"
+                       title="关联查询" class="iframeurl"><span class="text-33C3F7">[关联查询]</span></a>
+                    <a data-type="send" data-url="${ctxPath}/player/updateRelationTipName/?where=${lswhere}"
+                       title="关联备注" class="modifyurl" href="javascript:void(0);"><span class="text-33C3F7">[关联备注]</span></a>
+                    @}
+                    <a data-addtabs="player_relation_lock" data-title="联合锁定" href="#"
+                       onclick="goOperateByRelation(this,${user.UserID!},'SendNum','lock','/player/relation')"><span
+                            class="text-33C3F7">[关联锁定]</span></a>
+                    <a data-addtabs="player_relation_trade" data-title="联合禁止交易" href="#"
+                       onclick="goOperateByRelation(this,${user.UserID!},'SendNum','trade','/player/relation')"><span
+                            class="text-33C3F7">[关联禁止交易]</span></a>
+                    @}
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">当日输赢:</td>
+                <td style="">${user.DayWaste!0}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">注册时间:</td>
+                <td style="">${user.RegisterDate!}</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">3日总输赢:</td>
+                <td style="">${user.Day3Waste!0}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">账号类型:</td>
+                <td style="">${user.BusinessmanName!}
+                    @if(user.isInnerMember==1){
+                    (内部员工)
+                    @}else{
+                    <a href="#" onclick="goOperateByVIP(${user.UserID!},'','inner','','/player/setInnerMember')"><span
+                            class="text-33C3F7">[设置内部员工]</span></a>
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">首选游戏:</td>
+                <td style=""><span class="text-red">${user.FirstEnterServerName!'无'}</span></td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">VIP等级:</td>
+                <td style="">${user.vipLevel!}
+                    @if(isEmpty(user.Businessman) || user.Businessman!=1){
+                    @if(!isEmpty(isActive) && (isActive==0)){
+                    <a href="#"
+                       onclick="goOperateByVIP(${user.UserID!},'${cvlid!}','upgradeVIP','','/player/upgradeVIP/')"><span
+                            class="text-33C3F7">[升级VIP]</span></a>
+                    <a href="#"
+                       onclick="goOperateByVIP(${user.UserID!},'${cvlid!}','deleteVIP','','/player/deleteVIP')"><span
+                            class="text-33C3F7">[删除VIP]</span></a>
+                    <a href="#"
+                       onclick="goOperateByVIP(${user.UserID!},'${cvlid!}','refuseVIP','','/player/refuseVIP')"><span
+                            class="text-33C3F7">[拒绝VIP]</span></a>
+                    @} else if(!isEmpty(isActive) && (isActive==-1)){
+                    <a href="#"
+                       onclick="goOperateByVIP(${user.UserID!},'${cvlid!}','deleteVIP','','/player/deleteVIP')"><span
+                            class="text-33C3F7">[删除VIP]</span></a>
+                    <a href="#"
+                       onclick="goOperateByVIP(${user.UserID!},'${cvlid!}','refuseVIP','','/player/refuseVIP')"><span
+                            class="text-33C3F7">[拒绝VIP]</span></a>
+                    @}
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">游戏控制:</td>
+                <td id="cheat">
+                    作弊率1：
+                    @if(!isEmpty(user.CheatRate) && (user.CheatRate!=0)){
+                    作弊中，作弊率:${user.CheatRate}，
+                    @{ var ls = numberHandle(user.LimitScore);
+                    作弊金币:${ls}，
+                    @}
+                    @if(user.CheatRate>0){
+                    @{ var ls = numberHandle(user.LimitScore+user.BloodScore);
+                    剩余未完成作弊金币:${ls}，
+                    @}
+                    @}else{
+                    @{ var ls = numberHandle(user.LimitScore-user.BloodScore);
+                    剩余未完成作弊金币:${ls}，
+                    @}
+                    @}
+                    @} else {
+                    未作弊，上次作弊完成时间：${user.lastEndCheatTime}
+                    @}
+                    <br/>
+                    作弊率2：
+                    @if(!isEmpty(user.CheatRate2) && (user.CheatRate2!=0)){
+                    作弊中，作弊率:${user.CheatRate2}，
+                    @{ var ls = numberHandle(user.LimitScore2);
+                    作弊金币:${ls}，
+                    @}
+                    @if(user.CheatRate>0){
+                    @{ var ls = numberHandle(user.LimitScore2+user.BloodScore);
+                    剩余未完成作弊金币:${ls}，
+                    @}
+                    @}else{
+                    @{ var ls = numberHandle(user.LimitScore2-user.BloodScore);
+                    剩余未完成作弊金币:${ls}，
+                    @}
+                    @}
+                    @} else {
+                    未作弊，上次作弊完成时间：${user.lastEndCheatTime}
+                    @}
+                </td>
+                <td id="cheat2" style="display:none">
+                    作弊率1：
+                    未作弊，上次作弊完成时间：无
+                    <br/>
+                    作弊率2：
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">是否在线:</td>
+                <td style="">
+                    <span class="text-red">${user.OnlineServerName!'离线'}</span>
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">账号状态:</td>
+                <td style="">
+                    @if(user.LimitLogin == false){
+                    <span>正常
+					 @if(user.limitRank == 1){
+					(禁止上榜)
+					@} else {
+					(允许上榜)
+					@}
+					@if(user.limitGive == 0){
+					(允许交易)
+					@} else {
+					(禁止交易)
+					@}
+					</span>
+                    @}
+                    @if(user.LimitLogin == true){
+                    <span>锁定(禁止交易)</span>
+                    @}
+                </td>
+            </tr>
+            <!-- <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">周卡: </td>
+                <td style="">无</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">月卡: </td>
+                <td style="">无</td>
+            </tr> -->
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">最后登录机器码:</td>
+                <td>${user.LastLoginMachine!'无'}
+                    @if(!isEmpty(user.LastLoginMachine) && !isEmpty(LastLogonMachine) && (LastLogonMachine==true)){
+                    @{ var ls = whereHandle("{'LastLogonMachine':'"+user.LastLoginMachine+"'}"),lswhere = whereHandle("{'LastLoginMachine':'"+user.LastLoginMachine+"'}");
+                    <a name="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}" title="关联查询"
+                       class="iframeurl" href="${ctxPath}/player/relationindex/?id=${user.UserID!}&where=${ls}"><span
+                            class="text-33C3F7">[关联查询]</span><span class="text-33C3F7" >[关联数量:${sumMachine!}]</span></a>
+                    <a data-type="mach" data-url="${ctxPath}/player/updateRelationTipName/?where=${lswhere}"
+                       title="关联备注" class="modifyurl" href="javascript:void(0);"><span class="text-33C3F7">[关联备注]</span></a>
+                    @}
+                    @}
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">包名称:</td>
+                <td>${user.AccountTypeName!'无'}</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">奖励金币数:</td>
+                <td>
+                    使用转盘获得总金币：<span class="text-red">${onlineData.gold+dailyData.gold+codeData.gold}</span>;
+                    在线奖励金币数：<span class="text-red">${onlineData.gold}</span>;
+                    每日签到金币数：<span class="text-red">${dailyData.gold}</span>;
+                    打码返利金币数：<span class="text-red">${codeData.gold}</span>
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">转盘使用次数:</td>
+                <td>
+                    转盘使用次数：<span class="text-red">${onlineData.num+dailyData.num+codeData.num}</span>;
+                    在线奖励转盘次数：<span class="text-red">${onlineData.num}</span>,
+                    每日签到转盘次数：<span class="text-red">${dailyData.num}</span>,
+                    打码返利转盘次数：<span class="text-red">${codeData.num}</span>,
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">充值返利奖励金币:</td>
+                <td>
+                    <span class="text-red">${rebateGold}</span>;
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">玩家来源:</td>
+                <td>${user.IsDrain}&nbsp;&nbsp;(提示：1：引流量状态，0：非引流量状态; 0代表审核)</td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;" class="bg-f3f1f1" colspan="4">
+                    <span class="text-33C3F7"><strong>数据查询操作</strong></span>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="3">
+                    <table class="db-btn">
+                        <tr>
+								@if(shiro.hasPermission('loginLog')){
+                            <td>
+                                <button id="Landing_record"
+                                        class="btn btn-info bg-007EFF no-border margin-space iframeurl" type="button"
+                                        name="${ctxPath}/player/loginlog?id=${user.UserID!}"
+                                        data-addtabs="player_loginlog" title="用户登录记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">登录记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('goldChange')){
+                            <td>
+                                <button id="change_coin" class="btn btn-info bg-007EFF no-border margin-space iframeurl"
+                                        type="button" name="${ctxPath}/player/cionchangelog?id=${user.UserID!}"
+                                        data-addtabs="player_cionchangelog" title="金币变动记录" data-icon="fa fa"
+                                        data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">金币变动记录记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('bankGoldChange')){
+                            <td>
+                                <button id="insure" class="btn btn-info bg-007EFF no-border margin-space iframeurl"
+                                        type="button" name="${ctxPath}/player/insure?id=${user.UserID!}"
+                                        data-addtabs="player_insure" title="银行金币变动记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">银行金币变动记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('rechargeLog')){
+                            <td>
+                                <button id="Rechargerecord"
+                                        class="btn btn-info bg-007EFF no-border margin-space iframeurl" type="button"
+                                        name="${ctxPath}/player/rechargelog?id=${user.UserID!}"
+                                        data-addtabs="player_rechargelog" title="充值记录" data-icon="fa fa"
+                                        data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">充值记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('giftSendLog')){
+                            <td>
+                                <button id="gift_giving" class="btn btn-info bg-007EFF no-border margin-space iframeurl"
+                                        type="button" name="${ctxPath}/player/giftlog?id=${user.UserID!}"
+                                        data-addtabs="player_giftlog" title="礼物赠送记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">礼物赠送记录</i>
+                                </button>
+                            </td>
+                            @}
+                        </tr>
+                        <tr>
+							@if(shiro.hasPermission('lockLog')){
+                            <td>
+                                <button id="Lock_record" class="btn btn-info bg-007EFF no-border margin-space iframeurl"
+                                        type="button" name="${ctxPath}/playerlog/locked?id=${user.UserID!}"
+                                        data-addtabs="player_lockedlog" title="锁定记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">锁定记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('couponLog')){
+                            <td>
+                                <button id="Coupons_change"
+                                        class="btn btn-info bg-007EFF no-border margin-space iframeurl" type="button"
+                                        name="${ctxPath}/player/couponchangelog?id=${user.UserID!}"
+                                        data-addtabs="player_couponchangelog" title="奖券变动记录" data-icon="fa fa"
+                                        data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">奖券变动记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('exchangeLog')){
+                            <td>
+                                <button id="Record_exchange"
+                                        class="btn btn-info bg-007EFF no-border margin-space iframeurl" type="button"
+                                        name="${ctxPath}/player/exchange_record?id=${user.UserID!}" data-addtabs="player_pelog"
+                                        title="玩家兑换记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">兑换记录</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('cheatLog')){
+                            <td>
+                                <button id="point_control"
+                                        class="btn btn-info bg-007EFF no-border margin-space iframeurl" type="button"
+                                        name="${ctxPath}/point?id=${user.UserID!}" data-addtabs="point_control_log"
+                                        title="用户点控记录" data-icon="fa fa" data-type="tab">
+                                    <i class="ace-icon fa fa-check bigger-110">点控记录</i>
+                                </button>
+                            </td>
+                            @}
+                            <td>
+                                <button id="send_control" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/send/" data-addtabs="send_control_log"
+                                        data-title="发送邮件" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">发送邮件</i>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;" class="bg-f3f1f1" colspan="4">
+                    <span class="text-33C3F7"><strong>数据操作管理</strong></span>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="3">
+                    <table class="db-btn">
+                        <tr>
+							@if(shiro.hasPermission('updateGold')){
+                            <td>
+                                <button id="updatecount" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editGold/" data-addtabs="edit_gold"
+                                        data-title="增加/扣除金币" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">增加/扣除金币</i>
+                                    <input id="Labeltoken" style="display: none" value="${shiro.getUser().id}"/>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateBankGold')){
+                            <td>
+                                <button id="updatebank" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editBank/" data-addtabs="edit_coupon"
+                                        data-title="增加/扣除银行金币" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">增加/扣除银行金币</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateCoupon')){
+                            <td>
+                                <button id="LabelVoucher" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editCoupon/" data-addtabs="edit_coupon"
+                                        data-title="增加/扣除奖券" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">增加/扣除奖券</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('lockAccount')){
+                            <td>
+                                @if(user.LimitLogin == false){
+                                <a id="Lock_account" class="btn btn-info bg-007EFF no-border margin-space"
+                                   data-addtabs="player_locked" data-title="锁定用户" data-icon="fa fa" href="#"
+                                   onclick="goOperateByRelation(this,${user.UserID!},'single','lock','/player/relation')">
+                                    <i class="ace-icon fa fa-check bigger-110">锁定该账号</i>
+                                </a>
+                                @} else {
+                                <button class="btn btn-info bg-007EFF no-border margin-space" type="button"
+                                        data-url="/player/unlocked" data-addtabs="player_unlocked" data-title="解锁用户"
+                                        data-icon="fa fa" data-type="operate">
+                                    <i class="ace-icon fa fa-check bigger-110">恢复锁定</i>
+                                </button>
+                                @}
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateUserCheat')){
+                            <td>
+                                <button id="Amend_cheating" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editWin/" data-addtabs="edit_win"
+                                        data-title="修改玩家作弊率" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改玩家作弊率</i>
+                                </button>
+                            </td>
+                            @}
+                        </tr>
+                        <tr>
+							@if(shiro.hasPermission('updateUserPass')){
+                            <td>
+                                <button class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editPassword/" data-addtabs="edit_password"
+                                        data-title="修改密码" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改密码</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateGMChargeGold')){
+                            <td>
+                                <button id="regoldcoin" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editRecharge/" data-addtabs="edit_recharge"
+                                        data-title="修改GM充值" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">GM充值金币</i>
+                                </button>
+                            </td>
+                            @}
+                            @if(user.LimitLogin == false){
+							@if(shiro.hasPermission('lockUserRank')){
+                            <td>
+                                @if(user.limitRank == 1){
+                                <button id="" lass="btn btn-info bg-007EFF no-border margin-space" type="button"
+                                        data-url="/player/allowtop" data-addtabs="player_locktop" data-title="恢复上榜"
+                                        data-icon="fa fa" data-type="operate">
+                                    <i class="ace-icon fa fa-check bigger-110">恢复上榜</i>
+                                </button>
+                                @} else {
+                                <button id="Prohibit_list" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/locktop" data-addtabs="player_unlocktop"
+                                        data-title="禁止上榜" data-icon="fa fa" data-type="operate">
+                                    <i class="ace-icon fa fa-check bigger-110">禁止上榜</i>
+                                </button>
+                                @}
+                            </td>
+                            @}
+							@if(shiro.hasPermission('lockUserTrade')){
+                            <td>
+                                @if(user.limitGive == 1){
+                                <button class="btn btn-info bg-007EFF no-border margin-space" type="button"
+                                        data-url="/player/allowtrade" data-addtabs="player_locktrade" data-title="恢复交易"
+                                        data-icon="fa fa" data-type="operate">
+                                    <i class="ace-icon fa fa-check bigger-110">恢复交易</i>
+                                </button>
+                                @} else {
+                                <a id="Prohibition_transactions" class="btn btn-info bg-007EFF no-border margin-space"
+                                   data-addtabs="player_unlocktrade" data-title="禁止交易" data-icon="fa fa"
+                                   onclick="goOperateByRelation(this,${user.UserID!},'single','trade','/player/relation')">
+                                    <i class="ace-icon fa fa-check bigger-110">禁止交易</i>
+                                </a>
+                                @}
+                            </td>
+                            @}
+                            <td>
+                                <button id="IsDrain" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/edisIsDrain/" data-addtabs="edit_is_drain"
+                                        data-title="玩家来源" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">玩家来源</i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            @}
+							@if(shiro.hasPermission('updateUserType')){
+                            <td>
+                                <button id="Revise_type" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editUserType/" data-addtabs="edit_UserType"
+                                        data-title="修改玩家类型" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改玩家类型</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateUserRemark')){
+                            <td>
+                                <button id="Revise_notes" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editNickName/" data-addtabs="edit_NickName"
+                                        data-title="修改玩家备注" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改玩家备注</i>
+                                </button>
+                            </td>
+                            @}
+							@if(shiro.hasPermission('updateUserCard')){
+                            <td>
+                                <button id="Revise_nick" class="btn btn-info bg-007EFF no-border margin-space" type="button" data-url="/player/updateNickName/" data-addtabs="update_NickName" data-title="修改玩家魅力卡" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改玩家魅力卡</i>
+                                </button>
+                            </td>
+                            @}
+                            @if(user.LimitLogin == true){
+                        </tr>
+                        <tr>
+                            @}
+							@if(shiro.hasPermission('updateUserCheat2')){
+                            <td>
+                                <button id="Amend_cheats" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/editWin2/" data-addtabs="edit_win2"
+                                        data-title="修改玩家作弊率2" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改玩家作弊率2</i>
+                                </button>
+                            </td>
+                            @}
+                            <td>
+                                <button id="bindPhone" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/bindPhone/" data-addtabs="edit_bindPhone"
+                                        data-title="绑定手机" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">绑定手机</i>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        @if(!isEmpty(user.TipDesc)){
+        <div>
+            <strong class="text-red">备注修改说明：${user.TipDesc!}</strong>
+        </div>
+        @}
+    </div>
+</div>
+<script>
+    $(function () {
+        $(".modifyurl").click(function () {
+            var url = $(this).attr('data-url');
+            var type = $(this).attr('data-type');
+            var str = '';
+            if (type == 'ip') {
+                str = '\n<span class="text-red"><small>注意：该IP所关联的所有账号备注都将被修改。</small></span>';
+            } else if (type == 'mobile') {
+                str = '\n<span class="text-red"><small>注意：该手机号所关联的所有账号备注都将被修改。</small></span>';
+            } else if (type == 'mach') {
+                str = '\n<span class="text-red"><small>注意：该机器码所关联的所有账号备注都将被修改。</small></span>';
+            } else if (type == 'send') {
+                str = '\n<span class="text-red"><small>注意：该赠送关联的所有账号备注都将被修改。</small></span>';
+            }
+            layer.prompt({
+                icon: 3,
+                btn: ['确认', '取消'], //按钮
+                title: '请输入备注.' + str
+            }, function (value, index) {
+                $.post(url, {tipName: value}, function (data) {
+                    layer.close(index);
+                    if (data.code === 0) {
+                        layer_alert(data.message, "success");
+                        setTimeout(function () {
+                            window.top.reloadTab();
+                        }, 500);
+                    }
+                    else {
+
+                    }
+                }, "json");
+            });
+        });
+        $("button:not(.iframeurl)").click(function () {
+            var url = $(this).attr('data-url');
+            var type = $(this).attr('data-type');
+            if (BladeTool.isNotEmpty(url) && type == 'tab') {
+                var obj = {
+                    id: $(this).attr('data-addtabs'),
+                    title: $(this).attr('data-title'),
+                    url: $(this).attr('data-url'),
+                    icon: $(this).attr('data-icon')
+                };
+                goNewTab(obj, '${user.UserID!}');
+            } else if (BladeTool.isNotEmpty(url) && type == 'window') {
+                var obj = {
+                    id: $(this).attr('data-addtabs'),
+                    title: $(this).attr('data-title'),
+                    url: $(this).attr('data-url'),
+                    width: '800px',
+                    height: '520px'
+                };
+                goLayer(obj, '${user.userid!}');
+            } else if (BladeTool.isNotEmpty(url) && type == 'operate') {
+                var obj = {
+                    url: $(this).attr('data-url')
+                };
+                goOperate(obj, '${user.userid!}');
+            }
+            else {
+                layer_alert('操作开发中...', 'warn');
+            }
+        });
+        var name = $("#Labeltoken").val();//管理员ID
+       /*根据权限限制人员查看账号和手机号*/
+        /* var Arole = ${shiro.getUser().isSysRole};
+        var Urole = ${shiro.getUser().isUserRole};
+        if(Arole == false || Urole == true){
+            var phone = "${user.bindPhone!}";
+            var mphone = phone.substr(0, 3) + '****' + phone.substr(7);
+            var acc = "${user.Accounts!}";
+            var macc = acc.substr(0,2) + '****' + acc.substr(acc.length-1);
+            $("#setAccount").text(macc);
+            $("#setphone").text(mphone);
+        }*/
+        var uid = $("#userID").html();
+        /*if(uid == "230832"){
+            $("#cheat").remove();
+            $("#cheat2").css("display","table-cell");
+        }*/
+    });
+
+    function goSearch(id, type, val, url) {
+        var params = {};
+        if (type == 'IP') {
+            params['LastLogonIP'] = val;
+        } else if (type == 'mobile') {
+            params['Accounts'] = val;
+        } else if (type == 'win') {
+            params['RelationUserID'] = id;
+        } else if (type == 'machine') {
+            params['LastLoginMachine'] = val;
+        } else if (type == 'win') {
+            params['sendNum'] = val;
+        }
+
+        var where = "";
+        $.each(params, function (key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        window.top.closeTab('player_search_relation_' + id);
+        window.top.addTabs({
+            id: 'player_search_relation_' + id,
+            title: '关联查询',
+            url: ctx + url + '?id=' + id + '&where=' + where,
+            icon: 'fa',
+            close: true
+        });
+    }
+
+    function goOperateByVIP(id, cvlid, type, val, url) {
+        var str = '';
+        var flag = false;
+        if (type == 'upgradeVIP') {
+            str = '是否确定将此用户升级VIP?';
+            $.post(ctx + '/player/getMaxLevelVip', {id: id}, function (data) {
+                if (data.code === 0) {
+                    var lv = data.data;
+                    console.log('-------------' + lv);
+                    var levels = '';
+                    for (var i = 2; i <= lv; i++) {
+                        levels += '<a class="center-block" href="#" onclick="setLevel(' + i + ',' + id + ',\'' + url + '\',' + cvlid + ')">' + i + '</a>';
+                    }
+                    layer.confirm(levels, {
+                        icon: 3,
+                        btn: false, //按钮
+                        title: '请选择VIP等级'
+                    }, function () {
+                    }, function () {
+                        //layer.msg('已取消');
+                        return;
+                    });
+                }
+                else {
+                }
+            }, "json");
+        } else if (type == 'deleteVIP') {
+            str = '是否确定将此用户删除VIP?';
+            flag = true;
+        } else if (type == 'refuseVIP') {
+            str = '是否确定将此用户拒绝VIP?';
+            flag = true;
+        } else if (type == 'inner') {
+            str = '是否确定设置为内部员工?';
+            flag = true;
+        }
+        if (flag) {
+            layer.confirm(str, {
+                icon: 3,
+                btn: ['确定', '取消'] //按钮
+            }, function () {
+                $.post(ctx + url, {id: id, cvlid: cvlid}, function (data) {
+                    if (data.code === 0) {
+                        layer_alert(data.message, "success");
+                        setTimeout(function () {
+                            //window.top.reloadTab();
+                            var tt = window.top.reloadTab;
+                            if (tt && typeof(tt) == "function") {
+                                window.top.reloadTab();
+                            } else {
+                                parent.location.reload();
+                            }
+                        }, 500);
+                    }
+                    else {
+                        layer_post(data);
+                    }
+                }, "json");
+
+            }, function () {
+                //layer.msg('已取消');
+            });
+        }
+    }
+
+    function setLevel(level, id, url, cvlid) {
+        if (BladeTool.isNotEmpty(level) && level != 0) {
+            $.post(ctx + url, {id: id, level: level, cvlid: cvlid}, function (data) {
+                if (data.code === 0) {
+                    layer_alert(data.message, "success");
+                    setTimeout(function () {
+                        //window.top.reloadTab();
+                        var tt = window.top.reloadTab;
+                        if (tt && typeof(tt) == "function") {
+                            window.top.reloadTab();
+                        } else {
+                            parent.location.reload();
+                        }
+                    }, 500);
+                }
+                else {
+                    layer_post(data);
+                }
+            }, "json");
+        } else {
+            layer_alert('请先选择VIP等级', "warn");
+        }
+    }
+
+    function goOperateByRelation(obj, id, type, locktype, url) {
+        var data = {
+            id: $(obj).attr('data-addtabs'),
+            title: $(obj).attr('data-title'),
+            url: url,
+            width: '800px',
+            height: '520px'
+        };
+        layer.open({
+            type: 2,
+            title: data.title,
+            area: [data.width, data.height],
+            fix: false, //不固定
+            maxmin: true,
+            content: ctx + data.url + '?id=' + id + '&type=' + type + '&locktype=' + locktype
+        });
+    }
+
+    function goNewTab(data, id) {
+        window.top.addTabs({
+            id: data.id + '_' + id,
+            title: data.title,
+            url: ctx + data.url + '?id=' + id,
+            icon: data.icon,
+            close: true
+        });
+    }
+
+    function goLayer(data, id) {
+        layer.open({
+            type: 2,
+            title: data.title,
+            area: [data.width, data.height],
+            fix: false, //不固定
+            maxmin: true,
+            content: ctx + data.url + id
+        });
+    }
+
+    function goOperate(data, id) {
+        layer.confirm('是否操作？', {
+            icon: 3,
+            btn: ['确定', '取消'] //按钮
+        }, function () {
+            $.post(ctx + data.url, {id: id}, function (data) {
+                if (data.code === 0) {
+                    layer_alert(data.message, "success");
+                    setTimeout(function () {
+                        var tt = window.top.reloadTab;
+                        if (tt && typeof(tt) == "function") {
+                            window.top.reloadTab();
+                        } else {
+                            parent.location.reload();
+                        }
+                    }, 500);
+                }
+                else {
+                    layer_post(data);
+                }
+            }, "json");
+
+        }, function () {
+            //layer.msg('已取消');
+        });
+    }
+</script>
+	<!-- 引入列表页所需js -->
+	@include("/common/_listscript.html"){}
+@}

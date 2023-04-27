@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>支付订单</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="data-spm" content="a2h1u">
+<meta name="author" content="" />
+<meta name="copyright" content="" />
+<meta name="keywords" content=""/>
+<meta name="description" content=""/>
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="format-detection" content="email=no" />
+<!-- 启用360浏览器的极速模式(webkit) -->
+<meta name="renderer" content="webkit">
+<!-- 避免IE使用兼容模式 -->
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<!-- 针对手持设备优化，主要是针对一些老的不识别viewport的浏览器，比如黑莓 -->
+<meta name="HandheldFriendly" content="true">
+<!-- 微软的老式浏览器 -->
+<meta name="MobileOptimized" content="320">
+<!-- uc强制竖屏 -->
+<meta name="screen-orientation" content="portrait">
+<!-- QQ强制竖屏 -->
+<meta name="x5-orientation" content="portrait">
+<!-- UC强制全屏 -->
+<meta name="full-screen" content="yes">
+<!-- QQ强制全屏 -->
+<meta name="x5-fullscreen" content="true">
+<!-- UC应用模式 -->
+<meta name="browsermode" content="application">
+<!-- QQ应用模式 -->
+<meta name="x5-page-mode" content="app">
+<!--这meta的作用就是删除默认的苹果工具栏和菜单栏-->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<!--网站开启对web app程序的支持-->
+<meta name="apple-touch-fullscreen" content="yes">
+<!--在web app应用下状态条（屏幕顶部条）的颜色-->
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<!-- windows phone 点击无高光 -->
+<meta name="msapplication-tap-highlight" content="no">
+<!--移动web页面是否自动探测电话号码-->
+<meta http-equiv="x-rim-auto-match" content="none">
+<!--移动端版本兼容 start -->
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0" name="viewport" />
+<!--移动端版本兼容 end -->
+    <link rel="stylesheet" href="${ctxPath}/static/assets/css/bootstrap.css"/>
+    <link rel="shortcut icon" href="${ctxPath}/static/style/images/favicon.ico" type="image/x-icon"/>
+</head>
+<body>
+
+<div>
+    <input value="${payinfo.TradeSerialNo!}"/>订单号
+    <input value="${payinfo.TotalAmount!}"/>支付金额
+</div>
+
+<script src='${ctxPath}/static/assets/js/jquery.js'></script>
+<script src="${ctxPath}/static/assets/js/bootstrap.js"></script>
+</body>
+</html>

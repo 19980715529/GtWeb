@@ -1,0 +1,68 @@
+@layout("/common/_container.html"){
+<style>
+html {
+	overflow: hidden;
+}
+</style>
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		backDom('杀蝗虫配置','killbuguser');
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		// var _colnames=[ "id","最小买分","最大买分","最大卖分","最大输赢","输赢次数","作弊率","最小作弊值","最大作弊值","是否启用"];
+		var _colnames=[ "id","最小充值","最大充值","最大兑换","最大输赢","点控次数","作弊率","最小作弊值","最大作弊值","是否启用"];
+		var _colmodel=[
+		                  {name:"id", sortable:false,hidden:true},
+		                  {name:"minRecharge", sortable:false},
+		                  {name:"maxRecharge", sortable:false},
+		                  {name:"maxExchange", sortable:false},
+		                  {name:"winScoreMax", sortable:false},
+		                  {name:"pointControlNum", sortable:false},
+		                  {name:"cheatRate", sortable:false},
+		                  {name:"cheatValuePercentMin", sortable:false},
+		                  {name:"cheatValuePercentMax", sortable:false},
+		                  {name:"isOpenName", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"id"},
+			pager : pager_selector,
+			postData: {},
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+		    <button class="btn btn-sx btn-white btn-search hide" id="gotoSearch">查询</button>
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	<script>
+	$(function(){
+		$("#gotoSearch").bind("click", function () {
+			reloadGrid();
+		});
+	});
+	</script>
+	@include("/common/_listscript.html"){}
+@}	

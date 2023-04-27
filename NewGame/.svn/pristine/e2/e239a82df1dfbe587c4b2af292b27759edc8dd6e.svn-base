@@ -1,0 +1,188 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间ID: </td>
+					<td><input type="text" value="${room.ServerID!}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间名称: </td>
+					<td><input type="text" name="room.ServerName" value="${room.ServerName!}" disabled="disabled"/></td>
+				</tr>
+				<tr>	
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
+					<td><select name="room.KindID" id="KindID" disabled="disabled"></select></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">绑定血池: </td>
+					<td><select name="room.BloodPondID" id="BloodPondID" disabled="disabled"></select></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+					<td><input type="text" name="room.SortID" value="${room.SortID!}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">桌子数量: </td>
+					<td>
+						<input type="text" name="room.TableCount" value="${room.TableCount!}" disabled="disabled"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间类型: </td>
+					<td>
+						<select name="room.ServerType" id="ServerType" disabled="disabled"></select>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">服务端口: </td>
+					<td><input type="text" name="room.ServerPort" value="${room.ServerPort}" disabled="disabled"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数据库名称: </td>
+					<td><input type="text" name="room.DataBaseName" value="${room.DataBaseName}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">数据库地址: </td>
+					<td>
+						<select name="room.DataBaseAddr" id="DataBaseAddr" disabled="disabled"></select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">税收比例: </td>
+					<td><input type="text" name="room.RevenueRatio" value="${room.RevenueRatio}" disabled="disabled"/>‰(千分比)</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最低坐下金币: </td>
+					<td><input type="text" name="room.MinTableScore" value="${room.MinTableScore}" disabled="disabled"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最小进入金币: </td>
+					<td><input type="text" name="room.MinEnterScore" value="${room.MinEnterScore}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大进入金币: </td>
+					<td><input type="text" name="room.MaxEnterScore" value="${room.MaxEnterScore}" disabled="disabled"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最小进入等级: </td>
+					<td>
+						<select id="MinEnterMember" name="room.MinEnterMember" disabled="disabled"></select>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大进入等级: </td>
+					<td>
+						<select name="room.MaxEnterMember" id="MaxEnterMember" disabled="disabled"></select>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大玩家数目: </td>
+					<td><input type="text" name="room.MaxPlayer" value="${room.MaxPlayer}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏最小人数: </td>
+					<td><input type="text" name="room.MinPartakeGameUser" value="${room.MinPartakeGameUser}" disabled="disabled"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏最大人数: </td>
+					<td><input type="text" name="room.MaxPartakeGameUser" value="${room.MaxPartakeGameUser}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">禁用状态: </td>
+					<td>
+						@if(room.Nullity == 0){
+						<input type="radio" name="room.Nullity" value="0" checked="checked" disabled="disabled"/>启用
+						<input type="radio" name="room.Nullity" value="1" disabled="disabled"/>禁用
+						@} else {
+						<input type="radio" name="room.Nullity" value="0" disabled="disabled"/>启用
+						<input type="radio" name="room.Nullity" value="1" checked="checked" disabled="disabled"/>禁用
+						@}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间当前血池: </td>
+					<td><input type="text" name="room.ControlVal" value="${room.ControlVal}" disabled="disabled"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td><input type="text" name="room.ServerNote" value="${room.ServerNote}" class="form-control" disabled="disabled"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">运行机器: </td>
+					<td style="word-break:break-all;" colspan="3">
+						<input type="text" name="room.ServiceMachine" value="${room.ServiceMachine}" class="form-control" disabled="disabled"/>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+<script>
+	$(function() {
+		// 获取账户类型
+		new Ajax(BladeApp.ctxPath + "/gamekind/getGameKindItem", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="0">无</option>';
+		        	for (var i = 0; i < type.length; i++) {
+		        		html += '<option value="' + type[i]['KindID'] + '"';
+		        		if('${room.KindID}' == type[i]['KindID']) {
+		        			html += ' selected="selected"';
+		        		}
+						html += '>' + type[i]['KindName'] + '</option>';
+					}
+		        	$("#KindID").html(html);
+		        }
+		 }).start();
+		new Ajax(BladeApp.ctxPath + "/config/getSupporTypeStatus", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="0">无</option>';
+		        	for (var i = 0; i < type.length; i++) {
+		        		html += '<option value="' + type[i]['code'] + '"';
+		        		if(type[i]['code'] == '${room.ServerType}') {
+		        			html += ' selected="selected"';
+		        		}
+						html += '>' + type[i]['description'] + '</option>';
+					}
+		        	$("#ServerType").html(html);
+		        }
+		 }).start();
+		new Ajax(BladeApp.ctxPath + "/database/getDataBaseInfo", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="127.0.0.1">无</option>';
+		        	for (var i = 0; i < type.length; i++) {
+		        		html += '<option value="' + type[i]['DBAddr'] + '"';
+		        		if(type[i]['DBAddr'] == '${room.DataBaseAddr}') {
+		        			html += ' selected="selected"';
+		        		}
+						html += '>' + type[i]['DBAddr'] + '</option>';
+					}
+		        	$("#DataBaseAddr").html(html);
+		        }
+		 }).start();
+		new Ajax(BladeApp.ctxPath + "/blood/getBloodPondConfig", function (data) {
+		        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+		        	var type = data.data;
+		        	var html = '<option value="0">未绑定血池</option>';
+		        	html += '<option value="0">不绑定血池</option>';
+		        	for (var i = 0; i < type.length; i++) {
+		        		html += '<option value="' + type[i]['ID'] + '"';
+		        		if(type[i]['ID'] == '${room.BloodPondID}') {
+		        			html += ' selected="selected"';
+		        		}
+						html += '>' + type[i]['BloodPondbalanceName'] + '</option>';
+					}
+		        	$("#BloodPondID").html(html);
+		        }
+		 }).start();
+		new Ajax(BladeApp.ctxPath + "/viptype/getVipMemberProperty", function (data) {
+	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+	        	var type = data.data;
+	        	var minhtml = '<option value="0">全部用户</option>';
+	        	var maxhtml = '<option value="0">全部用户</option>';
+	        	for (var i = 0; i < type.length; i++) {
+	        		if(type[i]['MemberOrder'] != 11) {
+	        			minhtml += '<option value="' + type[i]['MemberOrder'] + '"';
+	        			maxhtml += '<option value="' + type[i]['MemberOrder'] + '"';
+		        		if(type[i]['MemberOrder'] == '${room.MinEnterMember}') {
+		        			minhtmlhtml += ' selected="selected"';
+		        		}
+		        		if(type[i]['MemberOrder'] == '${room.MaxEnterMember}') {
+		        			maxhtml += ' selected="selected"';
+		        		}
+		        		minhtml += '>' + type[i]['MemberName'] + '</option>';
+		        		maxhtml += '>' + type[i]['MemberName'] + '</option>';
+	        		}
+				}
+	        	$("#MinEnterMember").html(minhtml);
+	        	$("#MaxEnterMember").html(maxhtml);
+	        }
+	 }).start();
+	});
+</script>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

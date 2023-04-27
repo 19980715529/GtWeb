@@ -1,0 +1,73 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池ID: </td>
+					<td>${blood.ID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池名称: </td>
+					<td>${blood.BloodPondbalanceName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当前血池值: </td>
+					<td>${blood.BloodPondbalanceVal!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池常规触底值: </td>
+					<td>${blood.BloodPondbalanceValOut!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池平衡值: </td>
+					<td>${blood.BloodPondVal!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">放分警戒倍数配置: </td>
+					<td>${blood.TrueAlertTimes1!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">放分极限倍数配置: </td>
+					<td>${blood.TrueAlertTimes2!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">吃分警戒倍数配置: </td>
+					<td>${blood.FlaseAlertTimes1!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">吃分极限倍数配置: </td>
+					<td>${blood.FlaseAlertTimes2!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">放分作弊率1: </td>
+					<td>${blood.TrueCheatate1!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">放分作弊率2: </td>
+					<td>${blood.TrueCheatate2!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">放分作弊率3: </td>
+					<td>${blood.TrueCheatate3!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">吃分作弊率1: </td>
+					<td>${blood.FlaseCheatate1!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">吃分作弊率2: </td>
+					<td>${blood.FlaseCheatate2!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">吃分作弊率3: </td>
+					<td>${blood.FlaseCheatate3!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当前状态: </td>
+					<td>${blood.StateName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">血池银行: </td>
+					<td>${blood.BloodPondBank!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">操作时间: </td>
+					<td>${blood.CreateTime!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否对玩家点控有影响: </td>
+					<td>${blood.IsMustControlName!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否生效: </td>
+					<td>${blood.NullityName!}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

@@ -1,0 +1,100 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '';
+	if(BladeTool.isNotEmpty('${PlatformID}')) {
+		_filter = '{"PlatformID":"${PlatformID}"}';
+	}
+	var PlatformID = '${PlatformID}';
+	
+	$(function(){
+		initGrid();
+		initMenuBtn("btns","siteconfig");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "ConfigID",/*"KEY",*/"键名称"/*,"排序"*/];
+		var _colmodel=[   
+		                  {name:"ConfigID", sortable:false,hidden:true},
+		                  //{name:"ConfigKey", sortable:false},
+						  {name:"ConfigName", sortable:false}
+						  //{name:"SortID", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"ConfigID"},
+			pager : pager_selector,
+			postData: {where:_filter},
+			rowNum:100,
+			height: 'auto'
+		});
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			<!-- 简单查询第一组 -->
+			<label class=""> 键名称： </label> 
+			<input type="text" id="name" value="" placeholder=""
+				class="" /> 
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()" id="gotoSearch">查询</button>
+			</label>
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	<script>
+	function goSearch() {
+		var name = $("#name").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(name)) {
+			wheres['ConfigName'] = name;
+		}
+		
+		wheres['PlatformID'] = '${PlatformID}';
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+	}
+	</script>
+	
+	@include("/common/_listscript.html"){}
+@}	

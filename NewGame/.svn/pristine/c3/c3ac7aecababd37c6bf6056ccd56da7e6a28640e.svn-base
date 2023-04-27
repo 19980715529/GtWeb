@@ -1,0 +1,55 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新包ID: </td>
+					<td>${clienttypemapnew.NewType!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">旧包ID: </td>
+					<td>${clienttypemapnew.OldType!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启高防: </td>
+					<td>${clienttypemapnew.IsOnlineName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否允许查看: </td>
+					<td>${clienttypemapnew.IsCanSeeAllName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否允许活动: </td>
+					<td>${clienttypemapnew.IsForbidActivityName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否允许赠送: </td>
+					<td>${clienttypemapnew.IsForbidGiftName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否允许签到: </td>
+					<td>${clienttypemapnew.IsForbidSignName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否能够显示系统自定义头像: </td>
+					<td>${clienttypemapnew.canSeeCustomHeadName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启首充礼包: </td>
+					<td>${clienttypemapnew.RechargeGiftName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">版本号: </td>
+					<td>${clienttypemapnew.IsUserThirdRechargeName!}</td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

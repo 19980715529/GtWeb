@@ -1,0 +1,64 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+	var ctx="${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	
+	$(function(){
+		initGrid();
+		initMenuBtn("btns","${code}");
+	});
+	
+	function initGrid(){
+		var grid_url = ctx+"/${code}/list";//查询列表接口
+		var _colnames=[ "模块ID","模块名称","服务器版本","客户端版本","数据库名","数据库地址"];
+		var _colmodel=[   {name:"GameID", sortable:false},
+						  {name:"GameName", sortable:false},
+						  {name:"ServerVersion", sortable:false,formatter:rowShow},
+						  {name:"ClientVersion", sortable:false,formatter:rowShow},
+						  {name:"DataBaseName", sortable:false},
+						  {name:"DataBaseAddr", sortable:false}
+						];
+		
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames:_colnames,
+			colModel:_colmodel, 
+			jsonReader:{id:"GameID"},
+			pager : pager_selector,
+			postData: {sort: 'GameID', order: 'desc'},
+			rowNum:100,
+			height: 'auto'
+		});
+		
+		function rowShow(cellvalue, options, rowObject) {
+			var html = '';
+			if(options.colModel.name=='ServerVersion' || options.colModel.name=='ClientVersion') {
+				html = CalVersion(cellvalue);
+			}
+			return html;
+		}	
+	}
+</script>
+	<!-- 配置grid -->
+	<div class="row">
+		<div class="col-xs-12 tb-grid">
+			<!-- 配置查询 -->
+			@ var _col=[
+			@			  {name:"模块ID",index:"GameID",type:"text"},
+			@			  {name:"模块名称",index:"GameName",type:"text"}
+			@		   ];
+			@ include("/common/_function/_search_multi.html",{"col":_col}){}
+			<!-- 按钮组 -->
+			<div class="welljq well-sm" id="btns"></div>
+			<!-- grid -->
+			<table id="grid-table"></table>
+			<!-- 分页 -->
+			<div id="grid-pager"></div>
+		</div>
+	</div>
+	
+	@include("/common/_listscript.html"){}
+@}	

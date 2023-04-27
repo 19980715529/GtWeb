@@ -1,0 +1,42 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">购买金额: </td>
+                    <td ><input name="firstrechage.amount" value=""/></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">获得金币: </td>
+                    <td><input name="firstrechage.gold" value=""/></td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+                    <td><input type="text" name="firstrechage.sort" value="" /></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送数量: </td>
+                    <td><input type="text" name="firstrechage.giveNum" value="" /></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送类型: </td>
+                    <td><input type="radio" name="firstrechage.typ" value="2">转盘次数</input>
+                        <input type="radio" name="firstrechage.type" value="1">金币数量</input>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

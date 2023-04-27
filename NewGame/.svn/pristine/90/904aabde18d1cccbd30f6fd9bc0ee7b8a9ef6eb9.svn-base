@@ -1,0 +1,79 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员ID: </td>
+					<td>${viptype.MemberOrder!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">会员名称: </td>
+					<td>${viptype.MemberName!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">任务奖励: </td>
+					<td>${viptype.TaskRate!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商城折扣: </td>
+					<td>${viptype.ShopRate!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">银行优惠: </td>
+					<td>${viptype.InsureRate!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日赠送: </td>
+					<td>${viptype.DayPresent!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">每日登陆礼包: </td>
+					<td>${viptype.DayGiftID!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">创建时间: </td>
+					<td>${viptype.CollectDate!}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
+					<td>${viptype.CollectNote!}</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">拥有金币: </td>
+					<td>${viptype.ScoreCount!0}</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加在线奖励: </td>
+					<td>
+						@if(viptype.OnlineReward == 0){
+							<span class="text-red">X</span>
+						@} else{
+							${viptype.OnlineReward!}%
+						@}
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加救济金奖励: </td>
+					<td>
+						@if(viptype.Relieffund == 0){
+							<span class="text-red">X</span>
+						@} else{
+							${viptype.Relieffund!}%
+						@}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加签到奖励: </td>
+					<td>
+						@if(viptype.Sign == 0){
+							<span class="text-red">X</span>
+						@} else{
+							${viptype.Sign!}%
+						@}
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">增加膜拜奖励: </td>
+					<td colspan="3">
+						@if(viptype.Visiting == 0){
+							<span class="text-red">X</span>
+						@} else{
+							${viptype.Visiting!}%
+						@}
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_close:"关闭"}) {}
+@}

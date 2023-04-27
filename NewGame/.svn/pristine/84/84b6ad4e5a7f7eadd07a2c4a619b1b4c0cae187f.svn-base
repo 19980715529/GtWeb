@@ -1,0 +1,229 @@
+@layout("/common/_container.html"){
+
+
+<script type="text/javascript">
+	var ctx = "${ctxPath}";
+	var grid_selector = "#grid-table";
+	var pager_selector = "#grid-pager";
+	var _filter = '';
+	if(BladeTool.isNotEmpty('${id}')) {
+		_filter = '{"UserID":"${id}"}';
+	}
+
+	$(function() {
+		backDom('用户登录记录','player_loginlog');
+		initGrid();
+	});
+
+	function initGrid() {
+		var grid_url = ctx + "/${code}/lllist";//查询列表接口
+		var _colnames = [ "ID","玩家ID","靓号", "昵称", "房间名称", "金币", "登录时间", "登录IP", "机器码"];
+		var _colmodel = [ 
+		                  {name : "UserID",sortable:false,hidden:true}, 
+		                  {name : "UserID",sortable:false,formatter: genLink},
+                          {name : "BeautifulID",sortable:false},
+		                  {name : "NickName",sortable:false,formatter: genLink},
+		                  {name : "ServerName",sortable:false}, 
+		                  {name : "Score",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "EnterTime",sortable:false}, 
+		                  {name : "ClientIP",sortable:false}, 
+						  {name : "MachineSerial", width : 300,sortable:false} ];
+
+		jQuery(grid_selector).jqGrid({
+			url:grid_url,
+			autowidth: true,
+			shrinkToFit : false,//适用于较少字段,响应式
+			colNames : _colnames,
+			colModel : _colmodel,
+			pager : pager_selector,
+			postData : {where: _filter, sort: "EnterTime", order: "desc"},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:100,
+			height: 'auto'
+		});
+		jQuery("#coin-grid-table").jqGrid({
+			url:ctx + "/${code}/slllist",
+			shrinkToFit : true,//适用于较少字段,响应式
+			colNames : ["登录IP","IP登录总次数"],
+			colModel : [
+			            {name : "EnterClientIP", width : 100, sortable:false,align:'center',formatter:rowShow}, 
+			            {name : "UserNum", width : 100, sortable:false,align:'center'}
+			            ],
+			postData : {where: _filter},
+			multiselect : false,
+			rownumbers : false,
+			rowNum:-1,
+			sortname:"UserNum",
+			sortorder:"desc",
+			height: 'auto'
+		});
+		function rowShow(cellvalue, options, rowObject) {
+			var html = cellvalue + '('+ rowObject.Location +')';
+			return html;
+		}
+		
+		function genTable(data) {
+			console.log(data);
+			var html = '<tr><td>登录IP</td><td>IP登录总次数</td></tr>';
+			for (var i = 0; i < data.length; i++) {
+				html += '<tr>';
+				html += '<td>' + data[i]['EnterClientIP'] + '</td>';
+				html += '<td>' + data[i]['UserNum'] + '</td>';
+				html += '</tr>';
+			}
+			$('#coin-grid-table').empty().append(html);
+		}
+		function genLink(cellvalue, options, rowObject) {
+			var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+			return html;
+		}
+	}
+
+	function goNewTab(id) {
+		window.top.addTabs({
+	        id: 'player_showdetail_' + id,
+	        title: '用户详情',
+	        url: ctx + '/player/detailinfo/' + id,
+	        icon: '',
+	        close: true
+	    });
+	}
+</script>
+
+
+<!-- 配置grid -->
+<div class="row">
+	<form data-url="" method="post" class="" role="form">
+		<!-- 配置查询 -->
+		<div class="">
+			<!-- 简单查询第一组 -->
+			<label class=""> 玩家ID： </label> 
+			<input type="text" id="UserID" value="${id!}" placeholder="请输入用户ID查询数据"
+				class="" /> 
+			<!-- 简单查询第二组 -->
+			<label class=""> 登录时间： </label> 
+			<input type="text" id="start_time" value="" class="" />
+			- 
+			<input type="text" id="end_time" value="" class="" />
+			<!-- 简单查询第三组 -->
+			<label class=""> 机器码： </label> 
+			<input type="text" id="EnterMachine" value="" placeholder=""
+				class="" /> 
+
+			<!-- 简单查询按钮 -->
+			<label class="">
+				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+				<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+			</label>
+		</div>
+	</form>
+	<!-- 登录记录 -->
+	<table id="coin-grid-table">
+	</table>
+	<div class="space-4"></div>
+	<!-- grid -->
+	<table id="grid-table" style="margin-bottom:50px;"></table>
+	<!-- 分页 -->
+	<div id="grid-pager"></div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+	
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD hh:mm:ss', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		istime: true,
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	
+	function goSearch() {
+		var UserID = $("#UserID").val();
+		var EnterMachine = $("#EnterMachine").val();
+		var wheres = {};
+		
+		if(BladeTool.isNotEmpty(UserID)) {
+			wheres['UserID'] = UserID;
+		} else {
+			layer_alert('请输入玩家ID!', "warn");
+	    	return;
+		}
+		if(BladeTool.isNotEmpty(EnterMachine)) {
+			wheres['EnterMachine'] = EnterMachine;
+		}
+		
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+			layer_alert('请输入开始时间!', "warn");
+	    	return;
+		} else if(BladeTool.isNotEmpty(end_time)) {
+			wheres['EnterTime_datelt'] = end_time;
+		}
+		if(BladeTool.isNotEmpty(start_time)) {
+			wheres['EnterTime_dategt'] = start_time;
+			if(BladeTool.isEmpty(end_time)) {
+				wheres['EnterTime_datelt'] = getBeforeDate(0);
+				$("#end_time").val(getBeforeDate(0));
+			}
+		}
+	    
+	    var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+		
+		$.each(wheres, function(key, value) {
+			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+				where += "\"" + key + "\":\"" + value + "\"" + ",";
+			}
+		});
+		
+		if (BladeTool.isNotEmpty(where)) {
+			where = '{' + where;
+			where = where.substring(0, where.length - 1);
+			where += '}';
+		}
+        
+		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+		var pageNum = $jqGrid.getGridParam('page');
+		$jqGrid.jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			},
+			page: (isAutoPage) ? pageNum : 1
+		}).trigger("reloadGrid");
+		
+		jQuery("#coin-grid-table").jqGrid("setGridParam", {
+			datatype : "json",
+			postData : {
+				where : where
+			}
+		}).trigger("reloadGrid");
+	}
+	
+	function resetForm() {
+		$("input").val("");
+        reloadGrid();
+        $("#coin-grid-table").jqGrid('setGridParam', { postData: {'where':''}}).trigger("reloadGrid");
+	}
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

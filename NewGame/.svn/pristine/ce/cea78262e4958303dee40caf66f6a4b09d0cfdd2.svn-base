@@ -1,0 +1,67 @@
+@layout("/common/_container.html"){
+	<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+	<div class="col-xs-12 tb-grid">
+	<form data-url="${ctxPath}/${code}/update" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">房间: </td>
+					<td>${lbloodpoolconfig.ServerName!}
+						<input type="hidden" name="lbloodpoolconfig.serverID" value="${lbloodpoolconfig.serverID!}"/>
+					</td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">状态: </td>
+					<td>
+						@if(lbloodpoolconfig.status==0) {
+							<input type="radio" name="lbloodpoolconfig.status" value="0" checked="checked"/>吃分
+							<input type="radio" name="lbloodpoolconfig.status" value="1"/>吐分
+						@} else {
+							<input type="radio" name="lbloodpoolconfig.status" value="0"/>吃分
+							<input type="radio" name="lbloodpoolconfig.status" value="1" checked="checked"/>吐分
+						@}
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">高严重报警线: </td>
+					<td><input name="lbloodpoolconfig.failMaxLine" value="${lbloodpoolconfig.failMaxLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">高严重报警线吐分概率: </td>
+					<td><input name="lbloodpoolconfig.maxFailOutCheat" value="${lbloodpoolconfig.maxFailOutCheat!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">高报警线: </td>
+					<td><input name="lbloodpoolconfig.maxLine" value="${lbloodpoolconfig.maxLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">高报警线吐分概率: </td>
+					<td><input name="lbloodpoolconfig.maxOutCheat" value="${lbloodpoolconfig.maxOutCheat!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">顶线拐点: </td>
+					<td><input name="lbloodpoolconfig.highLine" value="${lbloodpoolconfig.highLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">通常吐分概率: </td>
+					<td><input name="lbloodpoolconfig.normalOutCheat" value="${lbloodpoolconfig.normalOutCheat!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">底线拐点: </td>
+					<td><input name="lbloodpoolconfig.zeroLine" value="${lbloodpoolconfig.zeroLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">通常吃分概率: </td>
+					<td><input name="lbloodpoolconfig.normalEatCheat" value="${lbloodpoolconfig.normalEatCheat!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">低报警线: </td>
+					<td><input name="lbloodpoolconfig.minLine" value="${lbloodpoolconfig.minLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">低报警线吃分概率: </td>
+					<td><input name="lbloodpoolconfig.minEatCheat" value="${lbloodpoolconfig.minEatCheat!}"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">低严重报警线: </td>
+					<td><input name="lbloodpoolconfig.failMinLine" value="${lbloodpoolconfig.failMinLine!}"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">低严重低报警线吃分概率: </td>
+					<td><input name="lbloodpoolconfig.minFailEatCheat" value="${lbloodpoolconfig.minFailEatCheat!}"/></td>
+				</tr>
+			</tbody>
+		</table>
+		</form>
+	</div>
+</div>
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}
