@@ -13,39 +13,39 @@
 				xName: '日强活跃(人)',
 				barName: {
 					tName: '总强活跃',
-					sName: 'IOS强活跃',
-					rName: '安卓强活跃',
-					pcName:'PC强活跃'
+					sName: '注册活跃',
+					rName: '游客活跃',
+					pcName:'充值活跃'
 				}
 			},
 			day: {
 				title: '用户日活跃数据统计',
 				xName: '日活跃(人)',
 				barName: {
-					tName: '总日活跃',
-					sName: 'IOS日活跃',
-					rName: '安卓日活跃',
-					pcName:'PC活跃'
+					tName: '总强活跃',
+					sName: '注册活跃',
+					rName: '游客活跃',
+					pcName:'充值活跃'
 				}
 			},
 			week: {
 				title: '用户周活跃数据统计',
 				xName: '周活跃(人)',
 				barName: {
-					tName: '总周活跃',
-					sName: 'IOS周活跃',
-					rName: '安卓周活跃',
-					pcName:'PC周活跃'
+					tName: '总强活跃',
+					sName: '注册活跃',
+					rName: '游客活跃',
+					pcName:'充值活跃'
 				}
 			},
 			month: {
 				title: '用户月活跃数据统计',
 				xName: '月活跃(人)',
 				barName: {
-					tName: '总月活跃',
-					sName: 'IOS月活跃',
-					rName: '安卓月活跃',
-					pcName:'PC月活跃'
+					tName: '总强活跃',
+					sName: '注册活跃',
+					rName: '游客活跃',
+					pcName:'充值活跃'
 				}
 			}
 	}
@@ -62,13 +62,13 @@
 	
 	function initHomeTable() {
 		var grid_url = ctx + "/${code}/ualist";
-		var _colNames = ["日期","活跃总人数","IOS活跃人数","安卓活跃人数","PC活跃人数"];
+		var _colNames = ["日期","活跃总人数","注册活跃人数","游客活跃人数","充值活跃人数"];
 		var _colModel = [
-				            {name : "CollectDate", width : 100, sortable:false,align:'center'}, 
-				            {name : "Total", width : 100, sortable:false,align:'center'},
-				            {name : "IOS", width : 100, sortable:false,align:'center'},
-				            {name : "Android", width : 100, sortable:false,align:'center'},
-				            {name : "PC", width : 100, sortable:false,align:'center'}
+				            {name : "writedate", width : 100, sortable:false,align:'center'},
+				            {name : "totalActivity", width : 100, sortable:false,align:'center'},
+				            {name : "tatolRegActivity", width : 100, sortable:false,align:'center'},
+				            {name : "TouritsActivity", width : 100, sortable:false,align:'center'},
+				            {name : "RecActivity", width : 100, sortable:false,align:'center'}
 				           ];
 		initGrid('home',grid_selector,grid_url,_colNames,_colModel);
 	}
@@ -88,8 +88,8 @@
 			rownumbers : false,
 			rowNum:-1,
 			afterInsertRow: function(rowid, rowdata, rowelem) {
-				if(BladeTool.isNotEmpty(rowdata['Total'])) {
-					objToal['UserNum'] += rowdata['Total'];
+				if(BladeTool.isNotEmpty(rowdata['totalActivity'])) {
+					objToal['UserNum'] += rowdata['totalActivity'];
 				}
 			},
 			gridComplete:function() {

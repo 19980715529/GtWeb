@@ -1,7 +1,0 @@
- <script src="${ctxPath}/static/assets/js/jqGrid/jquery.jqGrid.src.js" charset="utf-8" type="text/javascript" ></script>
- <script src="${ctxPath}/static/assets/js/jqGrid/i18n/grid.locale-cn.js" charset="utf-8" type="text/javascript" ></script>
- <script src="${ctxPath}/static/style/js/forlist.js" charset="utf-8" type="text/javascript" ></script>
- <script src="${ctxPath}/static/blade/js/blade-btn.js" charset="utf-8" type="text/javascript" ></script>
- 
- <script src="${ctxPath}/static/assets/js/jquery.contextmenu.js" charset="utf-8" type="text/javascript" ></script>
- <script src="${ctxPath}/static/blade/js/blade-girdmenu.js" charset="utf-8" type="text/javascript" ></script>

@@ -26,10 +26,10 @@
 			title: '用户注册数据统计',
 			xName: '注册(人)',
 			barName: {
-				tName: '总注册',
-				sName: 'IOS',
-				rName: '安卓',
-				pcName: 'PC'
+				tName: '总新增',
+				sName: '注册用户',
+				rName: '游客',
+				// pcName: 'PC'
 			}
 		};
 		initEchart('home-chart',info,'${ctxPath}/statistics/getRegisterAxis?where='+_filter);
@@ -40,17 +40,15 @@
 	
 	function initHomeTable() {
 		var grid_url = ctx + "/${code}/dglist";
-		var _colNames = ["日期","总注册","新充值","新兑换","IOS","安卓","PC注册","未进房间","所占比例"];
+		var _colNames = ["日期","总新增","总注册","总游客","新充值","新兑换","未进房间"];
 		var _colModel = [
-				            {name : "CollectDate", width : 100, sortable:false,align:'center'}, 
-				            {name : "RegisterCount", width : 100, sortable:false,align:'center'},
-            				{name : "NewUserUpman", width : 100, sortable:false,align:'center'},
-            				{name : "NewUserDownman", width : 100, sortable:false,align:'center'},
-				            {name : "IOSReg", width : 100, sortable:false,align:'center'},
-				            {name : "AndReg", width : 100, sortable:false,align:'center'},
-				            {name : "PCReg", width : 100, sortable:false,align:'center'},
-				            {name : "UnEnterCount", width : 100, sortable:false,align:'center'},
-				            {name : "Rate", width : 100, sortable:false,align:'center', formatter:"number", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:3} }
+				            {name : "writedate", width : 100, sortable:false,align:'center'},
+				            {name : "totalNewUser", width : 100, sortable:false,align:'center'},
+            				{name : "totalNewRec", width : 100, sortable:false,align:'center'},
+            				{name : "totalTourist", width : 100, sortable:false,align:'center'},
+				            {name : "newRecUser", width : 100, sortable:false,align:'center'},
+				            {name : "newExcUser", width : 100, sortable:false,align:'center'},
+				            {name : "notRoom", width : 100, sortable:false,align:'center'}
 				           ];
 		var data = {
 			where:_filter,
@@ -91,33 +89,31 @@
 			postData : data,
 			multiselect : false,
 			rownumbers : false,
-			rowNum:-1,
-			gridComplete:function() {
-				if(type=='home'){
-					var PlatformID = $("#ptypeid").val();
-					if(BladeTool.isEmpty(PlatformID)) {
-						PlatformID = '-1';
-					}
-					new Ajax("${ctxPath}/statistics/getDayReg?PlatformID="+PlatformID, function (data) {
-				        if(data.code == 0) {
-				        	var temp = data.data;
-							//$("#DayReg").text(fmoney(data.data.RegisterCount,0));//当日总充值
-							var html = '<tr role="row" id="0" tabindex="0" class="ui-widget-content jqgrow ui-row-ltr ui-state-highlight" aria-selected="true">';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.writedate+'" aria-describedby="grid-table_CollectDate">'+temp.writedate+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.totalreg+'" aria-describedby="grid-table_RegisterCount">'+temp.totalreg+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.newUserUpman+'" aria-describedby="grid-table_newUserUpman">'+temp.newUserUpman+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.newUserDownman+'" aria-describedby="grid-table_newUserDownman">'+temp.newUserDownman+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.iosregcount+'" aria-describedby="grid-table_IOSReg">'+temp.iosregcount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.andregcount+'" aria-describedby="grid-table_AndReg">'+temp.andregcount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.pcregcount+'" aria-describedby="grid-table_PCReg">'+temp.pcregcount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.unenter+'" aria-describedby="grid-table_UnEnterCount">'+temp.unenter+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.rate+'" aria-describedby="grid-table_Rate">'+fmoney(temp.rate,3)+'</td>';
-				        	html += '</tr>';
-							$('#1').before(html);
-				        }
-				 	}).start();
-				}
-			}
+			rowNum:-1
+			// gridComplete:function() {
+			// 	if(type=='home'){
+			// 		var PlatformID = $("#ptypeid").val();
+			// 		if(BladeTool.isEmpty(PlatformID)) {
+			// 			PlatformID = '-1';
+			// 		}
+			// 		new Ajax("${ctxPath}/statistics/getDayReg?PlatformID="+PlatformID, function (data) {
+			// 	        if(data.code == 0) {
+			// 	        	var temp = data.data;
+			// 				//$("#DayReg").text(fmoney(data.data.RegisterCount,0));//当日总充值
+			// 				var html = '<tr role="row" id="0" tabindex="0" class="ui-widget-content jqgrow ui-row-ltr ui-state-highlight" aria-selected="true">';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.writedate+'" aria-describedby="grid-table_CollectDate">'+temp.writedate+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.totalNewUser+'" aria-describedby="grid-table_RegisterCount">'+temp.totalNewUser+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.totalNewRec+'" aria-describedby="grid-table_newUserUpman">'+temp.totalNewRec+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.totalTourist+'" aria-describedby="grid-table_newUserDownman">'+temp.totalTourist+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.newRecUser+'" aria-describedby="grid-table_IOSReg">'+temp.newRecUser+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.newExcUser+'" aria-describedby="grid-table_AndReg">'+temp.newExcUser+'</td>';
+			// 	        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.notRoom+'" aria-describedby="grid-table_PCReg">'+temp.notRoom+'</td>';
+			// 	        	html += '</tr>';
+			// 				$('#1').before(html);
+			// 	        }
+			// 	 	}).start();
+			// 	}
+			// }
 		});
 	}
 </script>
@@ -223,21 +219,21 @@
 				var totaldata = [];
 				var iosdata = [];
 				var anddata = [];
-				var pcdata = [];
+				// var pcdata = [];
 				for ( var i=0; i<len;i++) {
-					xAxisData[i]=tempdata[i]['CollectDate'];
-					totaldata[i] = tempdata[i]['RegisterCount'];
-					iosdata[i] = tempdata[i]['IOSReg'];
-					anddata[i] = tempdata[i]['AndReg'];
-					pcdata[i] = tempdata[i]['PCReg'];
+					xAxisData[i]=tempdata[i]['writedate'];
+					totaldata[i] = tempdata[i]['totalNewUser'];
+					iosdata[i] = tempdata[i]['totalNewRec'];
+					anddata[i] = tempdata[i]['totalTourist'];
+					// pcdata[i] = tempdata[i]['newRecUser'];
 				}
 				
-				genEcharts(myChart,info,xAxisData,totaldata,iosdata,anddata,pcdata);
+				genEcharts(myChart,info,xAxisData,totaldata,iosdata,anddata);
 				myChart.hideLoading(); 
 			});
  		}
 		
-		function genEcharts(myChart,info,xAxisData,totaldata,iosdata,anddata,pcdata) {
+		function genEcharts(myChart,info,xAxisData,totaldata,iosdata,anddata) {
 	        var xData = [];
 	        
 	        // 指定图表的配置项和数据
@@ -249,7 +245,8 @@
 	            tooltip: {trigger: 'axis'},
 	            legend: {
 		        	show: true,
-		        	data: [info['barName']['tName'],info['barName']['sName'],info['barName']['rName'],info['barName']['pcName']],
+		        	// data: [info['barName']['tName'],info['barName']['sName'],info['barName']['rName'],info['barName']['pcName']],
+		        	data: [info['barName']['tName'],info['barName']['sName'],info['barName']['rName']],
 	                left: 'right',
 	                y:'middle',
 	                orient: 'vertical',
@@ -338,23 +335,25 @@
   	            		color: 'green'
   	            	}
   	             }
- 	            },{
- 	                name: info['barName']['pcName'],
- 	                type: 'line',
- 	                data: pcdata,
- 	               symbol: 'rect',
-  	              symbolSize: 8,
-  	            itemStyle: {
-   	            	normal: {
-   	            		color: 'purple'
-   	            	}
-   	             },
-  	             lineStyle: {
-  	            	normal: {
-  	            		color: 'purple'
-  	            	}
-  	             }
- 	            }]
+ 	            }
+				 // ,{
+ 	            //     name: info['barName']['pcName'],
+ 	            //     type: 'line',
+ 	            //     data: pcdata,
+ 	            //    symbol: 'rect',
+  	           //    symbolSize: 8,
+  	           //  itemStyle: {
+   	          //   	normal: {
+   	          //   		color: 'purple'
+   	          //   	}
+   	          //    },
+  	           //   lineStyle: {
+  	           //  	normal: {
+  	           //  		color: 'purple'
+  	           //  	}
+  	           //   }
+ 	            // }
+				 ]
 	        };
 
 	        // 使用刚指定的配置项和数据显示图表。
@@ -468,9 +467,9 @@
 					title: '用户注册数据统计',
 					xName: '注册(人)',
 					barName: {
-						tName: '总注册',
-						sName: 'IOS',
-						rName: '安卓'
+						tName: '总新增',
+						sName: '注册用户',
+						rName: '游客'
 					}
 				};
 			initEchart('home-chart',info,'${ctxPath}/statistics/getRegisterAxis?where='+where);

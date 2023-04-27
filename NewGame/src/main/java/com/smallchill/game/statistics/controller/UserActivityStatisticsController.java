@@ -61,7 +61,7 @@ public class UserActivityStatisticsController extends BaseController implements 
 		switch(params.get("type")) {
 		case "home":
 		case "day":
-			gird = commonService.getInfoList("charts_activity_statistics." + params.get("type") + "_list", params);
+			gird = commonService.getInfoList("charts_activity_statistics1." + params.get("type") + "_list", params);
 			break;
 		case "week":
 		case "month":
@@ -69,7 +69,7 @@ public class UserActivityStatisticsController extends BaseController implements 
 			gird = JSON.toJSON(gridInfo);
 			break;
 		default:
-			gird = commonService.getInfoList("charts_activity_statistics." + params.get("type") + "_list", params);
+			gird = commonService.getInfoList("charts_activity_statistics1." + params.get("type") + "_list", params);
 			break;
 		}
 		return gird;
@@ -125,7 +125,7 @@ public class UserActivityStatisticsController extends BaseController implements 
 		LOGGER.info("用户活跃统计->周/月统计->afterDayDate:" + afterDayDate);
 		LOGGER.info("用户活跃统计->周/月统计->startTime:" + startTime);
 		DateFormatKit format = new DateFormatKit();
-		List<Map> infoList = commonService.getInfoList("charts_activity_statistics." + params.get("type") + "_list", params);
+		List<Map> infoList = commonService.getInfoList("charts_activity_statistics1." + params.get("type") + "_list", params);
 		Map temp = null;
 		String type = params.get("type");
 		List<Map> gridInfo = new ArrayList<Map>();
@@ -146,33 +146,37 @@ public class UserActivityStatisticsController extends BaseController implements 
 		for (Entry<String, Integer> map : sort) {
 			String key = map.getKey(); // 年份-周
 			temp= new HashMap();
-			temp.put("CollectDate", key+((type.equals("week")?"周":"月")));
+			temp.put("writedate", key+((type.equals("week")?"周":"月")));
 			
 			String tempYW = ""; // 年份-周
-			int IOS = 0;
-			int Android = 0; // 统计用户数
-			int PC = 0; // 统计用户数
+			int totalActivity = 0;
+			int tatolRegActivity = 0;
+			int TouritsActivity = 0; // 统计用户数
+			int RecActivity = 0; // 统计用户数
 			for (Map m : infoList) {
 				String week = JSON.toJSONString(m.get(StrKit.upperFirst(type))).replaceAll("\"", "");
 				String year = JSON.toJSONString(m.get("Year")).replaceAll("\"", "");
 				tempYW = year + "-" + week;
 				if(StrKit.equals(key, tempYW)) {
-					if(StrKit.notBlank(JSON.toJSONString(m.get("IOS")))) {
-						IOS = Integer.parseInt(JSON.toJSONString(m.get("IOS")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("totalActivity")))) {
+						totalActivity = Integer.parseInt(JSON.toJSONString(m.get("totalActivity")).replaceAll("\"", ""));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("Android")))) {
-						Android = Integer.parseInt(JSON.toJSONString(m.get("Android")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("tatolRegActivity")))) {
+						tatolRegActivity = Integer.parseInt(JSON.toJSONString(m.get("tatolRegActivity")).replaceAll("\"", ""));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("PC")))) {
-						PC = Integer.parseInt(JSON.toJSONString(m.get("PC")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("TouritsActivity")))) {
+						TouritsActivity = Integer.parseInt(JSON.toJSONString(m.get("TouritsActivity")).replaceAll("\"", ""));
+					}
+					if(StrKit.notBlank(JSON.toJSONString(m.get("RecActivity")))) {
+						RecActivity = Integer.parseInt(JSON.toJSONString(m.get("RecActivity")).replaceAll("\"", ""));
 					}
 					break;
 				}
 			}
-			temp.put("IOS", IOS);
-			temp.put("Android", Android);
-			temp.put("PC", PC);
-			temp.put("Total", (IOS+Android+PC));
+			temp.put("tatolRegActivity", tatolRegActivity);
+			temp.put("TouritsActivity", TouritsActivity);
+			temp.put("RecActivity", RecActivity);
+			temp.put("totalActivity", totalActivity);
 			gridInfo.add(temp);
 		}
 		return gridInfo;
@@ -184,7 +188,7 @@ public class UserActivityStatisticsController extends BaseController implements 
 		String data1 = "[";
 		String data2 = "[";
 		String data3 = "[";
-		List<Map> infoList = commonService.getInfoList("charts_activity_statistics." + params.get("type") + "_list", params);
+		List<Map> infoList = commonService.getInfoList("charts_activity_statistics1." + params.get("type") + "_list", params);
 
 		DateFormatKit format = new DateFormatKit();
 		while(afterDayDate.compareTo(endTime) <= 0) {
@@ -193,31 +197,31 @@ public class UserActivityStatisticsController extends BaseController implements 
 				continue;
 			}
 			String d = format.getDay(format.parseDate(afterDayDate));
-			int IOS = 0;
-			int Android = 0;
-			int PC = 0;
-			int Total = 0;
+			int totalActivity = 0;
+			int tatolRegActivity = 0;
+			int TouritsActivity = 0;
+			int RecActivity = 0;
 			for (Map m : infoList) {
-				if(StrKit.equals(d, JSON.toJSONString(m.get("CollectDate")).replaceAll("\"", ""))) {
-					if(StrKit.notBlank(JSON.toJSONString(m.get("IOS")))) {
-						IOS = Integer.parseInt(JSON.toJSONString(m.get("IOS")));
+				if(StrKit.equals(d, JSON.toJSONString(m.get("writedate")).replaceAll("\"", ""))) {
+					if(StrKit.notBlank(JSON.toJSONString(m.get("totalActivity")))) {
+						totalActivity = Integer.parseInt(JSON.toJSONString(m.get("totalActivity")));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("Android")))) {
-						Android = Integer.parseInt(JSON.toJSONString(m.get("Android")));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("tatolRegActivity")))) {
+						tatolRegActivity = Integer.parseInt(JSON.toJSONString(m.get("tatolRegActivity")));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("PC")))) {
-						PC = Integer.parseInt(JSON.toJSONString(m.get("PC")));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("TouritsActivity")))) {
+						TouritsActivity = Integer.parseInt(JSON.toJSONString(m.get("TouritsActivity")));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("Total")))) {
-						Total = Integer.parseInt(JSON.toJSONString(m.get("Total")));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("RecActivity")))) {
+						RecActivity = Integer.parseInt(JSON.toJSONString(m.get("RecActivity")));
 					}
 					break;
 				}
 			}
-			data += "[\"" + d + "\"," + (Total) + "],";
-			data1 += "[\"" + d + "\"," + IOS + "],";
-			data2 += "[\"" + d + "\","+Android+"],";
-			data3 += "[\"" + d + "\","+PC+"],";
+			data += "[\"" + d + "\"," + (totalActivity) + "],";
+			data1 += "[\"" + d + "\"," + tatolRegActivity + "],";
+			data2 += "[\"" + d + "\","+TouritsActivity+"],";
+			data3 += "[\"" + d + "\","+RecActivity+"],";
 			afterDayDate = format.getSpecifiedDayAfter(afterDayDate);
 		}
 		data += "]";
@@ -240,7 +244,7 @@ public class UserActivityStatisticsController extends BaseController implements 
 	private Map genChartsDataByOther(Map<String,String> params, String afterDayDate, String endTime) {
 		LOGGER.info("用户活跃统计->周/月统计->afterDayDate:" + afterDayDate);
 		LOGGER.info("用户活跃统计->周/月统计->endTime:" + endTime);
-		List<Map> infoList = commonService.getInfoList("charts_activity_statistics." + params.get("type") + "_list", params);
+		List<Map> infoList = commonService.getInfoList("charts_activity_statistics1." + params.get("type") + "_list", params);
 		String type = params.get("type");
 		String data = "[";
 		String data1 = "[";
@@ -266,30 +270,34 @@ public class UserActivityStatisticsController extends BaseController implements 
 			String key = map.getKey(); // 年份-周
 			Integer value = map.getValue(); // 周
 			String tempYW = ""; // 年份-周
-			int IOS = 0;
-			int Android = 0; // 统计用户数
-			int PC = 0; // 统计用户数
+			int totalActivity=0;
+			int tatolRegActivity = 0;
+			int TouritsActivity = 0; // 统计用户数
+			int RecActivity = 0; // 统计用户数
 			for (Map m : infoList) {
 				String week = JSON.toJSONString(m.get(StrKit.upperFirst(type))).replaceAll("\"", "");
 				String year = JSON.toJSONString(m.get("Year")).replaceAll("\"", "");
 				tempYW = year + "-" + week;
 				if(StrKit.equals(key, tempYW)) {
-					if(StrKit.notBlank(JSON.toJSONString(m.get("IOS")))) {
-						IOS = Integer.parseInt(JSON.toJSONString(m.get("IOS")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("totalActivity")))) {
+						totalActivity = Integer.parseInt(JSON.toJSONString(m.get("totalActivity")).replaceAll("\"", ""));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("Android")))) {
-						Android = Integer.parseInt(JSON.toJSONString(m.get("Android")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("tatolRegActivity")))) {
+						tatolRegActivity = Integer.parseInt(JSON.toJSONString(m.get("tatolRegActivity")).replaceAll("\"", ""));
 					}
-					if(StrKit.notBlank(JSON.toJSONString(m.get("PC")))) {
-						PC = Integer.parseInt(JSON.toJSONString(m.get("PC")).replaceAll("\"", ""));
+					if(StrKit.notBlank(JSON.toJSONString(m.get("TouritsActivity")))) {
+						TouritsActivity = Integer.parseInt(JSON.toJSONString(m.get("TouritsActivity")).replaceAll("\"", ""));
+					}
+					if(StrKit.notBlank(JSON.toJSONString(m.get("RecActivity")))) {
+						RecActivity = Integer.parseInt(JSON.toJSONString(m.get("RecActivity")).replaceAll("\"", ""));
 					}
 					break;
 				}
 			}
-			data += "[\"" + value + "\"," + (IOS+Android+PC) + "],";
-			data1 += "[\"" + value + "\"," + IOS + "],";
-			data2 += "[\"" + value + "\"," + Android + "],";
-			data3 += "[\"" + value + "\"," + PC + "],";
+			data += "[\"" + value + "\"," + totalActivity + "],";
+			data1 += "[\"" + value + "\"," + tatolRegActivity + "],";
+			data2 += "[\"" + value + "\"," + TouritsActivity + "],";
+			data3 += "[\"" + value + "\"," + RecActivity + "],";
 			afterDayDate = format.getSpecifiedDayAfter(afterDayDate);
 		}
 		data += "]";

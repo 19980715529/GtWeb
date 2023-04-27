@@ -190,6 +190,8 @@
 	        	$('#linet').show();
 	        	_filter = '{"startTime":"' +getBeforeDate(0) +'","endTime":"' +getBeforeDate(0)+'"}';
 	        	_filter = encodeURI(_filter);
+				// 切换回来的时候查询加载，防止数据消失
+				location.reload(true)
 	        } else {
 	        	$('#linet').hide();
 	        	_filter = '{"startTime":"' +getBeforeDate(30) +'","endTime":"' +getBeforeDate(0)+'"}';
@@ -351,7 +353,7 @@
 				break;
 		}
 	}
-	
+
 	function getData(obj,data) {
 	// 基于准备好的dom，初始化echarts实例
 	var myChart = echarts.init(document.getElementById(obj['id']));

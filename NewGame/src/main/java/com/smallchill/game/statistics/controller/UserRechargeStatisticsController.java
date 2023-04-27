@@ -46,7 +46,11 @@ public class UserRechargeStatisticsController extends BaseController implements 
 		mm.put("code", CODE);
 		return BASE_PATH + "user_recharge_statistics.html";
 	}
-	
+
+	/**
+	 * 用户充值统计
+	 * @return
+	 */
 	//	@SystemControllerLog(description = "用户充值统计")
 	@SuppressWarnings({ "rawtypes" })
 	@Json
@@ -59,7 +63,7 @@ public class UserRechargeStatisticsController extends BaseController implements 
 		LOGGER.info("充值统计->获取表格数据查询参数：-------------------");
 		LOGGER.info(parameter);
 		Map paras = JSON.parseObject(parameter, Map.class);
-		Object gird = commonService.getInfoList("charts_recharge_statistics.new_list", paras);
+		Object gird = commonService.getInfoList("charts_recharge_statistics.new_list1", paras);
 		return gird;
 	}
 	
@@ -78,7 +82,7 @@ public class UserRechargeStatisticsController extends BaseController implements 
 		String startTime = JSON.toJSONString(where.get("startTime")).replaceAll("\"", "");
 		String endTime = JSON.toJSONString(where.get("endTime")).replaceAll("\"", "");
 		String afterDayDate = startTime;
-		List<Map> infoList = commonService.getInfoList("charts_recharge_statistics.new_list", where);
+		List<Map> infoList = commonService.getInfoList("charts_recharge_statistics.new_list1", where);
 		
 		String data = "[";
 		DateFormatKit format = new DateFormatKit();
@@ -90,9 +94,9 @@ public class UserRechargeStatisticsController extends BaseController implements 
 			String d = format.getDay(format.parseDate(afterDayDate));
 			Double OrderAmount = 0D;
 			for (Map m : infoList) {
-				if(StrKit.equals(d, JSON.toJSONString(m.get("CollectDate")).replaceAll("\"", ""))) {
-					if(m.get("TAmount") != null && StrKit.notBlank(JSON.toJSONString(m.get("TAmount")))) {
-						OrderAmount = Double.parseDouble(JSON.toJSONString(m.get("TAmount")));
+				if(StrKit.equals(d, JSON.toJSONString(m.get("writedate")).replaceAll("\"", ""))) {
+					if(m.get("recAmount") != null && StrKit.notBlank(JSON.toJSONString(m.get("recAmount")))) {
+						OrderAmount = Double.parseDouble(JSON.toJSONString(m.get("recAmount")));
 					}
 					break;
 				}
@@ -116,9 +120,8 @@ public class UserRechargeStatisticsController extends BaseController implements 
 			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
 		}
 		LOGGER.info("ARPU->获取表格数据查询参数：-------------------");
-		LOGGER.info(parameter);
 		Map paras = JSON.parseObject(parameter, Map.class);
-		Object gird = commonService.getInfoList("charts_recharge_statistics.new_ARPU_list", paras);
+		Object gird = commonService.getInfoList("charts_recharge_statistics.new_ARPU_list1", paras);
 		return gird;
 	}
 	
@@ -137,7 +140,7 @@ public class UserRechargeStatisticsController extends BaseController implements 
 		String startTime = JSON.toJSONString(where.get("startTime")).replaceAll("\"", "");
 		String endTime = JSON.toJSONString(where.get("endTime")).replaceAll("\"", "");
 		String afterDayDate = startTime;
-		List<Map> infoList = commonService.getInfoList("charts_recharge_statistics.new_ARPU_list", where);
+		List<Map> infoList = commonService.getInfoList("charts_recharge_statistics.new_ARPU_list1", where);
 		
 		String data = "[";
 		double mOrderAmount = 0D;
@@ -181,7 +184,7 @@ public class UserRechargeStatisticsController extends BaseController implements 
 		Map executeCall = Db.executeCall(new OnConnection<Map>(){
 			@Override
 			public Map call(Connection conn) throws SQLException {
-				CallableStatement cstmt = conn.prepareCall("{call [QPGameUserDB].[dbo].[Statistics_DayRecharge]( ? ) }");
+				CallableStatement cstmt = conn.prepareCall("{call [QPGameRecordDB].[dbo].[RealTransactionStatistics]( ? ) }");
 				ResultSet rs = null;
 				//设置输入参数
 				cstmt.setInt(1, Integer.parseInt(PlatformID));
@@ -192,21 +195,32 @@ public class UserRechargeStatisticsController extends BaseController implements 
 				Map ret = new HashMap();
 				//遍历结果
 				while(rs.next()){
-	                // 通过字段检索
-	                ret.put("TAmount", rs.getLong("TAmount"));
-	                ret.put("TUser", rs.getInt("TUser"));
-	                ret.put("TCount", rs.getInt("TCount"));
-	                ret.put("IOS", rs.getInt("IOS"));
-	                ret.put("IOSUser", rs.getInt("IOSUser"));
-	                ret.put("IOSCount", rs.getInt("IOSCount"));
-	                ret.put("Android", rs.getInt("Android"));
-	                ret.put("AndroidUser", rs.getInt("AndroidUser"));
-	                ret.put("AndroidCount", rs.getInt("AndroidCount"));
-	                ret.put("pcczmoney", rs.getInt("pcczmoney"));
-	                ret.put("pcczrc", rs.getInt("pcczrc"));
-	                ret.put("pcczcount", rs.getInt("pcczcount"));
-	                ret.put("Gm_Money", rs.getLong("Gm_Money"));
-	                ret.put("CollectDate", rs.getString("CollectDate"));
+	                // 总充值
+	                ret.put("TotalRec", rs.getLong("TotalRec"));
+					// 充值人数
+	                ret.put("TotalRecUserNum", rs.getInt("TotalRecUserNum"));
+					// 充值次数
+	                ret.put("TotalRecNum", rs.getInt("TotalRecNum"));
+					// 总兑换
+	                ret.put("TotalExc", rs.getInt("TotalExc"));
+					// 总兑换人数
+	                ret.put("TotalExcUserNum", rs.getInt("TotalExcUserNum"));
+					// 兑换次数
+	                ret.put("TotalExcNum", rs.getInt("TotalExcNum"));
+					// 新增充值
+	                ret.put("newTotalRec", rs.getInt("newTotalRec"));
+					// 新增充值人数
+	                ret.put("newTotalRecUserNum", rs.getInt("newTotalRecUserNum"));
+					// 今日兑换
+	                ret.put("jrTotalExc", rs.getInt("jrTotalExc"));
+					// 今日兑换人数
+	                ret.put("jrTotalExcUserNum", rs.getInt("jrTotalExcUserNum"));
+					// 今日兑换次数
+	                ret.put("jrTotalExcNum", rs.getInt("jrTotalExcNum"));
+					// 总充提差
+	                ret.put("RE", rs.getInt("RE"));
+					// 今日充提差
+	                ret.put("jrRe", rs.getLong("jrRe"));
 	            }
 				
 				// 其他代码

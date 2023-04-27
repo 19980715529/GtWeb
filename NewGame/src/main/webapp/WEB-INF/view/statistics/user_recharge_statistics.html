@@ -1,434 +1,502 @@
 @layout("/common/_container.html"){
 <script type="text/javascript">
-	var ctx = "${ctxPath}";
-	var grid_selector = "#grid-table";
-	var pager_selector = "";
-	var _filter = '{"PlatformID":"-1","startTime":"' +getBeforeDate(30) +'","endTime":"' +getBeforeDate(1)+'"}';
-	_filter = encodeURI(_filter);
-	var searchType = 'home';
+    var ctx = "${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "";
+    var _filter = '{"PlatformID":"-1","startTime":"' + getBeforeDate(30) + '","endTime":"' + getBeforeDate(1) + '"}';
+    _filter = encodeURI(_filter);
+    var searchType = 'home';
 
-	$(function() {
-		backDom('用户充值统计','statistics_userrecharge');
-		initHomeTable();
-		var info = {
-			title: '充值统计',
-			xName: '充值(元)',
-			barName: '充值',
-			url:'${ctxPath}/statistics/getRechargeAxis?where='+_filter
-		};
-		initEchart('home-chart',info);
-		
-		$("#start_time").val(getBeforeDate(30));
-		$("#end_time").val(getBeforeDate(1));
-	});
-	
-	function initHomeTable() {
-		var grid_url = ctx + "/${code}/urlist";
-		var _colNames = ["日期","充值金额(元)","GM充值金额(元)","IOS充值金额(元)","安卓充值金额(元)","PC充值金额(元)","充值人次","IOS充值人次","安卓充值人次","PC充值人次","充值次数","IOS充值次数","安卓充值次数","PC充值次数"];
-		var _colModel = [
-				            {name : "CollectDate", sortable:false,align:'center'}, 
-				            {name : "TAmount", sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "Gm_Money", sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "IOS", sortable:false,align:'center'},
-				            {name : "Android", sortable:false,align:'center'},
-				            {name : "pcczmoney", sortable:false,align:'center'},
-				            {name : "TUser", sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "IOSUser", sortable:false,align:'center'},
-				            {name : "AndroidUser", sortable:false,align:'center'},
-				            {name : "pcczrc", sortable:false,align:'center'},
-				            {name : "TCount", sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "IOSCount", sortable:false,align:'center'},
-				            {name : "AndroidCount", sortable:false,align:'center'},
-				            {name : "pcczcount", sortable:false,align:'center'}
-				            ];
-		var data = {
-				where:_filter
-			};
-		initGrid('home',grid_selector,grid_url,_colNames,_colModel,data);
-	}
+    $(function () {
+        backDom('用户充值统计', 'statistics_userrecharge');
+        initHomeTable();
+        var info = {
+            title: '充值统计',
+            xName: '充值(元)',
+            barName: '充值',
+            url: '${ctxPath}/statistics/getRechargeAxis?where=' + _filter
+        };
+        initEchart('home-chart', info);
 
-	function initARUPTable() {
-		var grid_url = ctx + "/${code}/arpulist";
-		var _colNames = ["日期","总计注册","总计充值金额","ARPU"];
-		var _colModel = [
-				            {name : "writedate", width : 100, sortable:false,align:'center'}, 
-				            {name : "regcount", width : 100, sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "TAmount", width : 100, sortable:false,align:'center', formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
-				            {name : "ARPU", width : 100, sortable:false,align:'center'}
-				            ];
-		var data = {
-				where:_filter
-			};
-		initGrid('ARUP',"#ARUP-grid-table",grid_url,_colNames,_colModel,data);
-	}
+        $("#start_time").val(getBeforeDate(30));
+        $("#end_time").val(getBeforeDate(1));
+    });
 
-	function initGrid(type,t_selector,grid_url,_colNames,_colModel,data) {
-		var objToal = {
-				TAmount: 0,
-				Gm_Money: 0,
-				IOS: 0,
-				TUser: 0,
-				TCount: 0
-		};
-		jQuery(t_selector).jqGrid({
-			url: grid_url,
-			shrinkToFit : true,//适用于较少字段,响应式
-			colNames : _colNames,
-			colModel : _colModel,
-			postData : data,
-			multiselect : false,
-			rownumbers : false,
-			rowNum:-1,
-			afterInsertRow: function(rowid, rowdata, rowelem) {
-				// 当日总充值
-				if(BladeTool.isNotEmpty(rowdata['TAmount'])) {
-					objToal['TAmount'] += rowdata['TAmount'];
-				}
-				if(BladeTool.isNotEmpty(rowdata['Gm_Money'])) {
-					objToal['Gm_Money'] += rowdata['Gm_Money'];
-				}
-				if(BladeTool.isNotEmpty(rowdata['IOS'])) {
-					objToal['IOS'] += rowdata['IOS'];
-				}
-				if(BladeTool.isNotEmpty(rowdata['TUser'])) {
-					objToal['TUser'] += rowdata['TUser'];
-				}
-				if(BladeTool.isNotEmpty(rowdata['TCount'])) {
-					objToal['TCount'] += rowdata['TCount'];
-				}
-			},
-			gridComplete:function() {
-				if(searchType=='home'){
-					
-					var PlatformID = $("#ptypeid").val();
-					if(BladeTool.isEmpty(PlatformID)) {
-						PlatformID = '-1';
-					}
-					new Ajax("${ctxPath}/statistics/getDayRecharge?PlatformID="+PlatformID, function (data) {
-				        console.log(data);
-				        if(data.code == 0) {
-				        	var temp = data.data;
-							//$("#DayReg").text(fmoney(data.data.RegisterCount,0));//当日总充值
-							var html = '<tr role="row" id="0" tabindex="0" class="ui-widget-content jqgrow ui-row-ltr ui-state-highlight" aria-selected="true">';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.CollectDate+'" aria-describedby="grid-table_CollectDate">'+temp.CollectDate+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.TAmount+'" aria-describedby="grid-table_TAmount">'+temp.TAmount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.Gm_Money+'" aria-describedby="grid-table_Gm_Money">'+temp.Gm_Money+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.IOS+'" aria-describedby="grid-table_IOS">'+temp.IOS+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.Android+'" aria-describedby="grid-table_Android">'+temp.Android+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.pcczmoney+'" aria-describedby="grid-table_pcczmoney">'+temp.pcczmoney+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.TUser+'" aria-describedby="grid-table_TUser">'+temp.TUser+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.IOSUser+'" aria-describedby="grid-table_IOSUser">'+temp.IOSUser+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.AndroidUser+'" aria-describedby="grid-table_AndroidUser">'+temp.AndroidUser+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.pcczrc+'" aria-describedby="grid-table_pcczrc">'+temp.pcczrc+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.TCount+'" aria-describedby="grid-table_TCount">'+temp.TCount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.IOSCount+'" aria-describedby="grid-table_IOSCount">'+temp.IOSCount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.AndroidCount+'" aria-describedby="grid-table_AndroidCount">'+temp.AndroidCount+'</td>';
-				        	html += '<td role="gridcell" style="text-align:center;" title="'+temp.pcczcount+'" aria-describedby="grid-table_pcczcount">'+temp.pcczcount+'</td>';
-				        	html += '</tr>';
-							$('#1').before(html);
+    function initHomeTable() {
+        var grid_url = ctx + "/${code}/urlist";
+        var _colNames = ["日期", "充值金额", "新增充值金额", "充值人数", "新增充值人数", "充值次数", "新增充值次数", "兑换金额", "兑换人数", "兑换次数", "充提差"];
+        var _colModel = [
+            {name: "writedate", sortable: false, align: 'center'},
+            {
+                name: "recAmount",
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {
+                name: "newRecAmount",
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {name: "recNum", sortable: false, align: 'center'},
+            {name: "newRecNum", sortable: false, align: 'center'},
+            {name: "recCount", sortable: false, align: 'center'},
+            {
+                name: "newRecCount",
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {name: "excAmount", sortable: false, align: 'center'},
+            {name: "excNum", sortable: false, align: 'center'},
+            {name: "excCount", sortable: false, align: 'center'},
+            {name: "RE", sortable: false, align: 'center',formatoptions:{"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 2}}
+        ];
+        var data = {
+            where: _filter
+        };
+        initGrid('home', grid_selector, grid_url, _colNames, _colModel, data);
+    }
 
-							$("#TAmount").text(fmoney((objToal['TAmount']+temp.TAmount),0));//总充值
-							$("#Gm_Money").text(fmoney((objToal['Gm_Money']+temp.Gm_Money),0));//Gm_Money充值
-							$("#IOS").text(fmoney((objToal['IOS']+temp.IOS),0));//IOS充值
-							$("#TUser").text(fmoney((objToal['TUser']+temp.TUser),0));// 充值人数
-							$("#TCount").text(fmoney((objToal['TCount']+temp.TCount),0));//充值次数
+    function initARUPTable() {
+        var grid_url = ctx + "/${code}/arpulist";
+        var _colNames = ["日期", "活跃人数", "总充值金额", "新增充值金额","总充值人数","新增充值人数","ARPU","新增充值ARPU"];
+        var _colModel = [
+            {name: "writedate", width: 100, sortable: false, align: 'center'},
+            {
+                name: "totalActivity",
+                width: 100,
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {
+                name: "recAmount",
+                width: 100,
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {
+                name: "newRecAmount", width: 100, sortable: false, align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
 
-				        }
-						objToal = {
-								TAmount: 0,
-								Gm_Money: 0,
-								IOS: 0,
-								TUser: 0,
-								TCount: 0
-						};
-				 	}).start();
-				}
-			}
-		});
-	}
+            },
+            {
+                name: "recNum", width: 100, sortable: false, align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}},
+            {
+                name: "newRecNum",
+                width: 100,
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 0}
+            },
+            {
+                name: "ARPU",
+                width: 100,
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 2}
+            },
+            {
+                name: "newArpu",
+                width: 100,
+                sortable: false,
+                align: 'center',
+                formatter: "integer",
+                formatoptions: {"defaulValue ": 0, thousandsSeparator: ",", decimalPlaces: 2}
+            }
+        ];
+        var data = {
+            where: _filter
+        };
+        initGrid('ARUP', "#ARUP-grid-table", grid_url, _colNames, _colModel, data);
+    }
+
+    function initGrid(type, t_selector, grid_url, _colNames, _colModel, data) {
+        var objToal = {
+            TAmount: 0,
+            Gm_Money: 0,
+            IOS: 0,
+            TUser: 0,
+            TCount: 0
+        };
+        jQuery(t_selector).jqGrid({
+            url: grid_url,
+            shrinkToFit: true,//适用于较少字段,响应式
+            colNames: _colNames,
+            colModel: _colModel,
+            postData: data,
+            multiselect: false,
+            rownumbers: false,
+            rowNum: -1,
+            afterInsertRow: function (rowid, rowdata, rowelem) {
+                // 当日总充值
+                if (BladeTool.isNotEmpty(rowdata['TAmount'])) {
+                    objToal['TAmount'] += rowdata['TAmount'];
+                }
+                if (BladeTool.isNotEmpty(rowdata['Gm_Money'])) {
+                    objToal['Gm_Money'] += rowdata['Gm_Money'];
+                }
+                if (BladeTool.isNotEmpty(rowdata['IOS'])) {
+                    objToal['IOS'] += rowdata['IOS'];
+                }
+                if (BladeTool.isNotEmpty(rowdata['TUser'])) {
+                    objToal['TUser'] += rowdata['TUser'];
+                }
+                if (BladeTool.isNotEmpty(rowdata['TCount'])) {
+                    objToal['TCount'] += rowdata['TCount'];
+                }
+            },
+            gridComplete: function () {
+                if (searchType == 'home') {
+
+                    var PlatformID = $("#ptypeid").val();
+                    if (BladeTool.isEmpty(PlatformID)) {
+                        PlatformID = '-1';
+                    }
+                    new Ajax("${ctxPath}/statistics/getDayRecharge?PlatformID=" + PlatformID, function (data) {
+                        console.log(data);
+                        if (data.code == 0) {
+                            var temp = data.data;
+                            //$("#DayReg").text(fmoney(data.data.RegisterCount,0));//当日总充值
+                            var html = '<tr role="row" id="0" tabindex="0" class="ui-widget-content jqgrow ui-row-ltr ui-state-highlight" aria-selected="true">';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalRec + '" aria-describedby="grid-table_CollectDate">' + temp.TotalRec + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalRecUserNum + '" aria-describedby="grid-table_TAmount">' + temp.TotalRecUserNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalRecNum + '" aria-describedby="grid-table_Gm_Money">' + temp.TotalRecNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalExc + '" aria-describedby="grid-table_IOS">' + temp.TotalExc + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalExcUserNum + '" aria-describedby="grid-table_Android">' + temp.TotalExcUserNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.TotalExcNum + '" aria-describedby="grid-table_pcczmoney">' + temp.TotalExcNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.newTotalRec + '" aria-describedby="grid-table_TUser">' + temp.newTotalRec + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.newTotalRecUserNum + '" aria-describedby="grid-table_IOSUser">' + temp.newTotalRecUserNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.jrTotalExc + '" aria-describedby="grid-table_AndroidUser">' + temp.jrTotalExc + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.jrTotalExcUserNum + '" aria-describedby="grid-table_pcczrc">' + temp.jrTotalExcUserNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.jrTotalExcNum + '" aria-describedby="grid-table_TCount">' + temp.jrTotalExcNum + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.RE + '" aria-describedby="grid-table_IOSCount">' + temp.RE + '</td>';
+                            html += '<td role="gridcell" style="text-align:center;" title="' + temp.jrRe + '" aria-describedby="grid-table_AndroidCount">' + temp.jrRe + '</td>';
+                            // html += '<td role="gridcell" style="text-align:center;" title="' + temp.pcczcount + '" aria-describedby="grid-table_pcczcount">' + temp.pcczcount + '</td>';
+                            html += '</tr>';
+                            $('#1').before(html);
+
+                            $("#TotalRec").text(fmoney(temp.TotalRec, 0));//总充值
+                            $("#TotalRecUserNum").text(fmoney(temp.TotalRecUserNum, 0));//总充值人数
+                            $("#TotalRecNum").text(fmoney(temp.TotalRecNum, 0));// 充值次数
+                            $("#TotalExc").text(fmoney(temp.TotalExc, 0));// 总兑换
+                            $("#TotalExcUserNum").text(fmoney(temp.TotalExcUserNum, 0));//兑换人数
+                            $("#TotalExcNum").text(fmoney(temp.TotalExcNum, 0));//兑换次数
+                            $("#RE").text(fmoney(temp.RE, 0));//
+                            $("#jrRe").text(fmoney(temp.jrRe, 0));//
+
+                        }
+                        objToal = {
+                            TAmount: 0,
+                            Gm_Money: 0,
+                            IOS: 0,
+                            TUser: 0,
+                            TCount: 0
+                        };
+                    }).start();
+                }
+            }
+        });
+    }
 </script>
 
 <ul id="myTab" class="nav nav-tabs">
-	<li class="active">
-		<a href="#home" data-toggle="tab">充值统计</a>
-	</li>
-	<li><a href="#ARUP" data-toggle="tab">ARUP</a></li>
+    <li class="active">
+        <a href="#home" data-toggle="tab">充值统计</a>
+    </li>
+    <li><a href="#ARUP" data-toggle="tab">ARUP</a></li>
 </ul>
 <!-- 配置grid -->
 <div class="row" style="margin-top:10px;">
-	<form data-url="" method="post" class="" role="form">
-		<!-- 配置查询 -->
-		<div class="statistics-search">
-			<!-- 简单查询第一组 -->
-			<span id="GameTypeForm">
+    <form data-url="" method="post" class="" role="form">
+        <!-- 配置查询 -->
+        <div class="statistics-search">
+            <!-- 简单查询第一组 -->
+            <span id="GameTypeForm">
 				<label class=""> 游戏平台： </label> 
 				<select id="ptypeid"></select>
 			</span>
-			<!-- 简单查询第二组 -->
-			<label class=""> 时间： </label> 
-			<input type="text" id="start_time" value="" class="" />
-			- 
-			<input type="text" id="end_time" value="" class="" />
+            <!-- 简单查询第二组 -->
+            <label class=""> 时间： </label>
+            <input type="text" id="start_time" value="" class=""/>
+            -
+            <input type="text" id="end_time" value="" class=""/>
 
-			<!-- 简单查询按钮 -->
-			<label class="">
-				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
-			</label>
-		</div>
-	</form>
+            <!-- 简单查询按钮 -->
+            <label class="">
+                <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+            </label>
+        </div>
+    </form>
 </div>
 <div id="myTabContent" class="tab-content">
-	<div class="tab-pane fade in active" id="home">
-		<div id="home-chart" style="height: 450px;"></div>
-		<div class="total-block">
-		总充值：<span class="text-red" id="TAmount">0</span>元
-		GM充值：<span class="text-red" id="Gm_Money">0</span>元
-		IOS充值：<span class="text-red" id="IOS">0</span>元
-		充值人数：<span class="text-red" id="TUser">0</span>人
-		充值次数：<span class="text-red" id="TCount">0</span>次
-		</div>
-		<!-- grid -->
-		<table id="grid-table"></table>
-	</div>
-	<div class="tab-pane fade" id="ARUP">
-		<div id="ARUP-chart" style="height: 450px;"></div>
-		<!-- grid -->
-		<table id="ARUP-grid-table"></table>
-	</div>
+    <div class="tab-pane fade in active" id="home">
+        <div id="home-chart" style="height: 450px;"></div>
+        <div class="total-block">
+            总充值：<span class="text-red" id="TotalRec">0</span>,
+            总充值人数：<span class="text-red" id="TotalRecUserNum">0</span>人,
+            总充值次数：<span class="text-red" id="TotalRecNum">0</span>次,
+            总兑换：<span class="text-red" id="TotalExc">0</span>,
+            总兑换人数：<span class="text-red" id="TotalExcUserNum">0</span>人,
+            总兑换次数：<span class="text-red" id="TotalExcNum">0</span>次,
+            总充提差：<span class="text-red" id="RE">0</span>
+            今日充提差：<span class="text-red" id="jrRe">0</span>
+        </div>
+        <!-- grid -->
+        <table id="grid-table"></table>
+    </div>
+    <div class="tab-pane fade" id="ARUP">
+        <div id="ARUP-chart" style="height: 450px;"></div>
+        <!-- grid -->
+        <table id="ARUP-grid-table"></table>
+    </div>
 </div>
 <div class="space-4"></div>
 <div class="space-4"></div>
 <script src="${ctxPath}/static/echarts/echarts.min.js"></script>
 <script src="${ctxPath}/static/laydate/laydate.js"></script>
 <script type="text/javascript">
-		$('.nav-tabs a').on('show.bs.tab', function(event){
-	        //$(event.target.hash).css("height","450px").siblings().css("height","0");
-	        var id = event.target.hash.replace('#','');
-	        //var display = id=='home' ? '':'none';
-	        //$('#GameTypeForm').css("display",display);
-	        genEchart(id);
-	    });
-		
-		function genEchart(id) {
-			switch(id) {
-				case 'home':
-					searchType = 'home';
-					break;
-				case 'ARUP':
-					searchType = 'arpu';
-					initARUPTable();
-					var info = {
-							title: 'ARPU',
-							xName: 'ARPU',
-							barName: 'ARPU',
-							url:'${ctxPath}/statistics/getRechargeARPUAxis?where='+_filter
-						};
-					initEchart('ARUP-chart',info);
-					
-					$("#start_time").val(getBeforeDate(30));
-					$("#end_time").val(getBeforeDate(1));
-					break;
-				default:
-					break;
-			}
-		}
-		
-		function initEchart(id,info) {
-			 // 基于准备好的dom，初始化echarts实例
-	        var myChart = echarts.init(document.getElementById(id));
-			myChart.showLoading(); 
- 			$.get(info['url'], function (data) {
-				var homexdata = JSON.parse(data);
-				var d = homexdata.data.data;
-				var xAxisData = [];
-				var data = [];
-				for (var i = 0; i < d.length; i++) {
-					xAxisData[i] = d[i][0];
-					data[i] = d[i][1];
-				}
-				
-				genEcharts(myChart,xAxisData,data,info);
-				myChart.hideLoading(); 
-			});
- 		}
-		
-		function genEcharts(myChart,xAxisData,data,info) {
-	        var xData = [];
-	        
-	        // 指定图表的配置项和数据
-	        var option = {
-	            title: {
-	                text: info['title'],
-		            left: 'center'
-	            },
-	            tooltip: {trigger: 'axis'},
-	            legend: {
-		        	show: true,
-		        	data: [info['barName']],
-	                left: 'right',
-	                y:'middle',
-	                orient: 'vertical',
-	                padding: [
-	                          5,  // 上
-	                          40, // 右
-	                          5,  // 下
-	                          5, // 左
-	                      ]
-	            },
-	            xAxis: {
-	            	axisTick:{
-	            		interval:0,
-	            		show:true,
-	            		alignWithLabel:true
-	            	},
-	            	axisLabel: {
-	            		show:true,
-	            		interval:0,
-	            		rotate:30,
- 	            		formatter: function(value, index) {
- 	            			// 格式化成月/日，只在第一个刻度显示年份
- 	            		    var date = new Date(value);
- 	            		    var texts = [(date.getMonth() + 1), date.getDate()];
- 	            		    return texts.join('-');
- 	            		}
-	            	},
-	            	boundaryGap:true,
-	            	data: xAxisData
-	            },
-	            yAxis: {
-	            	type : 'value',
-	                name : info['xName'],
-	                /*axisLabel : {
-	                    formatter: '{value} k'
-	                },*/
-	                nameLocation:'middle',
-	                nameRotate:360,
-	                nameGap:40
-	            },
-	            series: [{
- 	                name: info['barName'],
- 	                type: 'line',
- 	                data: data,
- 	               symbol: 'circle',
- 	              symbolSize: 8,
- 	             itemStyle: {
-   	            	normal: {
-   	            		color: '#33C3F7'
-   	            	}
-   	             },
- 	             lineStyle: {
- 	            	normal: {
- 	            		color: '#33C3F7'
- 	            	}
- 	             }
- 	            }]
-	        };
+    $('.nav-tabs a').on('show.bs.tab', function (event) {
+        //$(event.target.hash).css("height","450px").siblings().css("height","0");
+        var id = event.target.hash.replace('#', '');
+        //var display = id=='home' ? '':'none';
+        //$('#GameTypeForm').css("display",display);
+        genEchart(id);
+    });
 
-	        // 使用刚指定的配置项和数据显示图表。
-	        myChart.setOption(option);
-	        window.onresize = myChart.resize;
-		}
-	
-	laydate({
-		elem : '#start_time',
-		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
-		max:laydate.now(-1),
-		choose : function(datas) { //选择日期完毕的回调
-			/*   alert('得到：'+datas); */
-		}
-	});
-	laydate({
-		elem : '#end_time',
-		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
-		max:laydate.now(-1),
-		choose : function(datas) { //选择日期完毕的回调
-			/*   alert('得到：'+datas); */
-		}
-	});
-	// 获取平台列表
-	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
-        console.log(data);
-        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-        	var type = data.data;
-        	var html = '<option value="-1">请选择</option>';
-        	for (var i = 0; i < type.length; i++) {
-				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
-			}
-        	$("#ptypeid").html(html);
+    function genEchart(id) {
+        switch (id) {
+            case 'home':
+                searchType = 'home';
+                break;
+            case 'ARUP':
+                searchType = 'arpu';
+                initARUPTable();
+                var info = {
+                    title: 'ARPU',
+                    xName: 'ARPU',
+                    barName: 'ARPU',
+                    url: '${ctxPath}/statistics/getRechargeARPUAxis?where=' + _filter
+                };
+                initEchart('ARUP-chart', info);
+
+                $("#start_time").val(getBeforeDate(30));
+                $("#end_time").val(getBeforeDate(1));
+                break;
+            default:
+                break;
         }
- 	}).start();
-	
-	function goSearch() {
-		var wheres = {};
-		var PlatformID = $("#ptypeid").val();
-		if(BladeTool.isNotEmpty(PlatformID)) {
-			wheres['PlatformID'] = PlatformID;
-		}
-		var start_time = $("#start_time").val();
-		var end_time = $("#end_time").val();
-	    
-		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
-			layer_alert('请输入开始时间!', "warn");
-	    	return;
-		} else if(BladeTool.isNotEmpty(end_time)) {
-			wheres['endTime'] = end_time;
-		}
-		if(BladeTool.isNotEmpty(start_time)) {
-			wheres['startTime'] = start_time;
-			if(BladeTool.isEmpty(end_time)) {
-				wheres['endTime'] = getBeforeDate(1);
-				$("#end_time").val(getBeforeDate(1));
-			}
-		}
-		
+    }
+
+    function initEchart(id, info) {
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById(id));
+        myChart.showLoading();
+        $.get(info['url'], function (data) {
+            var homexdata = JSON.parse(data);
+            var d = homexdata.data.data;
+            var xAxisData = [];
+            var data = [];
+            for (var i = 0; i < d.length; i++) {
+                xAxisData[i] = d[i][0];
+                data[i] = d[i][1];
+            }
+
+            genEcharts(myChart, xAxisData, data, info);
+            myChart.hideLoading();
+        });
+    }
+
+    function genEcharts(myChart, xAxisData, data, info) {
+        var xData = [];
+
+        // 指定图表的配置项和数据
+        var option = {
+            title: {
+                text: info['title'],
+                left: 'center'
+            },
+            tooltip: {trigger: 'axis'},
+            legend: {
+                show: true,
+                data: [info['barName']],
+                left: 'right',
+                y: 'middle',
+                orient: 'vertical',
+                padding: [
+                    5,  // 上
+                    40, // 右
+                    5,  // 下
+                    5, // 左
+                ]
+            },
+            xAxis: {
+                axisTick: {
+                    interval: 0,
+                    show: true,
+                    alignWithLabel: true
+                },
+                axisLabel: {
+                    show: true,
+                    interval: 0,
+                    rotate: 30,
+                    formatter: function (value, index) {
+                        // 格式化成月/日，只在第一个刻度显示年份
+                        var date = new Date(value);
+                        var texts = [(date.getMonth() + 1), date.getDate()];
+                        return texts.join('-');
+                    }
+                },
+                boundaryGap: true,
+                data: xAxisData
+            },
+            yAxis: {
+                type: 'value',
+                name: info['xName'],
+                /*axisLabel : {
+                    formatter: '{value} k'
+                },*/
+                nameLocation: 'middle',
+                nameRotate: 360,
+                nameGap: 40
+            },
+            series: [{
+                name: info['barName'],
+                type: 'line',
+                data: data,
+                symbol: 'circle',
+                symbolSize: 8,
+                itemStyle: {
+                    normal: {
+                        color: '#33C3F7'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        color: '#33C3F7'
+                    }
+                }
+            }]
+        };
+
+        // 使用刚指定的配置项和数据显示图表。
+        myChart.setOption(option);
+        window.onresize = myChart.resize;
+    }
+
+    laydate({
+        elem: '#start_time',
+        format: 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        max: laydate.now(-1),
+        choose: function (datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem: '#end_time',
+        format: 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        max: laydate.now(-1),
+        choose: function (datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if (data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="-1">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#ptypeid").html(html);
+        }
+    }).start();
+
+    function goSearch() {
+        var wheres = {};
+        var PlatformID = $("#ptypeid").val();
+        if (BladeTool.isNotEmpty(PlatformID)) {
+            wheres['PlatformID'] = PlatformID;
+        }
+        var start_time = $("#start_time").val();
+        var end_time = $("#end_time").val();
+
+        if (BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+            layer_alert('请输入开始时间!', "warn");
+            return;
+        } else if (BladeTool.isNotEmpty(end_time)) {
+            wheres['endTime'] = end_time;
+        }
+        if (BladeTool.isNotEmpty(start_time)) {
+            wheres['startTime'] = start_time;
+            if (BladeTool.isEmpty(end_time)) {
+                wheres['endTime'] = getBeforeDate(1);
+                $("#end_time").val(getBeforeDate(1));
+            }
+        }
+
         var where = "";
-		
-		$.each(wheres, function(key, value) {
-			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
-				where += "\"" + key + "\":\"" + value + "\"" + ",";
-			}
-		});
-		
-		if (BladeTool.isNotEmpty(where)) {
-			where = '{' + where;
-			where = where.substring(0, where.length - 1);
-			where += '}';
-		}
-        
-		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
-		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
-		
-		var _cid = '';
-		var _info = {};
-		if(searchType == 'home') {
-			_cid = 'home-chart';
-			_info = {
-					title: '充值统计',
-					xName: '充值(元)',
-					barName: '充值',
-					url:'${ctxPath}/statistics/getRechargeAxis?where='+where
-				};
-			$jqGrid = jQuery('#grid-table');
-		} else {
-			_cid = 'ARUP-chart';
-			_info = {
-					title: 'ARPU',
-					xName: 'ARPU',
-					barName: 'ARPU',
-					url:'${ctxPath}/statistics/getRechargeARPUAxis?where='+where
-				};
-			$jqGrid = jQuery('#ARUP-grid-table');
-		}
-		// 更新图表
-		initEchart(_cid,_info);
-		// 更新表格
-		$jqGrid.jqGrid("setGridParam", {
-			datatype : "json",
-			postData : {
-				where : where
-			}
-		}).trigger("reloadGrid");
-	}
+
+        $.each(wheres, function (key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+
+        var _cid = '';
+        var _info = {};
+        if (searchType == 'home') {
+            _cid = 'home-chart';
+            _info = {
+                title: '充值统计',
+                xName: '充值(元)',
+                barName: '充值',
+                url: '${ctxPath}/statistics/getRechargeAxis?where=' + where
+            };
+            $jqGrid = jQuery('#grid-table');
+        } else {
+            _cid = 'ARUP-chart';
+            _info = {
+                title: 'ARPU',
+                xName: 'ARPU',
+                barName: 'ARPU',
+                url: '${ctxPath}/statistics/getRechargeARPUAxis?where=' + where
+            };
+            $jqGrid = jQuery('#ARUP-grid-table');
+        }
+        // 更新图表
+        initEchart(_cid, _info);
+        // 更新表格
+        $jqGrid.jqGrid("setGridParam", {
+            datatype: "json",
+            postData: {
+                where: where
+            }
+        }).trigger("reloadGrid");
+    }
 </script>
 
 <!-- 引入列表页所需js -->

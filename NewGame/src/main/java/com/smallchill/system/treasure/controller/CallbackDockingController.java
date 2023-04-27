@@ -10,11 +10,15 @@ import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
-import static com.smallchill.core.constant.ConstKey.*;
+import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.game.service.CommonService;
 import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.*;
-import com.smallchill.system.treasure.utils.*;
+import com.smallchill.system.treasure.utils.HttpClientUtils;
+import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
+import com.smallchill.system.treasure.utils.SendHttp;
+import com.smallchill.system.treasure.utils.Utils;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
 import org.checkerframework.checker.units.qual.C;
@@ -43,7 +47,7 @@ import static com.smallchill.core.constant.ConstEmail.*;
  * @Date 2023/2/25 12:42
  * @Version 1.0 接口回调接口
  **/
-@RestController
+@Controller
 @RequestMapping("/callback")
 public class CallbackDockingController extends BaseController implements ConstShiro {
     @Autowired
@@ -54,6 +58,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
      * 充值回调接口
      * @return
      */
+    @Json
     @PostMapping("/recharge_rarp_callback")
     @Transactional
     public String callback(@RequestParam Map<String,Object> param){
@@ -104,7 +109,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
                         CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
             }
             // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
+            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and isThatTay=1 and orderStatus=2",
                     CMap.init().set("userId", rechargeRecords.getUserId()));
             if (re<1){
                 rechargeRecords.setIsThatTay(1);
@@ -145,6 +150,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
 
 
     // 兑换回调
+    @Json
     @PostMapping(value = "/exchange_rarp_callback")
     public String exchangeCallback(@RequestParam Map<String,Object> param) {
         if (param==null){
@@ -204,6 +210,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
      * 充值回调
      * @return
      */
+    @Json
     @PostMapping(value = "/recharge_safa_callback",consumes = "application/json")
     private String rechageSafeCallback(@RequestBody Map<String,Object> param){
         if (param == null){
@@ -245,7 +252,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
                         CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
             }
             // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
+            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and isThatTay=1 and orderStatus=2",
                     CMap.init().set("userId", rechargeRecords.getUserId()));
             if (re<1){
                 rechargeRecords.setIsThatTay(1);
@@ -288,6 +295,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
      * 兑换回调
      * @return
      */
+    @Json
     @PostMapping(value = "/exchange_safe_callback",consumes = "application/json")
     private String exchangeSafeCallback(@RequestBody Map<String,Object> param){
         if (param == null){
@@ -331,135 +339,12 @@ public class CallbackDockingController extends BaseController implements ConstSh
             exchangeReview.setEndTime(new Date());
             // 兑换失败，发送邮件是在退回的时候进行发送
         }
-        // 添加平台订单号
+        // 添加平台邮件
         exchangeReview.setPfOrderNum(sys_no);
         // 修改订单状态
         blade.update(exchangeReview);
         return "ok";
     }
-
-    /**
-     * MetaPay充值回调
-     */
-    @PostMapping(value = "/recharge_meta_callback",consumes = "application/json")
-    public String rechageMetaCallback(@RequestBody Map<String,Object> param){
-        if (param==null){
-            return "fail";
-        }
-        // 验证签名
-        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
-        boolean temp = RequestSignUtil.verifySign(params, PUBLIC_KEY1);
-        if (!temp){
-            return "fail";
-        }
-        // 判断订单号是否存在
-        Blade blade = Blade.create(RechargeRecords.class);
-        String orderNum = params.getString("referenceNo");
-        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}",
-                CMap.init().set("orderNum",orderNum));
-        if (rechargeRecords==null){
-            return "success";
-        }
-        // 获取平台订单
-        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
-        int status = params.getIntValue("status");
-        if (status==0){
-            // 回调成功,根据超时订单号将订单从延迟列表中取消
-            globalDelayQueue.cancelOrder(orderNum);
-            // 金币变动记录
-            if (rechargeRecords.getIsFirstCharge()==1){
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207,rechargeRecords.getGold());
-            }else {
-                RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5,rechargeRecords.getGold());
-            }
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
-                        CMap.init().set("IsFirstRecharge",1).set("UserID",rechargeRecords.getUserId()));
-            }
-            // 判断是否用户第一笔成功的充值
-            int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
-                    CMap.init().set("userId", rechargeRecords.getUserId()));
-            if (re<1){
-                rechargeRecords.setIsThatTay(1);
-            }
-            // 向游戏服务器发送请求
-            Map<String, Object> gameParam = new HashMap<>();
-            gameParam.put("Userid",rechargeRecords.getUserId());
-            gameParam.put("gameCoin",rechargeRecords.getGold());
-            gameParam.put("gold",rechargeRecords.getTopUpAmount());
-            gameParam.put("Type",0);
-            gameParam.put("IsFirstRecharge",0);
-            // 获取充值成功的邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-            // 普通充值类型
-            emailParam.put("goldType",5);
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                gameParam.put("IsFirstRecharge",1);
-                // 邮件类型首充
-                emailParam.put("goldType",207);
-            }
-            SendHttp.sendGame1002(gameParam);
-            emailParam.put("gold",0);
-            emailParam.put("toUserid",rechargeRecords.getUserId());
-            SendHttp.sendEmail(emailParam);
-            rechargeRecords.setEndTime(new Date());
-            rechargeRecords.setOrderStatus(2);
-            blade.update(rechargeRecords);
-        }else if (status==2){
-            // 从延迟队列中移除并且更新状态
-            globalDelayQueue.cancelOrder(orderNum);
-            rechargeRecords.setOrderStatus(3);
-            rechargeRecords.setEndTime(new Date());
-            blade.update(rechargeRecords);
-        }
-        return "success";
-    }
-
-    /**
-     * MetaPay兑换回调
-     */
-    @PostMapping(value = "/exchange_meta_pay_callback",consumes = "application/json")
-    public String exchangeMetaPayCallback(@RequestBody Map<String,Object> param){
-        if (param==null){
-            return "fail";
-        }
-        // 验证签名
-        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
-        boolean temp = RequestSignUtil.verifySign(params, PUBLIC_KEY1);
-        if (!temp){
-            return "fail";
-        }
-        // 获取订单号
-        String orderNum = params.getString("referenceNo");
-        // 根据订单号查询兑换订单
-        Blade blade = Blade.create(ExchangeReview.class);
-        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
-        int status = params.getIntValue("status");
-        if (status==0){
-            // 回调成功
-            exchangeReview.setStatus(4);
-            exchangeReview.setEndTime(new Date());
-            // 执行存储过程
-            extracted(exchangeReview);
-            // 兑换成功发送邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(4);
-            emailParam.put("gold", 0);
-            emailParam.put("toUserid", exchangeReview.getUserId());
-            emailParam.put("goldType",206);
-            SendHttp.sendEmail(emailParam);
-        }else if (status==2){
-            // 支付失败兑换变为支付失败
-            exchangeReview.setStatus(6);
-            exchangeReview.setEndTime(new Date());
-            // 兑换失败，发送邮件是在退回的时候进行发送
-        }
-        // 修改订单状态
-        blade.update(exchangeReview);
-        return "success";
-    }
-
 
     /**
      * 兑换需要执行的存储过程
@@ -482,7 +367,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
         SendHttp.sendGame1002(gameParam);
     }
 
-    // 执行存储过程
+    // 充值兑换执行存储过程
     public Object storedProcedure(Map<String,Object> map){
         SQLManager dao = Blade.dao("gameroomitemdb");
         Object o = dao.executeOnConnection(new OnConnection<Object>() {
@@ -495,10 +380,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
                     callableStatement.setInt("GameCoin",Integer.valueOf(map.get("GameCoin").toString()));
                     int type = Integer.valueOf(map.get("type").toString());
                     callableStatement.setInt("Type",type);
-                    callableStatement.setString("OrderNum","");
-                    if (type==0){
-                        callableStatement.setString("OrderNum",map.get("OrderNum").toString());
-                    }
+                    callableStatement.setString("OrderNum",map.get("OrderNum").toString());
                     callableStatement.executeQuery();
                     return "";
                 }catch (Exception e){

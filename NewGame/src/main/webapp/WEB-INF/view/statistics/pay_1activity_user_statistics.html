@@ -17,7 +17,7 @@
 		jQuery(grid_selector).jqGrid({
 			url: grid_url,
 			shrinkToFit : true,//适用于较少字段,响应式
-			colNames : ["日期","(1日)IOS","(1日)赠送","1日"],
+			colNames : ["日期","(1日)活跃","(1日)新增","1日"],
 			colModel : [
 			            {name : "ApplyDate", width : 100, sortable:false,align:'center'}, 
 			            {name : "ios1", width : 100, sortable:false,align:'center'},
@@ -91,7 +91,7 @@
         console.log(data);
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
         	var type = data.data;
-        	var html = '<option value="-1">请选择</option><option value="0">其他</option>';
+        	var html = '<option value="-1">请选择</option>';
         	for (var i = 0; i < type.length; i++) {
 				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
 			}

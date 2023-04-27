@@ -117,7 +117,7 @@ new_day_high_list
 	  group by CONVERT(VARCHAR(100), CountTime, 23)
 	  order by CONVERT(VARCHAR(100), CountTime, 23) asc
 	  
-online_week_list、
+online_week_list
 ===
 	SELECT Convert(decimal(10,3),(cast(SUM(OnlineCount) as FLOAT)/count(1))) OnlineCount,datepart(Wk,ApplyDate) Week,YEAR(ApplyDate) Year FROM
 	(select CONVERT(decimal(10,3),(SUM(cast(OnlineCount as FLOAT))/count(1))) OnlineCount,CONVERT(VARCHAR(100), CountTime, 23) ApplyDate

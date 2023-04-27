@@ -71,12 +71,13 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		Map channel = Db.findById("Channel", 3);
 		BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
 		// 用户的总赢
-		BigDecimal totalWin = RechargeExchangeCommon.getUserWin(id);
-		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("goldProportion").toString()),RoundingMode.DOWN).divide(winConfig, RoundingMode.DOWN);
-		if (fee.doubleValue()<=0.1){
-			fee = new BigDecimal("0");
-		}
-		infoByOne.put("money",fee);
+		BigDecimal totalWin = new BigDecimal(infoByOne.get("TotalWin").toString());
+		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("goldProportion").toString())).divide(winConfig, RoundingMode.DOWN);
+		// 用户总金币
+		BigDecimal gold = new BigDecimal(infoByOne.get("Score").toString());
+		BigDecimal fee1 = gold.divide(new BigDecimal(channel.get("goldProportion").toString()),RoundingMode.DOWN);
+		int min = Math.min(fee.intValue(), fee1.intValue());
+		infoByOne.put("money",min);
 		mm.put("LastLoginIp", ip);
 		mm.put("user", infoByOne);
 		mm.put("mobile", mobile);

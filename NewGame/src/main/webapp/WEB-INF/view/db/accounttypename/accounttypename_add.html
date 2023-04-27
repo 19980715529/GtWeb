@@ -1,10 +1,10 @@
 @layout("/common/_container.html"){
-<!-- PAGE CONTENT BEGINS -->
+	<!-- PAGE CONTENT BEGINS -->
 <div class="row">
 	<div class="col-xs-12 tb-grid">
-		<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
-			<table class="table table-bordered">
-				<tbody>
+	<form data-url="${ctxPath}/${code}/save" method="post" class="form-horizontal" role="form">
+		<table class="table table-bordered">
+			<tbody>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包ID: </td>
 					<td>
@@ -27,12 +27,12 @@
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">备注: </td>
 					<td><textarea rows="3" cols="20" name="accounttypename.remarks"></textarea></td>
 				</tr>
-				</tbody>
-			</table>
+			</tbody>
+		</table>
 		</form>
 	</div>
 </div>
 <script src="${ctxPath}/static/laydate/laydate.js"></script>
-<!-- 按钮 -->
-@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
+		<!-- 按钮 -->
+		@ include("/common/_curd/_btn.html",{btn_save:"确认新增",btn_close:"关闭"}) {}
 @}

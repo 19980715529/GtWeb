@@ -13,7 +13,7 @@ import java.sql.SQLException;
 @Component()
 public class GlobalTask {
 	// 定时器去每天统计数据
-//	@Scheduled(cron = "0 30 2 * * ? ")
+	@Scheduled(cron = "0 30 2 * * ? ")
 	public void StatisticsEveryDay(){
 		Db.executeCall(new OnConnection<Object>() {
 			@Override

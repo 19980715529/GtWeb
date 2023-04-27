@@ -50,9 +50,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * recharge.topUpAmount：充值的金额
      * recharge.pid: 父渠道id
      * recharge.id: 渠道id
-     * recharge.email：用户邮箱
-     * recharge.userName：用户名
-     * recharge.phone：电话号
+     * recharge.isFirstCharge：1是，0否首充
      * 响应参数格式
      * Userid userid
      * gold 充值数量
@@ -145,7 +143,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             }
             JSONObject jsonObject = JSON.parseObject(response);
             LOGGER.error(jsonObject.toString());
-            int code =jsonObject.getIntValue("code");
+            int code =(int) jsonObject.get("code");
             if (code==0){
                 // 错误时状态为30
                 rechargeRecords.setMsg(jsonObject.getString("msg"));
@@ -153,7 +151,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 关闭订单
                 rechargeRecords.setOrderStatus(3);
                 resultMap.put("urlPay","");
-                return json(resultMap,"Recharge application failed",1);
+                return json(resultMap,"玩家未支付",1);
             }else {
                 String pay_url =jsonObject.getJSONObject("data").getString("pay_url");
                 rechargeRecords.setUrlPay(pay_url);
@@ -177,7 +175,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return json(resultMap);
             }
         }else if (pid == 4){
-            // safe
             response = SendHttp.sendRechargeSafe(rechargeRecords,channel);
             if(response.equals("")){
                 return json(resultMap,"file",1);
@@ -187,43 +184,22 @@ public class RechargeDockingController extends BaseController implements ConstSh
             if ("success".equals(status)){
                 // 充值请求成功
                 // 获取支付链接
-                String payUrl = jsonObject.getString("order_data");
+                String payUrl = jsonObject.get("order_data").toString();
                 resultMap.put("urlPay",payUrl);
                 // 将订单加入到未支付的队列中
                 rechargeRecords.setUrlPay(payUrl);
                 GlobalDelayQueue.orderQueue.add(rechargeRecords);
                 rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
+                return json(resultMap,"充值申请成功");
             }else {
                 rechargeRecords.setMsg(jsonObject.getString("status_mes"));
                 // 关闭订单
                 rechargeRecords.setOrderStatus(3);
                 // 充值失败
-                return json(jsonObject,"Recharge application failed",1);
-            }
-        } else if (pid == 20) {
-            response = SendHttp.sendRechargeMetaPay(rechargeRecords);
-            if(response.equals("")){
-                return json(resultMap,"Recharge application failed",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            int code = jsonObject.getIntValue("platRespCode");
-            String PfOrderNum = jsonObject.getString("transId");
-            rechargeRecords.setPfOrderNum(PfOrderNum);
-            if (code==0){
-                // 获取支付地址
-                String payUrl = jsonObject.getString("url");
-                resultMap.put("urlPay",payUrl);
-                rechargeRecords.setUrlPay(payUrl);
-                // 将订单加入到未支付队列中
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(code+jsonObject.getString("msg"));
+                return json(jsonObject,"充值申请失败",1);
             }
         }
-        return json(resultMap,"Recharge application failed",1);
+        return json(resultMap,"充值失败",1);
     }
 
     /**兑换接口
@@ -233,7 +209,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * 银行卡号：exchange.bankNumber
      * 渠道类型: exchange.channelName
      * 用户名：exchange.cardholder
-     * 电话号：exchange.phone
      * @return
      */
     @Json
@@ -248,14 +223,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
         user_map.put("UserID",exchangeReview.getUserId());
         Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
         if (user==null){
-            // 用户不存在
-            return fail("Userid does not exist");
+            return fail("用户不存在");
         }
         // 获取用户绑定的电话
-        String phone = exchangeReview.getPhone();
+        String phone = user.get("bindPhone").toString();
         if ("".equals(phone)){
-            return fail("You need to bind your cell phone first");
+            return fail("请绑定手机号");
         }
+        exchangeReview.setPhone(phone);
         // 用户来源平台
         exchangeReview.setSourcePlatform(user.get("ClientType").toString());
         exchangeReview.setNickname(String.valueOf(user.get("NickName")));
@@ -272,7 +247,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             resultMap.put("unit","USDT");
             exchangeReview.setChannelId(19);
         }
-        if (amount.intValue()<min.intValue() || amount.intValue()>max.intValue()){
+        if (amount.compareTo(min) == -1 || amount.compareTo(max) == 1){
             return json(null,"兑换的金额不满足渠道条件",2);
         }
         // 获取总赢配置
@@ -349,8 +324,13 @@ public class RechargeDockingController extends BaseController implements ConstSh
     public AjaxResult channel_list() {
         String type = HttpKit.getRequest().getParameter("type");
         String UserId = HttpKit.getRequest().getParameter("UserId");
+//        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",UserId));
         // 获取用户绑定的电话
-        // 获取到所有的大渠道名称  mcName
+//        String phone = user.get("bindPhone").toString();
+//        if ("".equals(phone)){
+//            return fail("请绑定手机号");
+//        }
+        // 获取到所有的大渠道名称
         List<Map> channelMaxList = commonService.getInfoList("recharge_channel.find_all_max_channel", null);
         ArrayList<Object> channels = new ArrayList<>();
         if (Integer.valueOf(type) == 0){
@@ -404,7 +384,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 infoByOne.put("name",ch.get("channelName"));
                 infoByOne.put("isLabel",cha.get("isLabel"));
                 infoByOne.put("unit",cha.get("unit"));
-                infoByOne.put("mcName",cha.get("mcName"));
                 // 获取金币
                 BigDecimal gpt = new BigDecimal(infoByOne.get("goldProportion").toString());
                 // 根据用户总赢计算可以兑换的钱  用户总赢/10000/1.5
@@ -437,8 +416,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * @return
      */
     private String getGold(Integer userId) {
-        String amount = Db.queryStr("SELECT Amount FROM [QPGameUserDB].[dbo].[AA_Shop_Prop_UserProp] where User_Id = #{UserId} and Prop_Id = 1",
-                CMap.init().set("UserId",userId));
+        String amount = Db.queryStr("SELECT Amount FROM [QPGameUserDB].[dbo].[AA_Shop_Prop_UserProp] where User_Id = #{UserId} and Prop_Id = 1", CMap.init().set("UserId",userId));
         if (amount == null){
             return "";
         }

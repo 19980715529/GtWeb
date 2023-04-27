@@ -177,7 +177,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                 }
                 // 获取平台订单号
                 JSONObject respJson = JSONObject.parseObject(response);
-                String status = respJson.getString("status");
+                String status = respJson.get("status").toString();
                 if ("success".equals(status)){
                     // 申请成功，需要等待三方回调才能知道最终结果
                     exchangeReview.setStatus(1);
@@ -185,27 +185,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     // 获取三方反馈
                     exchangeReview.setMsg(respJson.getString("status_mes"));
                     // 申请失败，将订单状态设置为支付失败
-                    exchangeReview.setStatus(6);
-                }
-            } else if (pid == 20) {
-                response = SendHttp.sendExchangeMetaPay(exchangeReview);
-                LOGGER.error(response);
-                if ("".equals(response)){
-                    return error("fail");
-                }
-                // 获取平台订单号
-                JSONObject respJson = JSONObject.parseObject(response);
-                // 获取请求状态
-                int code = respJson.getIntValue("platRespCode");
-                if (code==0){
-                    // 请求成功, 获取平台订单号
-                    String PfOrderNum = respJson.getString("transId");
-                    exchangeReview.setPfOrderNum(PfOrderNum);
-                    exchange.setStatus(1);
-                }else {
-                    // 请求失败, 存储失败原因
-                    exchangeReview.setMsg(respJson.getString("msg"));
-                    // 将状态设置为失败
                     exchangeReview.setStatus(6);
                 }
             }

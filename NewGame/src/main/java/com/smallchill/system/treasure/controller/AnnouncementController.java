@@ -2,14 +2,17 @@ package com.smallchill.system.treasure.controller;
 
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
+import com.smallchill.game.newmodel.gameuserdb.ClientPos;
 import com.smallchill.game.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +29,7 @@ public class AnnouncementController extends BaseController implements ConstShiro
     /**
      * 公告接口
      */
-    @Autowired
+    @Resource
     private CommonService commonService;
     @PostMapping("/notice")
     public AjaxResult notice(){
@@ -71,14 +74,13 @@ public class AnnouncementController extends BaseController implements ConstShiro
         if (map == null){
             return "fail";
         }
+        // 用户id不为空则可以添加
         if (map.get("userId") !=null && StrKit.notBlank(map.get("userId").toString())){
             map.put("createTime",new Date());
-            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime,clientType) values (#{userId},#{Money},#{type},#{createTime},#{clientType})",
-                    map);
+            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime) values (#{userId},#{Money},#{type},#{createTime})", map);
             return "success";
         }else {
             return "fail";
         }
-
     }
 }

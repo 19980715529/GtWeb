@@ -17,7 +17,8 @@
 		jQuery(grid_selector).jqGrid({
 			url: grid_url,
 			shrinkToFit : true,//适用于较少字段,响应式
-			colNames : ["日期","(1日)IOS","(3日)IOS","(7日)IOS","(30日)IOS","(1日)赠送","(3日)赠送","(7日)赠送","(30日)赠送","1日","3日","7日","30日","(新增)IOS","(新增)赠送","新增"],
+			// colNames : ["日期","今日活跃","(1日)活跃","(3日)活跃","(7日)活跃","(15日)活跃","(30日)活跃","今日总新增","(1日)转换","(3日)转换","(7日)转换","(15日)转换","(30日)转换"],
+			colNames : ["日期","今日活跃","(1日)活跃","(3日)活跃","(7日)活跃","(15日)活跃","(30日)活跃"],
 			colModel : [
 			            {name : "ApplyDate", width : 100, sortable:false,align:'center'}, 
 			            {name : "ios1", width : 100, sortable:false,align:'center'},
@@ -25,16 +26,13 @@
 			            {name : "ios7", width : 100, sortable:false,align:'center'},
 			            {name : "ios30", width : 100, sortable:false,align:'center'},
 			            {name : "bus1", width : 100, sortable:false,align:'center'},
-			            {name : "bus3", width : 100, sortable:false,align:'center'},
-			            {name : "bus7", width : 100, sortable:false,align:'center'},
-			            {name : "bus30", width : 100, sortable:false,align:'center'},
-			            {name : "total1", width : 100, sortable:false,align:'center'},
-			            {name : "total3", width : 100, sortable:false,align:'center'},
-			            {name : "total7", width : 100, sortable:false,align:'center'},
-			            {name : "total30", width : 100, sortable:false,align:'center'},
-			            {name : "newios", width : 100, sortable:false,align:'center'},
-			            {name : "newbus", width : 100, sortable:false,align:'center'},
-			            {name : "newtotal", width : 100, sortable:false,align:'center'}
+			            {name : "bus3", width : 100, sortable:false,align:'center'}
+			            // {name : "bus7", width : 100, sortable:false,align:'center'},
+			            // {name : "bus30", width : 100, sortable:false,align:'center'},
+			            // {name : "total1", width : 100, sortable:false,align:'center'},
+			            // {name : "total3", width : 100, sortable:false,align:'center'},
+			            // {name : "total7", width : 100, sortable:false,align:'center'},
+			            // {name : "total30", width : 100, sortable:false,align:'center'}
 			            ],
 			postData : {where:_filter,sort:'ApplyDate',order:'desc',type:''},
 			multiselect : false,
@@ -104,7 +102,7 @@
         console.log(data);
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
         	var type = data.data;
-        	var html = '<option value="-1">请选择</option><option value="0">其他</option>';
+        	var html = '<option value="-1">请选择</option>';
         	for (var i = 0; i < type.length; i++) {
 				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
 			}

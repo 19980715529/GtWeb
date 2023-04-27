@@ -54,3 +54,35 @@ day_recharge
 	   where ClientType=#{PlatformID})
 	  @}
 	  ) t
+
+new_list1
+===
+        select id,CONVERT(VARCHAR(10), writedate, 23) writedate,recAmount,newRecAmount,recNum,newRecNum,recCount,newRecCount,excAmount,excNum,excCount,RE
+        from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords]
+        where 1=1
+        @if(!isEmpty(startTime)){
+            and CONVERT(VARCHAR(100), writedate, 23) >= CONVERT(VARCHAR(100), #{startTime}, 23)
+        @}
+        @if(!isEmpty(endTime)){
+            and CONVERT(VARCHAR(100), writedate, 23) <= CONVERT(VARCHAR(100), #{endTime}, 23)
+        @}
+        @if(!isEmpty(PlatformID)){
+            and clientType =#{PlatformID}
+        @}
+        order by writedate desc
+
+new_ARPU_list1
+===
+	  select id,CONVERT(VARCHAR(10), writedate, 23) writedate,recAmount,newRecAmount,recNum,newRecNum,ARPU,newArpu,totalActivity
+	  FROM [QPGameRecordDB].[dbo].[DailyDataMonitorRecords]
+	  where 1=1
+	  @if(!isEmpty(startTime)){
+		 and CONVERT(VARCHAR(100), writedate, 23) >= CONVERT(VARCHAR(100), #{startTime}, 23)
+	  @}
+	  @if(!isEmpty(endTime)){
+		 and CONVERT(VARCHAR(100), writedate, 23) <= CONVERT(VARCHAR(100), #{endTime}, 23)
+	  @}
+	   @if(!isEmpty(PlatformID)){
+	 	and clientType =#{PlatformID}
+	  @}
+	  order by writedate desc

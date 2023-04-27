@@ -23,7 +23,7 @@ new_list
 	  
 new_package_list
 ===
-	SELECT isnull((SELECT name FROM QPGameUserDB.dbo.AccountTypeName where clientType=a.ClientType),(case when a.ClientType=0 then '大厅' else '包'+cast(a.ClientType as varchar) end)) as AccountTypeName,
+	SELECT (SELECT name FROM login.dbo.ClientPos where clientType=a.ClientType) as AccountTypeName,
 	COUNT(userid) AS RegisterCount FROM QPGameUserDB.dbo.AccountsInfo a
 	  where isRobit=0
 	  @if(!isEmpty(StartTime_datelt)){
@@ -42,3 +42,22 @@ day_reg
 	@if(!isEmpty(PlatformID)){
 		and clientType=#{PlatformID}
 	@}
+
+new_list1
+===
+	  SELECT id,CONVERT(VARCHAR(10), writedate, 120) writedate,totalNewUser,totalNewRec,totalTourist,newRecUser,newExcUser,notRoom 
+        FROM [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] where 1=1
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, writedate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, writedate)<=0
+	  @}
+	  @if(!isEmpty(PlatformID)){
+		 and clientType=#{PlatformID}
+	  @}
+	  @if(!isEmpty(orderBy)){
+		 order by writedate asc
+	  @}else {
+		  order by writedate desc
+	  @}

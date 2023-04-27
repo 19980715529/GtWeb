@@ -7,7 +7,6 @@ import com.smallchill.core.annotation.Before;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.db.config.meta.intercept.ClientPosValidator;
-import com.smallchill.db.config.model.ClientPos;
 import org.bouncycastle.asn1.cms.CMSAlgorithmProtection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +23,7 @@ import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.DateKit;
+import com.smallchill.game.newmodel.gameuserdb.ClientPos;
 import com.smallchill.game.service.CommonService;
 
 @Controller
@@ -33,10 +33,10 @@ public class ClientPosController extends BaseController implements ConstShiro {
 	private static String CODE = "accounttypename";
 	private static String LIST_SOURCE = "db_accounttypename.list";
 	private static String PREFIX = "accounttypename";
-
+	
 	@Autowired
 	private CommonService commonService;
-
+	
 	@DoControllerLog(name="进入包配置列表页面")
 	@RequestMapping("/")
 	@Permission(ADMINISTRATOR)
@@ -44,7 +44,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 		mm.put("code", CODE);
 		return BASE_PATH + "accounttypename.html";
 	}
-
+	
 	@Json
 	@RequestMapping(KEY_LIST)
 	@Permission(ADMINISTRATOR)
@@ -52,14 +52,14 @@ public class ClientPosController extends BaseController implements ConstShiro {
 		Object gird = paginateBySelf(LIST_SOURCE);
 		return gird;
 	}
-
+	
 	@RequestMapping(KEY_ADD)
 	@Permission(ADMINISTRATOR)
 	public String add(ModelMap mm) {
 		mm.put("code", CODE);
 		return BASE_PATH + "accounttypename_add.html";
 	}
-
+	
 	@DoControllerLog(name="新增包信息")
 	@Json
 	@RequestMapping(KEY_SAVE)
@@ -67,15 +67,14 @@ public class ClientPosController extends BaseController implements ConstShiro {
 	@Permission(ADMINISTRATOR)
 	public AjaxResult save() {
 		ClientPos boxItem = mapping(PREFIX, ClientPos.class);
-		int temp = Db.insert("insert into [login].[dbo].[ClientPos] (clientType,ratio,name,remarks) values (#{clientType},#{ratio},#{name},#{remarks})",
-				boxItem);
+		int temp = Db.insert("insert into [login].[dbo].[ClientPos] (clientType,ratio,name,remarks) values (#{clientType},#{ratio},#{name},#{remarks})", boxItem);
 		if (temp>0) {
 			return success(SAVE_SUCCESS_MSG);
 		} else {
 			return error(SAVE_FAIL_MSG);
 		}
 	}
-
+	
 	@RequestMapping(KEY_EDIT + "/{id}")
 	@Permission(ADMINISTRATOR)
 	public String edit(@PathVariable Integer id, ModelMap mm) {
@@ -84,7 +83,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 		mm.put("code", CODE);
 		return BASE_PATH + "accounttypename_edit.html";
 	}
-
+	
 	@DoControllerLog(name="修改包信息")
 	@Json
 	@RequestMapping(KEY_UPDATE)
@@ -99,7 +98,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 			return error(UPDATE_FAIL_MSG);
 		}
 	}
-
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@RequestMapping(KEY_VIEW + "/{id}")
 	@Permission(ADMINISTRATOR)
@@ -111,7 +110,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 		mm.put("code", CODE);
 		return BASE_PATH + "accounttypename_view.html";
 	}
-
+	
 	@DoControllerLog(name="删除包信息")
 	@Json
 	@RequestMapping(KEY_REMOVE)

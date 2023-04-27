@@ -39,7 +39,8 @@ public class HttpClientUtils {
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
-            return EntityUtils.toString(response.getEntity(), "utf-8");
+            String resp = EntityUtils.toString(response.getEntity(), "utf-8");
+            return resp;
         } catch (Exception e) {
             return e.getMessage();
         }finally {

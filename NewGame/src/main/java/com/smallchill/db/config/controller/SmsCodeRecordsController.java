@@ -47,7 +47,14 @@ public class SmsCodeRecordsController extends BaseController implements ConstShi
     @RequestMapping(KEY_LIST)
     //@Permission({ ADMINISTRATOR, ADMIN })
     public Object list() {
+        // [QPGameUserDB].[dbo].[SendPhoneCodeRecord
         Object gird = null;
+        String phone = HttpKit.getRequest().getParameter("phone");
+        String userId = HttpKit.getRequest().getParameter("userId");
+        Map<String, Object> paras = new HashMap<>();
+        paras.put("phone",phone);
+        paras.put("userId",userId);
+//        gird = commonService.getInfoList(LIST_SOURCE, paras);
         gird = paginateBySelf(LIST_SOURCE);
         return gird;
     }

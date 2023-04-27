@@ -1,6 +1,5 @@
 package com.smallchill.system.treasure.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
@@ -11,10 +10,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import static com.smallchill.core.constant.ConstConfig.GAME_URL;
-import static com.smallchill.core.constant.ConstConfig.META_Pay_URL;
 import static com.smallchill.core.constant.ConstKey.*;
 import static com.smallchill.core.constant.ConstUrl.*;
 
@@ -93,7 +90,7 @@ public class SendHttp {
         return response;
     }
     /**
-     * rarp兑换
+     * 兑换
      */
 
     public static String sendExchangeRarp(ExchangeReview exchangeReview){
@@ -109,7 +106,7 @@ public class SendHttp {
         map.put("orderNo", exchangeReview.getOrderNumber());
         map.put("notifyUrl",EXCHANGE_RARP_CALLBACK_URL);
         map.put("fee",exchangeReview.getMoney());
-        map.put("bankCode","PAYMAYA");
+        map.put("bankCode","gcash");
         map.put("bankAccount",exchangeReview.getBankNumber());
         map.put("ifsc","no");
         map.put("customerName",exchangeReview.getBankNumber());
@@ -127,87 +124,6 @@ public class SendHttp {
         response = Utils.post(EXCHANGE_URL, map);
         return response;
     }
-
-    // MetaPay代收
-    public static String sendRechargeMetaPay(RechargeRecords records){
-        String response="";
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("appId",META_APPID);
-        // 代收渠道
-        map.put("channel",3);
-        // 平台订单号
-        map.put("referenceNo", records.getOrderNumber());
-        // 金额
-        map.put("amount",records.getTopUpAmount());
-        // 用户手机号
-        map.put("mobile","09111111111");
-        // 用户名称
-        map.put("userName","Lucio,Drew,Bongalos");
-        // 用户地址
-        map.put("address","E Flores St, Pasay, Metro Manila");
-        // 备注
-        map.put("remark","recharge");
-        // 用户邮箱
-        map.put("email","gtpay@gmail.com");
-        //
-        map.put("productType","GCASH_ONLINE");
-        //
-        map.put("notificationURL",RECHARGE_META_CALLBACK_URL);
-        // 生成签名
-        String sign = RequestSignUtil.getSign(map, PRIVATE_KEY);
-        map.put("sign",sign);
-        JSONObject jsonParams = JSONObject.parseObject(JSON.toJSONString(map));
-        response = RequestSignUtil.doPost(META_Pay_URL+"payment/collect/collect", jsonParams);
-        return response;
-    }
-
-    /**
-     *
-     * @param records
-     * @return
-     */
-    public static String sendExchangeMetaPay(ExchangeReview exchangeReview){
-        String response="";
-        HashMap<String, Object> map = new HashMap<>();
-        // 商户号
-        map.put("appId",META_APPID);
-        // 代付渠道
-        map.put("pickupCenter",7);
-        // 订单号
-        map.put("referenceNo", exchangeReview.getOrderNumber());
-        // 代付金额
-        map.put("collectedAmount",exchangeReview.getMoney());
-        // 账户
-        map.put("accountNo",exchangeReview.getBankNumber());
-        // 取款人名
-        map.put("userName",exchangeReview.getCardholder());
-        // 生日
-        map.put("birthDate","2019-08-30");
-        // 电话号
-        map.put("mobileNumber",exchangeReview.getPhone());
-        // 证件类型
-        map.put("certificateType","SSS");
-        // 证件号码，没有随机10位
-        map.put("certificateNo",getRandomNickname(10));
-        // 居住地址
-        map.put("address","190 Poblacion Street");
-        // 城市
-        map.put("city","HOUSTON");
-        // 省份
-        map.put("province","TEXAS");
-        // 回调url
-        map.put("notificationURL",EXCHANGE_RARP_CALLBACK_URL);
-        // 生成签名
-        String sign = RequestSignUtil.getSign(map, PRIVATE_KEY);
-        map.put("sign",sign);
-        JSONObject jsonParams = JSONObject.parseObject(JSON.toJSONString(map));
-        // 发起请求
-        response = RequestSignUtil.doPost("http://t.metapaytest.com/openapi/payment/remit/payout", jsonParams);
-        return response;
-    }
-
-
-
 
     // 发送邮件请求1001  金币类型:GoldType
     public static void sendEmail(Map<String,Object> map){
@@ -237,19 +153,5 @@ public class SendHttp {
     public static void sendGame1003(Integer userId){
         String str = "Userid:" + userId;
         HttpClientUtils.sendPostJson(GAME_URL, str);
-    }
-
-    /**
-     * 生产随机位数字符串
-     * @param length
-     * @return
-     */
-    public static String getRandomNickname(int length) {
-        StringBuilder val = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < length; i++) {
-            val.append(String.valueOf(random.nextInt(10)));
-        }
-        return val.toString();
     }
 }

@@ -1,7 +1,7 @@
 home_list
 ===
-	select dayqhy_ios IOS,dayqhy_and Android,pcdayqhy PC,(dayqhy_ios+dayqhy_and+pcdayqhy) Total, CONVERT(VARCHAR(100), writedate, 23) CollectDate 
-    from [QPGameRecordDB].[dbo].[MonitorRecordByDay] with (nolock)
+	select id,CONVERT(VARCHAR(10), writedate, 23) writedate,totalActivity,tatolRegActivity,TouritsActivity,RecActivity
+    from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] with (nolock)
 	where 1=1
 	  @if(!isEmpty(PlatformID)){
 		 and clientType=#{PlatformID}
@@ -20,8 +20,8 @@ home_list
 
 day_list
 ===
-	select dayhy_ios IOS,(dayhy_and) Android,(pcdayhy) PC,(pcdayhy+dayhy_ios+dayhy_and) Total,CONVERT(VARCHAR(100), writedate, 23) CollectDate 
-    from [QPGameRecordDB].[dbo].[MonitorRecordByDay] with (nolock)
+	select id,totalActivity,tatolRegActivity,TouritsActivity,RecActivity,CONVERT(VARCHAR(100), writedate, 23) writedate 
+    from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] with (nolock)
 	where 1=1
 	  @if(!isEmpty(PlatformID)){
 		 and clientType=#{PlatformID}
@@ -40,8 +40,9 @@ day_list
 
 week_list
 ===
-	select SUM(weekhy_ios) IOS,SUM(week_and) Android,SUM(pcweekhy) PC,datepart(Wk,writedate) Week,YEAR(writedate) Year 
-	  from [QPGameRecordDB].[dbo].[MonitorRecordByDay] with (nolock)
+	select SUM(totalActivity) totalActivity,SUM(tatolRegActivity) tatolRegActivity,SUM(TouritsActivity) TouritsActivity,
+    SUM(RecActivity) RecActivity,datepart(Wk,writedate) Week,YEAR(writedate) Year 
+	  from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] with (nolock)
 		where 1=1
 	  @if(!isEmpty(startTime)){
 		 and CONVERT(VARCHAR(100), writedate, 23) >= CONVERT(VARCHAR(100), #{startTime}, 23)
@@ -53,8 +54,9 @@ week_list
 
 month_list
 ===
-	  select SUM(monthhy_ios) IOS,SUM(monthhy_and) Android,datepart(month,writedate) Month,YEAR(writedate) Year 
-		from [QPGameRecordDB].[dbo].[MonitorRecordByDay] with (nolock)
+	  select SUM(totalActivity) totalActivity,SUM(tatolRegActivity) tatolRegActivity,SUM(TouritsActivity) TouritsActivity,
+    SUM(RecActivity) RecActivity,datepart(month,writedate) Month,YEAR(writedate) Year 
+		from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] with (nolock)
 	  where 1=1
 	  @if(!isEmpty(startTime)){
 		 and CONVERT(VARCHAR(100), writedate, 23) >= CONVERT(VARCHAR(100), #{startTime}, 23)

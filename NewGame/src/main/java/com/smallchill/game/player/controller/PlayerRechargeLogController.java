@@ -95,7 +95,7 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	@Json
 	@RequestMapping("/getTotalRecharge")
 	public AjaxResult getTotalRecharge() {
-		// 获取当天所有充值成功的人数和总收益
+		// 获当天取所有充值成功的人数和总收益
 		Map currentrecharge = commonService.getInfoByOne("player_recharge_log1.current_recharge",null);
 		// 获取当天新增添加的人数
 		Map newrecharge = commonService.getInfoByOne("player_recharge_log1.new_recharge",null);

@@ -149,9 +149,9 @@
 			</select>
 			
 			<!-- 简单查询第四组 -->
-			<label class=""> 充值类型： </label>
-			<select class="" id="recType">
-				<option value="">全部</option>
+			<label class=""> 用户类型： </label> 
+			<select class="" id="UserTypeID">
+				<option value="">请选择</option>
 				<option value="0">普通用户</option>
 				<option value="1">当日用户</option>
 			</select>
@@ -160,8 +160,8 @@
 			<input type="text" id="start_time" value="" class="" readonly="readonly"/>- 
 			<input type="text" id="end_time" value="" class="" readonly="readonly"/>
 			
-			<label class=""> 包来源： </label>
-			<select id="clientType"></select><br />
+<!--			<label class=""> 游戏平台： </label> -->
+<!--			<select id="ptypeid"></select><br />-->
 			</div>
 			<div class="padding-2">
 				<label class=""> 充值金额： </label>
@@ -224,12 +224,12 @@
 	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
         console.log(data);
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-        	var type = data.data;
+        	var type = data.rows;
         	var html = '<option value="">请选择</option>';
         	for (var i = 0; i < type.length; i++) {
 				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
 			}
-        	$("#clientType").html(html);
+        	$("#ptypeid").html(html);
         }
  	}).start();
 	
@@ -249,10 +249,9 @@
 		var UserID = $("#UserID").val();
 		var OrderID = $("#OrderID").val();
 		var ChannelID = $("#ChannelID").val();
-		var recType = $("#recType").val(); // 充值类型
+		var UserTypeID = $("#UserTypeID").val(); // 用户类型
 		var moneyMin = $("#moneyMin").val();
 		var moneyMax = $("#moneyMax").val();
-		var clientType = $("#clientType").val();
 		var wheres = {};
 		if (BladeTool.isNotEmpty(moneyMax) || BladeTool.isNotEmpty(moneyMin)){
 			if (moneyMin<0 || moneyMax<0){
@@ -284,11 +283,8 @@
 		if(BladeTool.isNotEmpty(ChannelID)) {
 			wheres['ChannelID'] = ChannelID;
 		}
-		if(BladeTool.isNotEmpty(recType)) {
-			wheres['recType'] = recType;
-		}
-		if(BladeTool.isNotEmpty(clientType)) {
-			wheres['clientType'] = clientType;
+		if(BladeTool.isNotEmpty(UserTypeID)) {
+			wheres['UserTypeID'] = UserTypeID;
 		}
 
 		var start_time = $("#start_time").val();

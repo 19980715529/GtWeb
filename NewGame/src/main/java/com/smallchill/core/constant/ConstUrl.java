@@ -52,14 +52,5 @@ public interface ConstUrl {
      *  safe 兑换充值请求地址
      */
     String SAFE_URL = "http://api.pnsafepay.com/gateway.aspx";
-    /**
-     * MetaPay 充值回调
-     */
-    String RECHARGE_META_CALLBACK_URL = CALLBACK_IP+"/NewGame_war_exploded/callback/recharge_meta_callback";
-    /**
-     * MetaPay兑换回调地址
-     */
-    String EXCHANGE_META_PAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_meta_pay_callback";
-
 
 }
