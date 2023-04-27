@@ -8,16 +8,18 @@
         <tbody>
         <tr>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏名称: </td>
-          <td ><input type="text" name="gameconf.name" value="${gameconf.name}"/></td>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
-          <td><input type="text" name="gameconf.sort" value="${gameconf.sort}"/></td>
+          <td ><input type="text" name="gameconf.name" value="${gameconf.name}"/>
+            <input type="hidden" name="gameconf.gameId" value="${gameconf.gameId}"/>
+          </td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
+          <td>
+            <select id="ptypeid" type="text" name="gameconf.clientType">
+            </select>
         </tr>
         <tr>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
-          <td>
-            <input type="radio" name="gameconf.isOpen" value="0" ${gameconf.isOpen==0?"checked":""}>关闭</input>&nbsp;&nbsp;&nbsp;
-            <input type="radio" name="gameconf.isOpen" value="1" ${gameconf.isOpen==1?"checked":""}>开启</input>
           </td>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+          <td><input type="text" name="gameconf.sort" value="${gameconf.sort}"/></td>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">界面状态: </td>
           <td>
             <input type="radio" name="gameconf.state" value="0" ${gameconf.state==0?"checked":""}/>无&nbsp;&nbsp;&nbsp;
@@ -29,15 +31,19 @@
         <tr>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别: </td>
           <td>
-            <select name="gameconf.type" value="${gameconf.type}">
-              <option value="slots">slots</option>
-              <option value="poker">poker</option>
-              <option value="fishing">fishing</option>
+            <select id="type" name="gameconf.type" value="${gameconf.type}">
             </select>
           </td>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别中排序: </td>
           <td>
             <input type="text" name="gameconf.typeSort" value="${gameconf.typeSort}"/>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+          <td>
+            <input type="radio" name="gameconf.isOpen" value="0" ${gameconf.isOpen==0?"checked":""}>关闭</input>&nbsp;&nbsp;&nbsp;
+            <input type="radio" name="gameconf.isOpen" value="1" ${gameconf.isOpen==1?"checked":""}>开启</input>
           </td>
         </tr>
         </tbody>
@@ -46,7 +52,30 @@
   </div>
 </div>
 <script>
-
+  // 获取平台列表
+  new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    console.log(data);
+    if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+      var type = data.data;
+      var html = '<option value="">请选择</option>';
+      for (var i = 0; i < type.length; i++) {
+        html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+      }
+      $("#ptypeid").html(html);
+    }
+  }).start();
+  // 获取游戏类型
+  new Ajax("${ctxPath}/${code}/gemaType", function (data) {
+    console.log(data);
+    if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+      var type = data.data;
+      var html = '<option value="">请选择</option>';
+      for (var i = 0; i < type.length; i++) {
+        html += '<option value="' + type[i]['id'] + '">' + type[i]['name'] + '</option>';
+      }
+      $("#type").html(html);
+    }
+  }).start();
 </script>
 <!-- 按钮 -->
 @ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}

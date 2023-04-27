@@ -1,7 +1,6 @@
 package com.smallchill.db.config.controller;
-
-import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
+import com.smallchill.core.annotation.Before;
 import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
@@ -10,19 +9,18 @@ import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
-import com.smallchill.db.config.model.ActiveList;
+import com.smallchill.db.config.meta.intercept.GameConfValidator;
 import com.smallchill.db.config.model.GameConf;
 import com.smallchill.game.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * @Description 活动列表后台配置
@@ -38,7 +36,7 @@ public class GameConfController extends BaseController implements ConstShiro {
     private static String LIST_SOURCE = "gameconf.new_list";
     private static String PREFIX = "gameconf";
 
-    @Autowired
+    @Resource
     private CommonService commonService;
     @DoControllerLog(name="进入充值配置列表页面")
     @RequestMapping("/")
@@ -51,8 +49,7 @@ public class GameConfController extends BaseController implements ConstShiro {
     @RequestMapping(KEY_LIST)
     //@Permission({ ADMINISTRATOR, ADMIN })
     public Object list() {
-        Object gird = paginate(LIST_SOURCE);
-        return gird;
+        return paginateBySelf(LIST_SOURCE);
     }
 
     /**
@@ -69,6 +66,7 @@ public class GameConfController extends BaseController implements ConstShiro {
      */
     @Json
     @RequestMapping(KEY_SAVE)
+    @Before(GameConfValidator.class)
     @Permission({ADMINISTRATOR,ADMIN})
     public AjaxResult save(ModelMap mm){
         GameConf gameConf = mapping(PREFIX, GameConf.class);
@@ -102,6 +100,7 @@ public class GameConfController extends BaseController implements ConstShiro {
      */
     @Json
     @RequestMapping(KEY_UPDATE)
+    @Before(GameConfValidator.class)
     @Permission({ADMINISTRATOR,ADMIN})
     public AjaxResult update(ModelMap mm){
         GameConf gameConf = mapping(PREFIX, GameConf.class);
@@ -149,4 +148,13 @@ public class GameConfController extends BaseController implements ConstShiro {
 //        item.put("RoomName", name);
 //        return item;
 //    }
+    /**
+     * 获取游戏类型
+     */
+    @Json
+    @RequestMapping("/gemaType")
+    public AjaxResult getGameType(){
+        List<Map> maps = Db.selectList("select id,name from blade_dict where pid = 56", null);
+        return json(maps);
+    }
 }

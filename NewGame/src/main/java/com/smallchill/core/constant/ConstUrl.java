@@ -1,6 +1,7 @@
 package com.smallchill.core.constant;
 
 import static com.smallchill.core.constant.ConstConfig.CALLBACK_IP;
+import static com.smallchill.core.constant.ConstConfig.META_Pay_URL;
 
 /**
  * @Description TODO
@@ -53,4 +54,75 @@ public interface ConstUrl {
      */
     String SAFE_URL = "http://api.pnsafepay.com/gateway.aspx";
 
+
+    /**
+     * MetaPay 充值地址
+     */
+    String RECHARGE_META_URL=META_Pay_URL+"payment/collect/collect";
+    /**
+     * MetaPay兑换地址
+     */
+    String EXCHANGE_META_URL=META_Pay_URL+"payment/remit/payout";
+    /**
+     * MetaPay 充值回调
+     */
+    String RECHARGE_META_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_meta_callback";
+    /**
+     * MetaPay兑换回调地址
+     */
+    String EXCHANGE_META_PAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_meta_pay_callback";
+
+
+
+    /**
+     * OMOM充值请求地址
+     */
+    String RECHARGE_OMOM_URL="https://pay.omompay.com/pay";
+    /**
+     * OMOM兑换请求地址
+     */
+    String EXCHANGE_OMOM_URL="https://pay.omompay.com/payment";
+    /**
+     * OMOM 充值回调地址
+     */
+    String RECHARGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_omom_callback";
+    /**
+     * OMOM 兑换回调地址
+     */
+    String EXCHANGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_omom_callback";
+
+
+    /**
+     * AIPay充值请求地址
+     */
+    String RECHARGE_AIPAY_URL = "https://top.adkjk.in/rpay-api/order/submit";
+    /**
+     * AIPay 兑换地址
+     */
+    String EXCHANGE_AIPAY_URL="https://top.adkjk.in/rpay-api/payout/submit";
+    /**
+     * AIPay 充值回调地址
+     */
+    String RECHARGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_AIPay_callback";
+    /**
+     * AIPay 兑换回调地址
+     */
+    String EXCHANGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_AIPay_callback";
+
+    /**
+     * WePay 充值地址
+     */
+    String RECHARGE_WEPAY_URL = "https://pyabxum.weglobalex.com/pay/web";
+    /**
+     * WePay 兑换地址
+     */
+    String EXCHANGE_WEPAY_URL="https://pyabxum.weglobalex.com/pay/transfer";
+    /**
+     * WePay 充值回调地址
+     */
+    String RECHARGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_WePay_callback";
+    /**
+     * WePay 兑换回调地址
+     */
+    String EXCHANGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_WePay_callback";
 }

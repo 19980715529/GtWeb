@@ -34,6 +34,8 @@ public class ExchangeReview extends BaseModel {
     private BigDecimal money; //发送的第三方的钱
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
+    private String tipsName;
+
 
     public String getMsg() {
         return msg;
@@ -209,5 +211,12 @@ public class ExchangeReview extends BaseModel {
 
     public void setPfOrderNum(String pfOrderNum) {
         this.pfOrderNum = pfOrderNum;
+    }
+
+    public String getTipsName() {
+        return tipsName;
+    }
+    public void setTipsName(String tipsName) {
+        this.tipsName = tipsName;
     }
 }

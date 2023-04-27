@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.smallchill.core.constant.ConstKey.SECRET_RARP_KEY;
-import static com.smallchill.core.constant.ConstKey.SECRET_SAFE_KEY;
+import static com.smallchill.core.constant.ConstKey.*;
 
 public class HttpClientUtils {
 
@@ -118,5 +117,42 @@ public class HttpClientUtils {
         }
         return false;
     }
+
+    /** Omo签名校验
+     *verification
+     */
+    public static Boolean Md5OmoVerification(Map<String, Object> requestParams) {
+        try {
+            String sign = requestParams.remove("sign").toString();
+            if (sign==null){
+                return false;
+            }
+            String sign1 = Utils.getSign(requestParams, OMOM_KEY);
+            if (sign.equals(sign1.toUpperCase())){
+                return true;
+            }
+        }catch (Exception e){
+            return false;
+        }
+        return false;
+    }
+
+    public static Boolean Md5WePayVerification(Map<String, Object> requestParams,String key) {
+        try {
+            String sign = requestParams.remove("sign").toString();
+            requestParams.remove("signType");
+            if (sign==null){
+                return false;
+            }
+            String sign1 = Utils.getSign(requestParams, key);
+            if (sign.equals(sign1)){
+                return true;
+            }
+        }catch (Exception e){
+            return false;
+        }
+        return false;
+    }
+
 
 }

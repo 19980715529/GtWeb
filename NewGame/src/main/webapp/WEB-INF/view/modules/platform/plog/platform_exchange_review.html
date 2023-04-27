@@ -15,7 +15,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames=["id","发起时间", "订单号","兑换进度","用户id","昵称","账户","持卡人信息","渠道类型","来源平台","兑换金额","消耗金币","消耗打码量","反馈","商户反馈","操作管理员","用户电话号"];
+        var _colnames=["id","发起时间", "订单号","兑换进度","用户id","备注","昵称","账户","持卡人信息","渠道类型","来源平台","兑换金额","消耗金币","消耗打码量","反馈","商户反馈","操作管理员","用户电话号"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -23,6 +23,7 @@
             // 兑换进度
             {name:"status",  sortable:false,formatter:rowShow},
             {name:"userId", sortable:false,formatter:genLink},
+            {name:"tipsName", sortable:false},
             {name:"nickname", sortable:false,formatter:genLink},
             {name:"bankNumber",sortable:false},
             {name:"cardholder", sortable:false},

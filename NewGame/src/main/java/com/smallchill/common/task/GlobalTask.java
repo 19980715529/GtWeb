@@ -12,8 +12,8 @@ import java.sql.SQLException;
 
 @Component()
 public class GlobalTask {
-	// 定时器去每天统计数据
-	@Scheduled(cron = "0 30 2 * * ? ")
+	// 定时器去每天统计数据,已经更新到数据库中执行
+//	@Scheduled(cron = "0 30 2 * * ? ")
 	public void StatisticsEveryDay(){
 		Db.executeCall(new OnConnection<Object>() {
 			@Override

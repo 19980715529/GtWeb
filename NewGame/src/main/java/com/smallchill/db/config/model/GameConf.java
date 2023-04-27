@@ -18,9 +18,10 @@ public class GameConf extends BaseModel {
     private Integer isOpen;
     private Integer sort;
     private Integer state;
-    private String type;
+    private Integer type;
     private Integer typeSort;
     private Integer gameId;
+    private Integer clientType;
 
     public Integer getGameId() {
         return gameId;
@@ -70,11 +71,11 @@ public class GameConf extends BaseModel {
         this.state = state;
     }
 
-    public String getType() {
+    public Integer getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(Integer type) {
         this.type = type;
     }
 
@@ -84,5 +85,13 @@ public class GameConf extends BaseModel {
 
     public void setTypeSort(Integer typeSort) {
         this.typeSort = typeSort;
+    }
+
+    public Integer getClientType() {
+        return clientType;
+    }
+
+    public void setClientType(Integer clientType) {
+        this.clientType = clientType;
     }
 }

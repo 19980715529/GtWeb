@@ -177,7 +177,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                 }
                 // 获取平台订单号
                 JSONObject respJson = JSONObject.parseObject(response);
-                String status = respJson.get("status").toString();
+                String status = respJson.getString("status");
                 if ("success".equals(status)){
                     // 申请成功，需要等待三方回调才能知道最终结果
                     exchangeReview.setStatus(1);
@@ -185,6 +185,87 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     // 获取三方反馈
                     exchangeReview.setMsg(respJson.getString("status_mes"));
                     // 申请失败，将订单状态设置为支付失败
+                    exchangeReview.setStatus(6);
+                }
+            } else if (pid == 20) {
+                response = SendHttp.sendExchangeMetaPay(exchangeReview);
+                LOGGER.error(response);
+                if ("".equals(response)){
+                    return error("fail");
+                }
+                // 获取平台订单号
+                JSONObject respJson = JSONObject.parseObject(response);
+                // 获取请求状态
+                int code = respJson.getIntValue("platRespCode");
+                if (code==0){
+                    // 请求成功, 获取平台订单号
+                    String PfOrderNum = respJson.getString("transId");
+                    exchangeReview.setPfOrderNum(PfOrderNum);
+                    exchange.setStatus(1);
+                }else {
+                    // 请求失败, 存储失败原因
+                    exchangeReview.setMsg(respJson.getString("msg"));
+                    // 将状态设置为失败
+                    exchangeReview.setStatus(6);
+                }
+            } else if (pid==23) {
+                // omom 请求的金额必须是整数这里进行处理
+                exchangeReview.setMoney(exchangeReview.getMoney().setScale(0,RoundingMode.FLOOR));
+                response = SendHttp.sendExchangeOmom(exchangeReview);
+                LOGGER.error(response);
+                if ("".equals(response)){
+                    return error("fail");
+                }
+                // 获取平台订单号
+                JSONObject respJson = JSONObject.parseObject(response);
+                String status = respJson.getString("status");
+                if ("success".equals(status)){
+                    // 请求成功, 获取平台订单号
+                    String PfOrderNum = respJson.getString("transaction_id");
+                    exchangeReview.setPfOrderNum(PfOrderNum);
+                    exchange.setStatus(1);
+                }else {
+                    // 请求失败, 存储失败原因
+                    exchangeReview.setMsg(respJson.getString("msg"));
+                    // 将状态设置为失败
+                    exchangeReview.setStatus(6);
+                }
+            } else if (pid == 26) {
+                response = SendHttp.sendExchangeAIPay(exchangeReview);
+                LOGGER.error(response);
+                if ("".equals(response)){
+                    return error("fail");
+                }
+                JSONObject respJson = JSONObject.parseObject(response);
+                int code = respJson.getIntValue("code");
+                if (code==0){
+                    // 请求成功, 获取平台订单号
+                    String PfOrderNum = respJson.getJSONObject("data").getString("payoutId");
+                    exchangeReview.setPfOrderNum(PfOrderNum);
+                    exchange.setStatus(1);
+                }else {
+                    // 请求失败, 存储失败原因
+                    exchangeReview.setMsg(respJson.getString("error"));
+                    // 将状态设置为失败
+                    exchangeReview.setStatus(6);
+                }
+            } else if (pid == 29) {
+                response = SendHttp.sendExchangeWePay(exchangeReview);
+                LOGGER.error(response);
+                if ("".equals(response)){
+                    return error("fail");
+                }
+                JSONObject respJson = JSONObject.parseObject(response);
+                String result = respJson.getString("respCode");
+                if ("SUCCESS".equals(result)){
+                    // 请求成功 ,获取平台订单号
+                    String PfOrderNum = respJson.getString("tradeNo");
+                    exchangeReview.setPfOrderNum(PfOrderNum);
+                    exchange.setStatus(1);
+                }else {
+                    // 请求失败, 存储失败原因
+                    exchangeReview.setMsg(respJson.getString("errorMsg"));
+                    // 将状态设置为失败
                     exchangeReview.setStatus(6);
                 }
             }
@@ -233,8 +314,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             return "";
         }
         // 获取到用户的金币
-        String amount = String.valueOf(feeMap.get("Amount"));
-        return amount;
+        return String.valueOf(feeMap.get("Amount"));
     }
     /**
      * 查询发送成功邮件

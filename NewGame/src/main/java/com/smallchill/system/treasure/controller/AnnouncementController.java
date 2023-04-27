@@ -2,12 +2,10 @@ package com.smallchill.system.treasure.controller;
 
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
-import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
-import com.smallchill.game.newmodel.gameuserdb.ClientPos;
 import com.smallchill.game.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -53,17 +51,22 @@ public class AnnouncementController extends BaseController implements ConstShiro
         return json(list);
     }
     /**
-     * 或许包配置
+     * 获取包配置
      */
     @PostMapping("/clientConf")
     public AjaxResult clientConf(@RequestParam Integer cid){
         if (cid==null){
             return fail("包id错误");
         }
-        Map map = Db.selectOne("select clientType,ratio from login.dbo.ClientPos where clientType=#{clientType}", CMap.init().set("clientType", cid));
+        Map map = Db.selectOne("select clientType,ratio from login.dbo.ClientPos where clientType=#{clientType}",
+                CMap.init().set("clientType", cid));
         if (map==null){
             return fail("包id错误");
         }
+        // 获取包中游戏  blade_dict 56
+        List<Map> games = Db.selectList("select id,sort,state,gameId,name,(select name from blade_dict where a.type=id) as type " +
+                "from [RYPlatformManagerDB].[dbo].[game_conf] as a where isOpen=1 and clientType=#{clientType} order by sort", CMap.init().set("clientType", cid));
+        map.put("games",games);
         return json(map);
     }
     /**
@@ -74,13 +77,14 @@ public class AnnouncementController extends BaseController implements ConstShiro
         if (map == null){
             return "fail";
         }
-        // 用户id不为空则可以添加
         if (map.get("userId") !=null && StrKit.notBlank(map.get("userId").toString())){
             map.put("createTime",new Date());
-            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime) values (#{userId},#{Money},#{type},#{createTime})", map);
+            Db.insert("insert into QPGameRecordDB.dbo.RechRecord (userId,Money,type,createTime,clientType) " +
+                    "values (#{userId},#{Money},#{type},#{createTime},#{clientType})", map);
             return "success";
         }else {
             return "fail";
         }
+
     }
 }
