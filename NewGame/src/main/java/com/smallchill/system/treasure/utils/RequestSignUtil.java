@@ -13,7 +13,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.assertj.core.util.Strings;
+//import org.assertj.core.util.Strings;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -79,7 +79,7 @@ public class RequestSignUtil {
         for (String key : params.keySet()) {
             if (!"sign".equals(key)) {
                 String b = params.getString(key);
-                if (!Strings.isNullOrEmpty(b)){
+                if (!isNullOrEmpty(b)){
                     paramNameList.add(key);
                 }
             }
@@ -104,7 +104,9 @@ public class RequestSignUtil {
         return true;
     }
 
-
+    public static boolean isNullOrEmpty(String s) {
+        return s == null || s.length() == 0;
+    }
     /**
      * 私钥加密
      *

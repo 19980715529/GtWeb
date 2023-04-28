@@ -60,4 +60,6 @@ public interface ConstConfig {
 	// 获取游戏服务地址
 	String GAME_URL = pool.get("game.url");
 	String CALLBACK_IP = pool.get("callback.ip");
+	String META_Pay_URL = pool.get("MetaPay.url");
+
 }
