@@ -23,7 +23,7 @@ public class RateLimitAspect {
         int period = rateLimit.period(); // 限制时间，单位秒
         long now = System.currentTimeMillis();
         long timestamp = timestamps.getOrDefault(methodName, now);
-        if (now - timestamp > period * 1000) { // 时间窗口过期，重置计数器和时间戳
+        if (now - timestamp > period * 1000L) { // 时间窗口过期，重置计数器和时间戳
             counters.put(methodName, new AtomicInteger(0));
             timestamps.put(methodName, now);
         }

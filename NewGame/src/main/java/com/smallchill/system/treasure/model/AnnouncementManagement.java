@@ -17,6 +17,7 @@ public class AnnouncementManagement extends BaseModel {
     private String title;
     private String content;
     private Integer isOpen;
+    private Integer clientType;
 
     public Integer getIsOpen() {
         return isOpen;
@@ -48,5 +49,13 @@ public class AnnouncementManagement extends BaseModel {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public Integer getClientType() {
+        return clientType;
+    }
+
+    public void setClientType(Integer clientType) {
+        this.clientType = clientType;
     }
 }

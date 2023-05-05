@@ -17,6 +17,12 @@
                     </td>
                 </tr>
                 <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
+                    <td>
+                        <select name="announcement.clientType" id="ptypeid"></select>
+                    </td>
+                </tr>
+                <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告内容: </td>
                     <td><textarea name="announcement.content" cols="80"></textarea></td>
                 </tr>
@@ -25,6 +31,20 @@
         </form>
     </div>
 </div>
+<script>
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#ptypeid").html(html);
+        }
+    }).start();
+</script>
 <!-- 按钮 -->
 @ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
 @}

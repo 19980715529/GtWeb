@@ -12,7 +12,6 @@ import com.smallchill.core.toolbox.cache.CacheKit;
 import com.smallchill.db.config.meta.intercept.GameConfValidator;
 import com.smallchill.db.config.model.GameConf;
 import com.smallchill.game.service.CommonService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,7 +37,7 @@ public class GameConfController extends BaseController implements ConstShiro {
 
     @Resource
     private CommonService commonService;
-    @DoControllerLog(name="进入充值配置列表页面")
+    @DoControllerLog(name="进入游戏大厅配置列表页面")
     @RequestMapping("/")
     public String index(ModelMap mm) {
         mm.put("code", CODE);

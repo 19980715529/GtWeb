@@ -44,8 +44,7 @@ public class SendHttp {
         //  签名
         String sign  = HttpClientUtils.getSign(map, SECRET_SAFE_KEY);
         map.put("sign", sign);
-        String res = HttpClientUtils.sendPostJson(SAFE_URL, JSONObject.toJSONString(map));
-        return res;
+        return HttpClientUtils.sendPostJson(SAFE_URL, JSONObject.toJSONString(map));
     }
     /**
      * 兑换请求safe

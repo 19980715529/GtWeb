@@ -1,0 +1,97 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/paymentChannel/save" method="post" class="form-horizontal" role="form">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户名: </td>
+                    <td ><select type="text" id="ChannelID" name="paymentChannel.cid"></select>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
+                    <td ><select type="text" id="clientType" name="paymentChannel.clientType"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最小值: </td>
+                    <td><input type="text" name="paymentChannel.min" value="" /></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最大值: </td>
+                    <td><input type="text" name="paymentChannel.max" value=""/></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道额为赠送: </td>
+                    <td><input type="text" name="paymentChannel.give" value="" /></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道税率: </td>
+                    <td><input type="text" name="paymentChannel.channelTaxRate" value=""></input></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单位: </td>
+                    <td>
+                        <input type="radio" name="paymentChannel.unit" value="PHP">PHP</input>&nbsp;&nbsp;
+                        <input type="radio" name="paymentChannel.unit" value="USDT">USDT</input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">金币倍率: </td>
+                    <td>
+                        <input type="text" name="paymentChannel.goldProportion"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否显示标签: </td>
+                    <td>
+                        <input type="radio" name="paymentChannel.isLabel" value="0" checked>否</input>&nbsp;&nbsp;
+                        <input type="radio" name="paymentChannel.isLabel" value="1">NEW</input>
+                        <input type="radio" name="paymentChannel.isLabel" value="2">HOT</input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">总赢倍率: </td>
+                    <td>
+                        <input type="text" name="paymentChannel.winConf"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+                    <td>
+                        <input type="text" name="paymentChannel.sort"></input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+                    <td>
+                        <input type="radio" name="paymentChannel.isOpen" value="0" checked>关闭</input>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="paymentChannel.isOpen" value="1">开启</input>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var ctx="${ctxPath}";
+    $(function (){
+        new Ajax(ctx + "/paymentChannel/getChannel", function (data) {
+            if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data.rows;
+                var html = '<option value="">请选择</option>';
+                for (var i = 0; i < type.length; i++) {
+                    html += '<option value="' + type[i]['id'] + '">' + type[i]['name'] + '</option>';
+                }
+                $("#ChannelID").html(html);
+            }
+        }).start();
+    })
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
+
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

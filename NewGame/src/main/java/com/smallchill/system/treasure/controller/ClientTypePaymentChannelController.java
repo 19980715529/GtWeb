@@ -12,46 +12,44 @@ import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
-import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.game.service.CommonService;
-import com.smallchill.system.service.ChannelService;
+import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.treasure.meta.intercept.ChannelAddValidator;
 import com.smallchill.system.treasure.meta.intercept.ChannelEditValidator;
+import com.smallchill.system.treasure.meta.intercept.PaymentChannelValidator;
 import com.smallchill.system.treasure.model.Channel;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.smallchill.system.treasure.model.PaymentChannel;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * 充值渠道接口
- */
 @Controller
-@RequestMapping("/rechargechannel")
-public class RechargeChannelController extends BaseController implements ConstShiro {
-    @Autowired
+@RequestMapping("/paymentChannel")
+public class ClientTypePaymentChannelController extends BaseController implements ConstShiro {
+    @Resource
     private CommonService commonService;
-    @Autowired
-    private ChannelService service;
-    private static String BASE_PATH = "/system/rechargechannel/";
-    private static String CODE = "rechargechannel";
-    private static String LIST_SOURCE = "recharge_channel.all_list";
-    private static String PREFIX = "channel"; // 与前端请求体名字匹配
-    @DoControllerLog(name="进入添加支付渠道管理界面")
+    @Resource
+    private ExchangeReviewService service;
+    private static String BASE_PATH = "/modules/platform/paymentChannel/";
+    private static String CODE = "paymentChannel";
+    private static String LIST_SOURCE = "payment_channel.all_list";
+    private static String PREFIX = "paymentChannel";
+
     @RequestMapping("/")
-    //@Permission({ ADMINISTRATOR, ADMIN })
-    public String index(ModelMap mm) {
-        mm.put("code", CODE);
-        return "/modules/platform/plog/platform_recharge_channel.html";
+    public String index(ModelMap mm){
+        mm.put("code",CODE);
+        return BASE_PATH+"paymentChannel.html";
     }
 
-    /*
-    获取充值列表
+    /**
+     *
+     * 获取充值列表
      */
     @Json
     @RequestMapping(KEY_LIST)
@@ -59,11 +57,8 @@ public class RechargeChannelController extends BaseController implements ConstSh
     public Object list() {
         return paginateBySelf(LIST_SOURCE);
     }
-    /*
-    添加/system/rechargechannel/rechargechannel_add.html
-    rechargechannel
-     */
-    @DoControllerLog(name="进入充值渠道的添加界面")
+
+    @DoControllerLog(name="进入分包充值渠道的添加界面")
     @RequestMapping(KEY_ADD)
     @Permission({ ADMINISTRATOR, ADMIN })
     public String add(ModelMap mm) {
@@ -71,19 +66,10 @@ public class RechargeChannelController extends BaseController implements ConstSh
             return REDIRECT_UNAUTH;
         }
         mm.put("code", CODE);
-        return BASE_PATH+"rechargechannel_add.html";
+        return BASE_PATH+"paymentChannel_add.html";
     }
 
-    @DoControllerLog(name="进入充值渠道的添加商户界面")
-    @RequestMapping(KEY_ADD+"/{id}")
-    public String add(@PathVariable Integer id, ModelMap mm) {
-        if(ShiroKit.lacksRole(ADMINISTRATOR)){
-            return REDIRECT_UNAUTH;
-        }
-        mm.put("code", CODE);
-        return BASE_PATH+"rechargechannel_max_add.html";
-    }
-    /*
+    /**
     进入修改界面
      */
     @RequestMapping(KEY_EDIT + "/{id}")
@@ -91,10 +77,10 @@ public class RechargeChannelController extends BaseController implements ConstSh
     public String edit(@PathVariable Integer id, ModelMap mm) {
         Map map = new HashMap();
         map.put("id", id);
-        Map channel = commonService.getInfoByOne("recharge_channel.by_id_one_channel", map);
+        Map channel = commonService.getInfoByOne("payment_channel.by_id_one_channel", map);
         mm.put("channel", channel);
         mm.put("code", CODE);
-        return BASE_PATH + "rechargechannel_edit.html";
+        return BASE_PATH + "paymentChannel_edit.html";
     }
     /*
     删除
@@ -130,40 +116,15 @@ public class RechargeChannelController extends BaseController implements ConstSh
     // 添加保存
     @Json
     @RequestMapping(KEY_SAVE)
-    @Before(ChannelAddValidator.class)
+    @Before(PaymentChannelValidator.class)
     @Permission(ADMINISTRATOR)
     public AjaxResult save() {
-        Channel channel = mapping(PREFIX, Channel.class);
-        // 判断pid是否等于空
-        int temp =0;
-        if(channel.getPid() == 0){
-            // 为空代表新商户
-            channel.setIsOpen(1);
-            channel.setPid(0);
-            CMap parse = CMap.parse(channel);
-            temp = Db.save("Channel", "id", parse);
-        }else {
-            // 查询排序最大值
-            Map sortMap = commonService.getInfoByOne("recharge_channel.get_max_sort", channel);
-            Integer sorts =null;
-            if (sortMap==null){
-                sorts=0;
-            }
-            sorts = Integer.valueOf(sortMap.get("sorts").toString())+1;
-            channel.setSort(sorts);
-            channel.setName(channel.getChannelName()+sorts);
-            // 查询商户名
-            Map map = Db.selectOne("select mcName from Channel where id =#{pid}", channel);
-            channel.setIsOpen(1);
-            channel.setMcName(map.get("mcName").toString());
-            CMap parse = CMap.parse(channel);
-            temp = Db.save("Channel", "id", parse);
-        }
-        if (temp> 0) {
-            CacheKit.removeAll(SYS_CACHE);
+        PaymentChannel paymentChannel = mapping(PREFIX, PaymentChannel.class);
+        boolean save = Blade.create(PaymentChannel.class).save(paymentChannel);
+        if (save){
             return success(SAVE_SUCCESS_MSG);
-        } else {
-            return error(SAVE_FAIL_MSG);
+        }else {
+            return fail(SAVE_FAIL_MSG);
         }
     }
     /**
@@ -179,22 +140,14 @@ public class RechargeChannelController extends BaseController implements ConstSh
         mm.put("code", CODE);
         return BASE_PATH + "rechargechannel_view.html";
     }
+
     /**
-     * 获取父渠道
+     * 获取所有渠道id和提示
      */
     @Json
     @RequestMapping("/getChannel")
     public AjaxResult getChannel(){
-        Object channel = paginateBySelf("recharge_channel.all_parent_list");
-        return json(channel);
-    }
-    /**
-     * 获取所有兑换小渠道数据
-     */
-    @Json
-    @RequestMapping("/getExchangeChannelMin")
-    public AjaxResult getExchangeChannelMin(){
-        Object channel = paginateBySelf("recharge_channel.all_exchange_channel_min");
+        Object channel = paginateBySelf("payment_channel.find_channel");
         return json(channel);
     }
 }

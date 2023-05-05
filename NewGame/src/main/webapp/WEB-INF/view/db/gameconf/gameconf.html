@@ -21,7 +21,7 @@
             {name: "name", sortable: false},
             {name: "isOpen", sortable: false, formatter: rowText},
             {name: "sort", sortable: false},
-            {name: "state", sortable: false},
+            {name: "state", sortable: false,formatter:rowShow},
             {name: "type", sortable: false},
             {name: "typeSort", sortable: false}
         ];
@@ -41,11 +41,13 @@
 
     function rowShow(cellvalue, options, rowObject) {
         var html = "";
-        if (options.colModel.name === 'RewardType') {
-            if (cellvalue === 1) {
-                html = "金币";
-            } else if (cellvalue === 2) {
-                html = "转盘奖励";
+        if (options.colModel.name === 'state') {
+            if (cellvalue === 0) {
+                html = '<span class="label label-default">无</span>';
+            } else if (cellvalue === 1) {
+                html = '<span class="label label-success">NEW</span>';
+            }else if (cellvalue===2){
+                html = '<span class="label label-warning">HOT</span>';
             }
         }
         return html;

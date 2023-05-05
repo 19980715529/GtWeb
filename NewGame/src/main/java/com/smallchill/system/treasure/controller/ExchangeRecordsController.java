@@ -21,6 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,9 +31,9 @@ import java.util.Map;
 @Controller
 @RequestMapping("/exchangerecords")
 public class ExchangeRecordsController extends BaseController implements ConstShiro {
-    @Autowired
+    @Resource
     private CommonService commonService;
-    @Autowired
+    @Resource
     private ExchangeReviewService service;
     private static String BASE_PATH = "/system/exchangereview/";
     private static String CODE = "exchangerecords";
@@ -64,9 +65,6 @@ public class ExchangeRecordsController extends BaseController implements ConstSh
         if(parameter.contains("%")){
             parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
         }
-        // 解析查询条件
-//        Map paras = JSON.parseObject(parameter, Map.class);
-//        gird = commonService.getInfoList(LIST_SOURCE, paras);
         gird = paginateBySelf(LIST_SOURCE);
         return gird;
     }

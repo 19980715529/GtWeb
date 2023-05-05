@@ -13,6 +13,7 @@
           </td>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
           <td>
+            <input type="hidden" id="clientType" value="${gameconf.clientType}"/>
             <select id="ptypeid" type="text" name="gameconf.clientType">
             </select>
         </tr>
@@ -31,7 +32,8 @@
         <tr>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别: </td>
           <td>
-            <select id="type" name="gameconf.type" value="${gameconf.type}">
+            <input type="hidden" id="type1" value="${gameconf.type}"/>
+            <select id="type" name="gameconf.type">
             </select>
           </td>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏类别中排序: </td>
@@ -55,11 +57,17 @@
   // 获取平台列表
   new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
     console.log(data);
-    if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+    if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
       var type = data.data;
-      var html = '<option value="">请选择</option>';
+      var html = '';
+      var clientType = parseInt($("#clientType").val())
       for (var i = 0; i < type.length; i++) {
-        html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+        var t = type[i]['clientType']
+        if (clientType===t){
+          html = '<option value="' + t + '">' + type[i]['name'] + '</option>'+html;
+        }else {
+          html += '<option value="' + t + '">' + type[i]['name'] + '</option>';
+        }
       }
       $("#ptypeid").html(html);
     }
@@ -67,11 +75,17 @@
   // 获取游戏类型
   new Ajax("${ctxPath}/${code}/gemaType", function (data) {
     console.log(data);
-    if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+    if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
       var type = data.data;
-      var html = '<option value="">请选择</option>';
+      var html = '';
+      var type1 = parseInt($("#type1").val())
       for (var i = 0; i < type.length; i++) {
-        html += '<option value="' + type[i]['id'] + '">' + type[i]['name'] + '</option>';
+        var t= type[i]['id']
+        if (type1===t){
+          html = '<option value="' + t + '">' + type[i]['name'] + '</option>'+html;
+        }else {
+          html += '<option value="' + t + '">' + type[i]['name'] + '</option>';
+        }
       }
       $("#type").html(html);
     }

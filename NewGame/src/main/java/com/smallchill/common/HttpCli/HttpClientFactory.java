@@ -81,6 +81,7 @@ public class HttpClientFactory {
                     e.printStackTrace();
                 }
 
+                assert sslsf != null;
                 Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
                         .<ConnectionSocketFactory> create().register("https", sslsf)
                         .register("http", new PlainConnectionSocketFactory()).build();

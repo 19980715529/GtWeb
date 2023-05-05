@@ -23,6 +23,14 @@
 
         </tr>
         <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
+          <td>
+            <input type="hidden" id="clientType" value="${announcement.clientType}"/>
+            <select name="announcement.clientType" id="ptypeid">
+            </select>
+          </td>
+        </tr>
+        <tr>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">公告内容: </td>
           <td colspan="3">
             <textarea name="announcement.content" cols="90">${announcement.content}</textarea>
@@ -33,6 +41,27 @@
     </form>
   </div>
 </div>
+<script>
+  // 获取平台列表
+  new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    console.log(data);
+    if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+      var type = data.data;
+      var html = '';
+      var clientType=parseInt($("#clientType").val())
+      for (var i = 0; i < type.length; i++) {
+        var t=type[i]['clientType'];
+        console.log(clientType,t)
+        if (clientType===t){
+          html= '<option value="' + t + '">' + type[i]['name'] + '</option>'+html;
+        }else {
+          html += '<option value="' + t + '">' + type[i]['name'] + '</option>';
+        }
+      }
+      $("#ptypeid").html(html);
+    }
+  }).start();
+</script>
 <!-- 按钮 -->
 @ include("/common/_curd/_btn.html",{btn_save:"确定修改",btn_close:"关闭"}) {}
 @}
