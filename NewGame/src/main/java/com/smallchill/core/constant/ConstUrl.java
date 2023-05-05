@@ -125,4 +125,18 @@ public interface ConstUrl {
      * WePay 兑换回调地址
      */
     String EXCHANGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_WePay_callback";
+
+    /**
+     * 银河系统充值地址 GALAXY
+     */
+    String RECHARGE_GALAXY_URL = "https://pay.xxxx.cash/api/transfer";
+    // 兑换地址
+    String EXCHANGE_GALAXY_URL="https://pay.xxxx.cash/api/daifu";
+
+    // GALAXY 充值回调地址
+    String RECHARGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_galaxy_callback";
+    // GALAXY 兑换回调地址
+    String EXCHANGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_galaxy_callback";
+
 }
+

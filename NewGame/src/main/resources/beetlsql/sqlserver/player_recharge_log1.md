@@ -14,17 +14,20 @@ new_recharge_log
 	 and r.topUpAmount >=#{moneyMin}
 	@}
     @if(!isEmpty(moneyMax)){
-	 and r.topUpAmount <=#{moneyMax}
+	    and r.topUpAmount <=#{moneyMax}
 	@}
+    @if(!isEmpty(recType)){
+        and r.isThatTay=#{recType}
+    @}
+    @if(!isEmpty(clientType)){
+        and r.packageName=#{clientType}
+    @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,r.createTime,#{createTime})<=0
 	@}
 	@if(!isEmpty(createTime)){
         and DATEDIFF(DAY,r.createTime,#{endTime})>=0
 	@}
-    @if(!isEmpty(UserTypeID)){
-        and r.isThatTay=#{UserTypeID}
-    @}
 	
 recharge_total_RMB
 ===

@@ -87,5 +87,11 @@ public interface ConstKey {
     // 代付密钥
 //    String WEPAY_PKEY = "KSIZ9QAGUTP79B1V5BBNNJ9LJP78GLLJ"; 测试
     String WEPAY_PKEY = "I4EIOUBMQKHHZ1XOQ7TGLJ6JI4QCBHMH";
-
+    /**
+     * 银河系统
+     */
+    // 商户号
+    String GALAXY_APPID = "88052";
+    // 密钥
+    String GALAXY_KEY = "f0bff0f0c0e3b25257677a79fc2e9fb2";
 }

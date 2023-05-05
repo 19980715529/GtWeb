@@ -72,11 +72,6 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	@Json
 	@RequestMapping(KEY_RCHARGE_LOG)
 	public Object rllist() {
-//		Object gird = paginateBySelf("player_recharge_log1.new_recharge_log");
-//		Map parseObject = JSON.parseObject(JSON.toJSONString(gird), Map.class);
-//		Object usercount = commonService.getInfoByOne("player_recharge_log.recharge_user_count",null);
-//		parseObject.put("userdata", usercount);
-//		gird = JSON.toJSON(parseObject);
 		Object gird = new Object();
 		String parameter = HttpKit.getRequest().getParameter("where");
 		if(StrKit.isBlank(parameter)) {

@@ -22,16 +22,16 @@
 		var grid_url = ctx + "/${code}/rllist";//查询列表接口
 		var _colnames = [ "发起时间", "订单号","用户ID","昵称","充值金额(PHP)", "获得金币", "订单状态", "包名称", "充值渠道", "充值类型", "完成时间"];
 		var _colmodel = [ { name : "createTime", sortable:false,width:200 },
-		                  { name : "orderNumber", sortable:false},
-		                  { name : "userId", sortable:false,formatter:genLink},
-		                  { name : "nickname", sortable:false,formatter:genLink},
-                          { name : "topUpAmount",sortable:false},
-		                  { name : "gold", sortable:false },
-		                  { name : "orderStatus", sortable:false, formatter: rowShow},
-		                  { name : "packageName", sortable:false},
-		                  { name : "channel", sortable:false},
-		                  { name : "channel_type", sortable:false},
-		                  { name : "endTime", sortable:false }]
+			{ name : "orderNumber", sortable:false},
+			{ name : "userId", sortable:false,formatter:genLink},
+			{ name : "nickname", sortable:false,formatter:genLink},
+			{ name : "topUpAmount",sortable:false},
+			{ name : "gold", sortable:false },
+			{ name : "orderStatus", sortable:false, formatter: rowShow},
+			{ name : "packageName", sortable:false},
+			{ name : "channel", sortable:false},
+			{ name : "channel_type", sortable:false},
+			{ name : "endTime", sortable:false }]
 
 		var totalcoin = 0;
 		jQuery(grid_selector).jqGrid({
@@ -71,14 +71,14 @@
 			return html;
 		}
 	}
-	
+
 	function getTotalRecharge(){
 		new Ajax("${ctxPath}/player/getTotalRecharge", function (data) {
-	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-	        	var temp = data.data;
+			if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+				var temp = data.data;
 				$("#totalRecharge").text(temp.currentrecharge.difference);
-	        	$("#totalMoney").text(temp.currentrecharge.money);
-	        	$("#totalUser").text(temp.currentrecharge.count);
+				$("#totalMoney").text(temp.currentrecharge.money);
+				$("#totalUser").text(temp.currentrecharge.count);
 				$("#totalNewMoney").text(temp.newrecharge.money);
 				$("#totalNewUser").text(temp.newrecharge.count);
 
@@ -86,8 +86,8 @@
 				$("#totalMoneys").text(temp.recharge.money);
 				$("#totalUsers").text(temp.recharge.num);
 
-	        }
-	    }).start();
+			}
+		}).start();
 	}
 	function real_time_data(){
 		new Ajax(ctx + "/exchangerecords/data", function (data) {
@@ -106,25 +106,25 @@
 			}
 		}).start();
 	}
-	
+
 	function goNewTab(id) {
 		window.top.addTabs({
-	        id: 'player_showdetail_' + id,
-	        title: '用户详情',
-	        url: ctx + '/player/detailinfo/' + id,
-	        icon: '',
-	        close: true
-	    });
+			id: 'player_showdetail_' + id,
+			title: '用户详情',
+			url: ctx + '/player/detailinfo/' + id,
+			icon: '',
+			close: true
+		});
 	}
 
 	function showUnLog() {
 		window.top.addTabs({
-	        id: 'recharge_unstatistics',
-	        title: '未统计充值记录',
-	        url: ctx + '/player/rechargeUnstatistics',
-	        icon: '',
-	        close: true
-	    });
+			id: 'recharge_unstatistics',
+			title: '未统计充值记录',
+			url: ctx + '/player/rechargeUnstatistics',
+			icon: '',
+			close: true
+		});
 	}
 </script>
 
@@ -136,32 +136,32 @@
 		<div class="">
 			<!-- 简单查询第一组 -->
 			<div class="padding-2">
-			<label class=""> 玩家ID： </label> 
-			<input type="text" id="UserID" value="${id!}" placeholder=""
-				class="" /> 
-			<!-- 简单查询第二组 -->
-			<label class=""> 订单号： </label> 
-			<input type="text" id="OrderID" value="" placeholder="" class="" />
-				
-<!--			 简单查询第三组-->
-			<label class=""> 充值渠道： </label>
-			<select class="" id="ChannelID">
-			</select>
-			
-			<!-- 简单查询第四组 -->
-			<label class=""> 用户类型： </label> 
-			<select class="" id="UserTypeID">
-				<option value="">请选择</option>
-				<option value="0">普通用户</option>
-				<option value="1">当日用户</option>
-			</select>
-			<!-- 简单查询第五组 -->			
-			<label class=""> 充值时间： </label> 
-			<input type="text" id="start_time" value="" class="" readonly="readonly"/>- 
-			<input type="text" id="end_time" value="" class="" readonly="readonly"/>
-			
-<!--			<label class=""> 游戏平台： </label> -->
-<!--			<select id="ptypeid"></select><br />-->
+				<label class=""> 玩家ID： </label>
+				<input type="text" id="UserID" value="${id!}" placeholder=""
+					   class="" />
+				<!-- 简单查询第二组 -->
+				<label class=""> 订单号： </label>
+				<input type="text" id="OrderID" value="" placeholder="" class="" />
+
+				<!--			 简单查询第三组-->
+				<label class=""> 充值渠道： </label>
+				<select class="" id="ChannelID">
+				</select>
+
+				<!-- 简单查询第四组 -->
+				<label class=""> 充值类型： </label>
+				<select class="" id="recType">
+					<option value="">全部</option>
+					<option value="0">普通充值</option>
+					<option value="1">新增充值</option>
+				</select>
+				<!-- 简单查询第五组 -->
+				<label class=""> 充值时间： </label>
+				<input type="text" id="start_time" value="" class="" readonly="readonly"/>-
+				<input type="text" id="end_time" value="" class="" readonly="readonly"/>
+
+				<label class=""> 包来源： </label>
+				<select id="clientType"></select><br />
 			</div>
 			<div class="padding-2">
 				<label class=""> 充值金额： </label>
@@ -169,12 +169,12 @@
 				<input type="text" id="moneyMax" value="" class="" placeholder="最大区间"/>
 
 
-			<!-- 简单查询按钮 -->
-			<label class="">
-				<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
-				<!--<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>-->
-				<a name="${ctxPath}/player/rechargeUnstatistics" title="未统计充值记录" class="btn btn-sx btn-white btn-search iframeurl" href="${ctxPath}/player/rechargeUnstatistics"><strong>查看未统计充值记录</strong></a>
-			</label>
+				<!-- 简单查询按钮 -->
+				<label class="">
+					<button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+					<!--<button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>-->
+					<a name="${ctxPath}/player/rechargeUnstatistics" title="未统计充值记录" class="btn btn-sx btn-white btn-search iframeurl" href="${ctxPath}/player/rechargeUnstatistics"><strong>查看未统计充值记录</strong></a>
+				</label>
 			</div>
 		</div>
 	</form>
@@ -204,54 +204,55 @@
 </div>
 <script src="${ctxPath}/static/laydate/laydate.js"></script>
 <script type="text/javascript">
-    laydate({
-        elem : '#start_time',
-        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
-        choose : function(datas) { //选择日期完毕的回调
-            /*   alert('得到：'+datas); */
-        }
-    });
-    laydate({
-        elem : '#end_time',
-        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
-        //festival: true, //显示节日
-        choose : function(datas) { //选择日期完毕的回调
-            /*   alert('得到：'+datas); */
-        }
-    });
-	
+	laydate({
+		elem : '#start_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+	laydate({
+		elem : '#end_time',
+		format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+		//festival: true, //显示节日
+		choose : function(datas) { //选择日期完毕的回调
+			/*   alert('得到：'+datas); */
+		}
+	});
+
 	// 获取平台列表
 	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
-        console.log(data);
-        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-        	var type = data.rows;
-        	var html = '<option value="">请选择</option>';
-        	for (var i = 0; i < type.length; i++) {
+		console.log(data);
+		if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+			var type = data.data;
+			var html = '<option value="">请选择</option>';
+			for (var i = 0; i < type.length; i++) {
 				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
 			}
-        	$("#ptypeid").html(html);
-        }
- 	}).start();
-	
+			$("#clientType").html(html);
+		}
+	}).start();
+
 	// 获取充值渠道
 	new Ajax(ctx + "/${code}/rechargechannel/list", function (data) {
-	        if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-	        	var type = data.data.rows;
-	        	var html = '<option value="">全部</option>';
-	        	for (var i = 0; i < type.length; i++) {
-					html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
-				}
-	        	$("#ChannelID").html(html);
-	        }
-	    }).start();
-	
+		if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
+			var type = data.data.rows;
+			var html = '<option value="">全部</option>';
+			for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
+			}
+			$("#ChannelID").html(html);
+		}
+	}).start();
+
 	function goSearch() {
 		var UserID = $("#UserID").val();
 		var OrderID = $("#OrderID").val();
 		var ChannelID = $("#ChannelID").val();
-		var UserTypeID = $("#UserTypeID").val(); // 用户类型
+		var recType = $("#recType").val(); // 充值类型
 		var moneyMin = $("#moneyMin").val();
 		var moneyMax = $("#moneyMax").val();
+		var clientType = $("#clientType").val();
 		var wheres = {};
 		if (BladeTool.isNotEmpty(moneyMax) || BladeTool.isNotEmpty(moneyMin)){
 			if (moneyMin<0 || moneyMax<0){
@@ -283,15 +284,18 @@
 		if(BladeTool.isNotEmpty(ChannelID)) {
 			wheres['ChannelID'] = ChannelID;
 		}
-		if(BladeTool.isNotEmpty(UserTypeID)) {
-			wheres['UserTypeID'] = UserTypeID;
+		if(BladeTool.isNotEmpty(recType)) {
+			wheres['recType'] = recType;
+		}
+		if(BladeTool.isNotEmpty(clientType)) {
+			wheres['clientType'] = clientType;
 		}
 
 		var start_time = $("#start_time").val();
 		var end_time = $("#end_time").val();
 		if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
 			layer_alert('请输入开始时间!', "warn");
-	    	return;
+			return;
 		} else if(BladeTool.isNotEmpty(end_time)) {
 			wheres['endTime'] = end_time;
 		}
@@ -302,25 +306,25 @@
 				$("#end_time").val(getBeforeDate(0));
 			}
 		}
-	    
-	    var filter = "";
-        if (typeof (_filter) != "undefined") {
-            filter = _filter;
-        }
-        var where = "";
-		
+
+		var filter = "";
+		if (typeof (_filter) != "undefined") {
+			filter = _filter;
+		}
+		var where = "";
+
 		$.each(wheres, function(key, value) {
 			if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
 				where += "\"" + key + "\":\"" + value + "\"" + ",";
 			}
 		});
-		
+
 		if (BladeTool.isNotEmpty(where)) {
 			where = '{' + where;
 			where = where.substring(0, where.length - 1);
 			where += '}';
 		}
-        
+
 		where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
 		isAutoPage = (BladeTool.isEmpty(where) ? true : false);
 		var pageNum = $jqGrid.getGridParam('page');
@@ -335,18 +339,18 @@
 			}
 		}).trigger("reloadGrid");
 	}
-	
+
 	function resetForm() {
 		$("input").val("");
 		$("select").val("");
 		$('#start_time').val(getBeforeDate(0));
 		$('#end_time').val(getBeforeDate(0));
-        reloadGrid();
+		reloadGrid();
 	}
 	$(function(){
-	 	$('#start_time').val(getBeforeDate(0));
-	 	$('#end_time').val(getBeforeDate(0));
-	 });
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+	});
 </script>
 
 <!-- 引入列表页所需js -->

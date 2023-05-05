@@ -400,6 +400,55 @@ public class SendHttp {
         response= Utils.post(EXCHANGE_WEPAY_URL, map);
         return response;
     }
+    public static String sendRechargeGalaxy(RechargeRecords rechargeRecords){
+        String response;
+        HashMap<String, Object> map = new HashMap<>();
+        // 商户号
+        map.put("merchant", GALAXY_APPID);
+        // 支付类型
+        map.put("payment_type", 3);
+        // 提交金额
+        map.put("amount", rechargeRecords.getOrderNumber());
+        // 订单号
+        map.put("order_id", rechargeRecords.getOrderNumber());
+        // 银行代码
+        map.put("bank_code", "gcash");
+        // 回调地址
+        map.put("callback_url", RECHARGE_GALAXY_CALLBACK_URL);
+        // 跳转地址
+        map.put("return_url", "https://www.baidu.com");
+        //
+        String sign = Utils.getSign(map, GALAXY_KEY);
+        map.put("sign", sign);
+        response = HttpClientUtils.sendPostJson(RECHARGE_GALAXY_URL, JSON.toJSONString(map));
+        return response;
+    }
+
+    public static String sendExchangeGalaxy(ExchangeReview exchangeReview){
+        String response;
+        HashMap<String, Object> map = new HashMap<>();
+        // 商户号
+        map.put("merchant", GALAXY_APPID);
+        // 提交金额
+        map.put("total_amount", exchangeReview.getMoney());
+        // 回调地址
+        map.put("callback_url", EXCHANGE_GALAXY_CALLBACK_URL);
+        // 订单号
+        map.put("order_id", exchangeReview.getOrderNumber());
+        // 银行代码
+        map.put("bank", "gcash");
+        // 收款人姓名
+        map.put("bank_card_name", exchangeReview.getBankNumber());
+        // 收款人账号
+        map.put("bank_card_account", exchangeReview.getBankNumber());
+        // IFSC
+        map.put("bank_card_remark", "");
+        // 获取签名
+        String sign = Utils.getSign(map, GALAXY_KEY);
+        map.put("sign", sign);
+        response = HttpClientUtils.sendPostJson(RECHARGE_GALAXY_URL, JSON.toJSONString(map));
+        return response;
+    }
 
 
 

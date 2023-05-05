@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
@@ -128,12 +129,13 @@ public class Utils {
             conn.setDoOutput(true);
             conn.getOutputStream().write(postDataBytes);
             Reader in = new BufferedReader(new InputStreamReader(
-                    conn.getInputStream(), "UTF-8"));
+                    conn.getInputStream(), StandardCharsets.UTF_8));
             StringBuilder sb = new StringBuilder();
             for (int c; (c = in.read()) >= 0;)
                 sb.append((char) c);
             response = sb.toString();
         } catch (Exception e) {
+            System.out.println(e.getMessage());
            return response;
         }
         return response;

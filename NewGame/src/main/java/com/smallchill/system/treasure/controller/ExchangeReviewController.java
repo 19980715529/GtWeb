@@ -268,6 +268,24 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     // 将状态设置为失败
                     exchangeReview.setStatus(6);
                 }
+            } else if (pid == 32) {
+                response = SendHttp.sendExchangeGalaxy(exchangeReview);
+                LOGGER.error(response);
+                if ("".equals(response)){
+                    return error("fail");
+                }
+                JSONObject respJson = JSONObject.parseObject(response);
+                int status = respJson.getIntValue("status");
+                // 成功
+                if (status==1){
+                    // 请求成功 ,获取平台订单号
+                    exchange.setStatus(1);
+                }else {
+                    // 请求失败, 存储失败原因
+                    exchangeReview.setMsg(respJson.getString("message"));
+                    // 将状态设置为失败
+                    exchangeReview.setStatus(6);
+                }
             }
         }else if(progress==4){
             // 兑换完成

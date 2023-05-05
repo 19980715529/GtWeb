@@ -86,4 +86,8 @@ public class RechargeExchangeCommon {
         });
         return o;
     }
+    /**
+     * rarp充值执行逻辑
+     */
+
 }

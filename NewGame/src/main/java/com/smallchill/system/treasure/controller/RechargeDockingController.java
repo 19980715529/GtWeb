@@ -137,165 +137,33 @@ public class RechargeDockingController extends BaseController implements ConstSh
         // 判断商家
         int pid = Integer.parseInt(channel.get("pid").toString());
         rechargeRecords.setChannelPid(pid);
-        if ( pid==1){
-            // RARP
-            response = SendHttp.sendRechargeRarp(rechargeRecords, channel);
-            if(response.equals("")){
-                return json(resultMap,"fail",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            LOGGER.error(jsonObject.toString());
-            int code =jsonObject.getIntValue("code");
-            if (code==0){
-                // 错误时状态为30
-                rechargeRecords.setMsg(jsonObject.getString("msg"));
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                // 关闭订单
-                rechargeRecords.setOrderStatus(3);
-                resultMap.put("urlPay","");
+        switch (pid) {
+            case 1:
+                // RARP
+                return rechargeRarp(rechargeRecords, resultMap, channel);
+            case 4:
+                // safe
+                return rechargeSafe(rechargeRecords, resultMap, channel);
+            case 20:
+                // MetaPay
+                return rechargeMetaPay(rechargeRecords, resultMap);
+            case 23:
+                // Omo
+                return rechargeOmo(rechargeRecords, resultMap);
+            case 26:
+                // AIPay
+                return rechargeAIPay(rechargeRecords, resultMap);
+            case 29:
+                // WePay
+                return rechargeWePay(rechargeRecords, resultMap);
+            case 32:
+                // 银河系统
+                return rechargeGalaxy(rechargeRecords,resultMap);
+            default:
                 return json(resultMap,"Recharge application failed",1);
-            }else {
-                String pay_url =jsonObject.getJSONObject("data").getString("pay_url");
-                rechargeRecords.setUrlPay(pay_url);
-                // 获取平台订单号
-                String ordernum = jsonObject.getJSONObject("data").getString("ordernum");
-                rechargeRecords.setPfOrderNum(ordernum);
-                // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
-                int status = jsonObject.getJSONObject("data").getIntValue("status");
-                // 生成订单记录
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                String url= jsonObject.getJSONObject("data").getString("pay_url");
-                resultMap.put("urlPay",url);
-                rechargeRecords.setUrlPay(url);
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                // 判断支付状态
-                if (status == 0){
-                    return json(resultMap);
-                }else if (status==10){
-                    return json(resultMap);
-                }
-                return json(resultMap);
-            }
-        }else if (pid == 4){
-            // safe
-            response = SendHttp.sendRechargeSafe(rechargeRecords,channel);
-            LOGGER.error(response);
-            if(response.equals("")){
-                return json(resultMap,"file",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            String status = jsonObject.get("status").toString();
-            if ("success".equals(status)){
-                // 充值请求成功
-                // 获取支付链接
-                String payUrl = jsonObject.getString("order_data");
-                resultMap.put("urlPay",payUrl);
-                // 将订单加入到未支付的队列中
-                rechargeRecords.setUrlPay(payUrl);
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(jsonObject.getString("status_mes"));
-                // 关闭订单
-                rechargeRecords.setOrderStatus(3);
-            }
-        } else if (pid == 20) {
-            response = SendHttp.sendRechargeMetaPay(rechargeRecords);
-            LOGGER.error(response);
-            if(response.equals("")){
-                return json(resultMap,"Recharge application failed",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            int code = jsonObject.getIntValue("platRespCode");
-            String PfOrderNum = jsonObject.getString("transId");
-            rechargeRecords.setPfOrderNum(PfOrderNum);
-            if (code==0){
-                // 获取支付地址
-                String payUrl = jsonObject.getString("url");
-                resultMap.put("urlPay",payUrl);
-                rechargeRecords.setUrlPay(payUrl);
-                // 将订单加入到未支付队列中
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(code+jsonObject.getString("msg"));
-                rechargeRecords.setOrderStatus(3);
-            }
-        } else if (pid == 23) {
-            response = SendHttp.sendRechargeOmom(rechargeRecords);
-            LOGGER.error(response);
-            if(response.equals("")){
-                return json(resultMap,"Recharge application failed",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            String status = jsonObject.getString("status");
-            if ("1".equals(status)){
-                // 获取支付地址
-                String payUrl = jsonObject.getString("payUrl");
-                resultMap.put("urlPay",payUrl);
-                rechargeRecords.setUrlPay(payUrl);
-                // 将订单加入到未支付队列中
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(jsonObject.getString("msg"));
-                rechargeRecords.setOrderStatus(3);
-            }
-        } else if (pid == 26) {
-            response = SendHttp.sendRechargeAIPay(rechargeRecords);
-            LOGGER.error(response);
-            if("".equals(response)){
-                return json(resultMap,"Recharge application failed",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            int code = jsonObject.getIntValue("code");
-            if (code==0){
-                // 获取支付链接
-                String payUrl = jsonObject.getJSONObject("data").getString("h5Url");
-                resultMap.put("urlPay",payUrl);
-                rechargeRecords.setUrlPay(payUrl);
-                // 设置平台订单号
-                String PfOrderNum = jsonObject.getString("orderId");
-                rechargeRecords.setPfOrderNum(PfOrderNum);
-                // 将订单加入到未支付队列中
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(jsonObject.getString("msg"));
-                rechargeRecords.setOrderStatus(3);
-            }
-        } else if (pid == 29) {
-            response = SendHttp.sendRechargeWePay(rechargeRecords);
-            LOGGER.error(response);
-            if ("".equals(response)){
-                return json(resultMap,"Recharge application failed",1);
-            }
-            JSONObject jsonObject = JSON.parseObject(response);
-            String code = jsonObject.getString("respCode");
-            if ("SUCCESS".equals(code)){
-                // 获取支付链接
-                String payUrl = jsonObject.getString("payInfo");
-                resultMap.put("urlPay",payUrl);
-                rechargeRecords.setUrlPay(payUrl);
-                // 设置平台订单号
-                String PfOrderNum = jsonObject.getString("orderNo");
-                rechargeRecords.setPfOrderNum(PfOrderNum);
-                // 将订单加入到未支付队列中
-                GlobalDelayQueue.orderQueue.add(rechargeRecords);
-                rechargeRecordsService.saveRtId(rechargeRecords);
-                return json(resultMap,"Recharge application success");
-            }else {
-                rechargeRecords.setMsg(jsonObject.getString("tradeMsg"));
-                rechargeRecords.setOrderStatus(3);
-            }
         }
-        rechargeRecordsService.saveRtId(rechargeRecords);
-        return json(resultMap,"Recharge application failed",1);
     }
+
 
     /**兑换接口
      * 获取前端参数：
@@ -567,6 +435,263 @@ public class RechargeDockingController extends BaseController implements ConstSh
     public AjaxResult first(){
         Map first = commonService.getInfoByOne("recharge_channel.first_list", null);
         return json(first);
+    }
+    /**
+     * 银河系统支付逻辑
+     */
+    private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap) {
+        JSONObject jsonObject;
+        String response;
+        response = SendHttp.sendRechargeGalaxy(rechargeRecords);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        rechargeRecords.setPfOrderNum("");
+        int status = jsonObject.getIntValue("status");
+        // 1：成功，0:失败
+        if (status==1) {
+            // 获取支付链接
+            String payUrl = jsonObject.getString("redirect_url");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("message"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * wepay支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @return
+     */
+    private AjaxResult rechargeWePay(RechargeRecords rechargeRecords, JSONObject resultMap) {
+        JSONObject jsonObject;
+        String PfOrderNum;
+        String response;
+        response = SendHttp.sendRechargeWePay(rechargeRecords);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        String respCode = jsonObject.getString("respCode");
+        if ("SUCCESS".equals(respCode)) {
+            // 获取支付链接
+            String payUrl = jsonObject.getString("payInfo");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 设置平台订单号
+            PfOrderNum = jsonObject.getString("orderNo");
+            rechargeRecords.setPfOrderNum(PfOrderNum);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("tradeMsg"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * AIPay支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @return
+     */
+    private AjaxResult rechargeAIPay(RechargeRecords rechargeRecords, JSONObject resultMap) {
+        int code;
+        String PfOrderNum;
+        String response;
+        JSONObject jsonObject;
+        response = SendHttp.sendRechargeAIPay(rechargeRecords);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        code = jsonObject.getIntValue("code");
+        if (code == 0) {
+            // 获取支付链接
+            String payUrl = jsonObject.getJSONObject("data").getString("h5Url");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 设置平台订单号
+            PfOrderNum = jsonObject.getString("orderId");
+            rechargeRecords.setPfOrderNum(PfOrderNum);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("msg"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * Omo支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @return
+     */
+    private AjaxResult rechargeOmo(RechargeRecords rechargeRecords, JSONObject resultMap) {
+        JSONObject jsonObject;
+        String response;
+        response = SendHttp.sendRechargeOmom(rechargeRecords);
+        LOGGER.error(response);
+        if (response.equals("")) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        int status = jsonObject.getIntValue("status");
+        if (status==1) {
+            // 获取支付地址
+            String payUrl = jsonObject.getString("payUrl");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("msg"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * MetaPay支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @return
+     */
+    private AjaxResult rechargeMetaPay(RechargeRecords rechargeRecords, JSONObject resultMap) {
+        JSONObject jsonObject;
+        String PfOrderNum;
+        int code;
+        String response;
+        response = SendHttp.sendRechargeMetaPay(rechargeRecords);
+        LOGGER.error(response);
+        if (response.equals("")) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        code = jsonObject.getIntValue("platRespCode");
+        PfOrderNum = jsonObject.getString("transId");
+        rechargeRecords.setPfOrderNum(PfOrderNum);
+        if (code == 0) {
+            // 获取支付地址
+            String payUrl = jsonObject.getString("url");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(code + jsonObject.getString("msg"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * safe支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @param channel
+     * @return
+     */
+    private AjaxResult rechargeSafe(RechargeRecords rechargeRecords, JSONObject resultMap, Map channel) {
+        String response;
+        JSONObject jsonObject;
+        response = SendHttp.sendRechargeSafe(rechargeRecords, channel);
+        LOGGER.error(response);
+        if (response.equals("")) {
+            return json(resultMap, "file", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        String statusStr = jsonObject.getString("status");
+        if ("success".equals(statusStr)) {
+            // 充值请求成功
+            // 获取支付链接
+            String payUrl = jsonObject.getString("order_data");
+            resultMap.put("urlPay", payUrl);
+            // 将订单加入到未支付的队列中
+            rechargeRecords.setUrlPay(payUrl);
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("status_mes"));
+            // 关闭订单
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    /**
+     * rarp支付逻辑
+     * @param rechargeRecords
+     * @param resultMap
+     * @param channel
+     * @return
+     */
+    private AjaxResult rechargeRarp(RechargeRecords rechargeRecords, JSONObject resultMap, Map channel) {
+        String response;
+        JSONObject jsonObject;
+        int code;
+        response = SendHttp.sendRechargeRarp(rechargeRecords, channel);
+        if (response.equals("")) {
+            return json(resultMap, "fail", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        LOGGER.error(jsonObject.toString());
+        code = jsonObject.getIntValue("code");
+        if (code == 0) {
+            // 错误时状态为30
+            rechargeRecords.setMsg(jsonObject.getString("msg"));
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            // 关闭订单
+            rechargeRecords.setOrderStatus(3);
+            resultMap.put("urlPay", "");
+            return json(resultMap, "Recharge application failed", 1);
+        } else {
+            String pay_url = jsonObject.getJSONObject("data").getString("pay_url");
+            rechargeRecords.setUrlPay(pay_url);
+            // 获取平台订单号
+            String ordernum = jsonObject.getJSONObject("data").getString("ordernum");
+            rechargeRecords.setPfOrderNum(ordernum);
+
+//                    int status = jsonObject.getJSONObject("data").getIntValue("status");
+            // 生成订单记录
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            String url = jsonObject.getJSONObject("data").getString("pay_url");
+            resultMap.put("urlPay", url);
+            rechargeRecords.setUrlPay(url);
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            // 判断支付状态 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
+            return json(resultMap);
+        }
     }
 
 }

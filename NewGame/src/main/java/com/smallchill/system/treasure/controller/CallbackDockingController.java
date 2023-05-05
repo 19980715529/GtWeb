@@ -104,6 +104,48 @@ public class CallbackDockingController extends BaseController implements ConstSh
     }
 
 
+    @PostMapping("/test")
+    @Transactional
+    public String callbackTest(@RequestParam Map<String,Object> param){
+        // 回调需要执行RechargeRecord函数
+        if (param==null){
+            return "fail";
+        }
+        // 获取自己的订单号
+        String orderNum = param.get("orderNum").toString();
+        // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败。一般成功、失败时才会回调
+        String status = param.get("status").toString();
+        // 根据订单id查询用户订单
+        Map<String, Object> map = new HashMap<>();
+        map.put("orderNumber",orderNum);
+        // 根据订单号查询兑换订单,不应该从队列中取出，可能回调时间比较常大于5分钟
+        RechargeRecords rechargeRecords = rechargeRecordsService.findFirstBy("orderNumber=#{orderNumber}", map);
+        if (rechargeRecords==null){
+            return "fail";
+        }
+        rechargeRecords.setMsg("测试");
+        Blade blade = Blade.create(RechargeRecords.class);
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        // 判断充值是否成功  订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败。一般成功、失败时才会回调   订单状态，1：待支付，2：已完成，3：已失败
+        if(Integer.parseInt(status)==20){
+            // 判断状态已经改变为已经完成，就不在处理
+            if (rechargeRecords.getOrderStatus()==2){
+                return "success";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else if(Integer.parseInt(status)==30){
+            // 充值失败将状态修改为已关闭
+            rechargeRecords.setOrderStatus(3);
+            // 将订单从队列中移除
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setEndTime(new Date());
+            rechargeRecordsService.update(rechargeRecords);
+        }else{
+            // 将充值中和为充值的订单状态不改变
+            return "success";
+        }
+        return "success";
+    }
     // 兑换回调
     @PostMapping(value = "/exchange_rarp_callback")
     public String exchangeCallback(@RequestParam Map<String,Object> param) {
@@ -578,7 +620,91 @@ public class CallbackDockingController extends BaseController implements ConstSh
         return "success";
     }
 
+    /**
+     * 银河系统充值回调
+     * @param param
+     * @return
+     */
+    @PostMapping("/recharge_galaxy_callback")
+    public String rechargeGalaxyCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("order_id");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "success";
+        }
+        // 获取支付状态 5:成功，3：失败
+        int status = params.getIntValue("status");
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        if (status==5){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "success";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else {
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecords.setEndTime(new Date());
+            String remark = params.getString("remark");
+            rechargeRecords.setMsg(remark);
+            blade.update(rechargeRecords);
+        }
+        return "success";
+    }
 
+    @PostMapping("/exchange_galaxy_callback")
+    public String exchangeGalaxyCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("order_id");
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "success";
+        }
+        // 获取订单状态 5； 成功，3：失败
+        int status = params.getIntValue("status");
+        if (status==5){
+            if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
+                return "success";
+            }
+            // 回调成功
+            successExcExecuted(exchangeReview);
+        }else {
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            // 兑换失败，发送邮件是在退回的时候进行发送
+            String remark = params.getString("remark");
+            exchangeReview.setMsg(remark);
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "success";
+    }
 
     // 执行存储过程
     public Object storedProcedure(Map<String,Object> map){

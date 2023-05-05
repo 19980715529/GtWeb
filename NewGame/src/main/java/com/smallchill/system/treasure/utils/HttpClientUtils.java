@@ -98,10 +98,7 @@ public class HttpClientUtils {
         }
         String sign1 = Utils.getSign(requestParams, SECRET_RARP_KEY);
         System.out.println("sign:"+sign1);
-        if (sign.equals(sign1)){
-            return true;
-        }
-        return false;
+        return sign.equals(sign1);
     }
     /**
      * safe 密钥校验 Md5RarpVerification
@@ -112,10 +109,7 @@ public class HttpClientUtils {
             return false;
         }
         String sign1 = getSign(map, SECRET_SAFE_KEY);
-        if (sign.equals(sign1)){
-            return true;
-        }
-        return false;
+        return sign.equals(sign1);
     }
 
     /** Omo签名校验
@@ -152,6 +146,22 @@ public class HttpClientUtils {
             return false;
         }
         return false;
+    }
+
+    /**
+     * safe 密钥校验 Md5RarpVerification
+     */
+    public static Boolean Md5GalaxyVerification(Map<String,Object> map){
+        try {
+            String sign = map.remove("sign").toString();
+            if (sign  == null){
+                return false;
+            }
+            String sign1 = Utils.getSign(map, GALAXY_KEY);
+            return sign.equals(sign1);
+        }catch (Exception e){
+         return false;
+        }
     }
 
 
