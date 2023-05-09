@@ -63,8 +63,7 @@ public class SendHttp {
         // 签名
         String sign  = HttpClientUtils.getSign(map, SECRET_SAFE_KEY);
         map.put("sign", sign);
-        String res = HttpClientUtils.sendPostJson(SAFE_URL, JSONObject.toJSONString(map));
-        return res;
+        return HttpClientUtils.sendPostJson(SAFE_URL, JSONObject.toJSONString(map));
     }
     /**
      * 充值rpra
@@ -223,7 +222,7 @@ public class SendHttp {
         // 提交时间
         map.put("pay_applydate",format);
         //
-        map.put("pay_bankcode",804);
+        map.put("pay_bankcode",821);
         // 回调地址
         map.put("pay_notifyurl",RECHARGE_OMOM_CALLBACK_URL);
         //生产签名
@@ -353,7 +352,7 @@ public class SendHttp {
         // 订单号
         map.put("mch_order_no",rechargeRecords.getOrderNumber());
         // 支付类型
-        map.put("pay_type","1700");
+        map.put("pay_type","1721");
         // 支付金额
         map.put("trade_amount",rechargeRecords.getTopUpAmount());
         // 订单时间
@@ -400,15 +399,15 @@ public class SendHttp {
         response= Utils.post(EXCHANGE_WEPAY_URL, map);
         return response;
     }
-    public static String sendRechargeGalaxy(RechargeRecords rechargeRecords){
+    public static String sendRechargeGalaxy(RechargeRecords rechargeRecords,String appid,String key,String url){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 商户号
-        map.put("merchant", GALAXY_APPID);
+        map.put("merchant", appid);
         // 支付类型
         map.put("payment_type", 3);
         // 提交金额
-        map.put("amount", rechargeRecords.getOrderNumber());
+        map.put("amount", rechargeRecords.getTopUpAmount());
         // 订单号
         map.put("order_id", rechargeRecords.getOrderNumber());
         // 银行代码
@@ -418,19 +417,20 @@ public class SendHttp {
         // 跳转地址
         map.put("return_url", "https://www.baidu.com");
         //
-        String sign = Utils.getSign(map, GALAXY_KEY);
+        String sign = Utils.getSign(map, key);
         map.put("sign", sign);
-        response = HttpClientUtils.sendPostJson(RECHARGE_GALAXY_URL, JSON.toJSONString(map));
+        LOGGER.error(map);
+        response = HttpClientUtils.sendPostJson(url, JSON.toJSONString(map));
         return response;
     }
 
-    public static String sendExchangeGalaxy(ExchangeReview exchangeReview){
+    public static String sendExchangeGalaxy(ExchangeReview exchangeReview,String appid,String key,String url){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 商户号
-        map.put("merchant", GALAXY_APPID);
+        map.put("merchant", appid);
         // 提交金额
-        map.put("total_amount", exchangeReview.getMoney());
+        map.put("total_amount", exchangeReview.getMoney().toString());
         // 回调地址
         map.put("callback_url", EXCHANGE_GALAXY_CALLBACK_URL);
         // 订单号
@@ -442,14 +442,71 @@ public class SendHttp {
         // 收款人账号
         map.put("bank_card_account", exchangeReview.getBankNumber());
         // IFSC
-        map.put("bank_card_remark", "");
+        map.put("bank_card_remark", exchangeReview.getBankNumber());
         // 获取签名
-        String sign = Utils.getSign(map, GALAXY_KEY);
+        String sign = Utils.getSign(map, key);
         map.put("sign", sign);
-        response = HttpClientUtils.sendPostJson(RECHARGE_GALAXY_URL, JSON.toJSONString(map));
+        LOGGER.error(map);
+        response = HttpClientUtils.sendPostJson(url, JSON.toJSONString(map));
         return response;
     }
 
+    public static String sendRechargeLetsPay(RechargeRecords rechargeRecords){
+        String response;
+        HashMap<String, Object> map = new HashMap<>();
+        // 商户号
+        map.put("mchId", LETSPAY_APPID);
+        // 订单号
+        map.put("orderNo", rechargeRecords.getOrderNumber());
+        // 金额
+        map.put("amount", rechargeRecords.getTopUpAmount().toString());
+        // 产品号
+        map.put("product", "philiwallet");
+        // 银河代号
+        map.put("bankcode", "gcash");
+        // 物品说明
+        map.put("goods", "email:520155@gmail.com/name:tom/phone:"+rechargeRecords.getPhone());
+        // 异步通知地址
+        map.put("notifyUrl", RECHARGE_LETSPAY_CALLBACK_URL);
+        // 跳转地址
+        map.put("returnUrl", "https://www.baidu.com");
+        // 生成签名
+        String sign = Utils.getSign(map, LETSPAY_KEY);
+        // 生成签名全部大写
+        map.put("sign", sign.toUpperCase());
+        LOGGER.error(JSON.toJSONString(map));
+        response = Utils.post(RECHARGE_LETSPAY_URL, map);
+        return response;
+    }
+
+    public static String sendExchangeLetsPay(ExchangeReview exchangeReview){
+        String response;
+        HashMap<String, Object> map = new HashMap<>();
+        // 转账类型
+        map.put("type","api");
+        // 商户号
+        map.put("mchId",LETSPAY_APPID);
+        // 订单号
+        map.put("mchTransNo",exchangeReview.getOrderNumber());
+        // 金额
+        map.put("amount",exchangeReview.getMoney());
+        // 通知地址
+        map.put("notifyUrl",EXCHANGE_LETSPAY_CALLBACK_URL);
+        // 账户名
+        map.put("accountName",exchangeReview.getCardholder());
+        // 账号
+        map.put("accountNo",exchangeReview.getBankNumber());
+        // 银行代码
+        map.put("bankCode","Gcash");
+        // 备注
+        map.put("remarkInfo","email:520155@gmail.com/phone:"+exchangeReview.getPhone()+"/mode:wallet");
+        // 生成签名全部大写
+        String sign = Utils.getSign(map, LETSPAY_KEY);
+        map.put("sign",sign.toUpperCase());
+        LOGGER.error(map);
+        response = Utils.post(EXCHANGE_LETSPAY_URL, map);
+        return response;
+    }
 
 
 
@@ -470,12 +527,12 @@ public class SendHttp {
     // 发送邮件请求1001  金币类型:GoldType
     public static void sendEmail(Map<String,Object> map){
         String str = "gold:" +map.get("gold").toString()+
-                ",action:1001"+
-                ",title:" +map.get("title").toString()+
-                ",toUserid:" +map.get("toUserid").toString()+
-                ",content:"+map.get("content").toString()+
-                ",FromUserID:"+map.get("senderId").toString()+
-                ",GoldType:"+map.get("goldType").toString();
+                "|action:1001"+
+                "|title:" +map.get("title").toString()+
+                "|toUserid:" +map.get("toUserid").toString()+
+                "|content:"+map.get("content").toString()+
+                "|FromUserID:"+map.get("senderId").toString()+
+                "|GoldType:"+map.get("goldType").toString();
         HttpClientUtils.sendPostJson(GAME_URL, str);
     }
 
@@ -485,10 +542,10 @@ public class SendHttp {
      */
     public static void sendGame1002(Map<String,Object> map){
         String str = "gold:" +map.get("gold")+
-                ",action:1002"+
-                ",Type:" +map.get("Type")+
-                ",Userid:" +map.get("Userid")+
-                ",gameCoin:"+map.get("gameCoin");
+                "|action:1002"+
+                "|Type:" +map.get("Type")+
+                "|Userid:" +map.get("Userid")+
+                "|gameCoin:"+map.get("gameCoin");
         HttpClientUtils.sendPostJson(GAME_URL, str);
     }
     // 1003 发送到后台提现前端修改金币数量

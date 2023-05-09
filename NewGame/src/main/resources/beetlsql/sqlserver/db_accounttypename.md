@@ -1,6 +1,6 @@
 list
 ===
-	  select clientType,name,ratio,remarks
+	  select clientType,name,ratio,remarks,isLog
 	  FROM [login].[dbo].[ClientPos]
 	  where 1=1
 	  @if(!isEmpty(name)){

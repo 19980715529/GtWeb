@@ -10,9 +10,7 @@ import org.beetl.sql.core.SQLManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -87,7 +85,26 @@ public class RechargeExchangeCommon {
         return o;
     }
     /**
-     * rarp充值执行逻辑
+     *  @UserID int,
+     * @ExchangeGold bigint,			--兑换金币
+     * @TotalWinRate float				--总赢倍率
      */
+    public static Integer ExchangeAmount(Integer userId,Long ExchangeGold,Integer TotalWinRate){
+        SQLManager dao = Blade.dao();
+        return dao.executeOnConnection(new OnConnection<Integer>() {
+            @Override
+            public Integer call(Connection connection) throws SQLException {
+                CallableStatement statement = connection.prepareCall("{? = call [RYPlatformManagerDB].[dbo].[ExchangeAmount](?,?,?)}");
+                // 注册输出参数
+                statement.registerOutParameter(1, Types.INTEGER);
+                // 设置参数
+                statement.setInt(2, userId);
+                statement.setLong(3, ExchangeGold);
+                statement.setInt(4, TotalWinRate);
+                statement.execute();
+                return statement.getInt(1);
+            }
+        });
+    }
 
 }

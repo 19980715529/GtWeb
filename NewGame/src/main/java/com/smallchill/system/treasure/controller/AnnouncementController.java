@@ -57,13 +57,13 @@ public class AnnouncementController extends BaseController implements ConstShiro
         if (cid==null){
             return fail("包id错误");
         }
-        Map map = Db.selectOne("select clientType,ratio from login.dbo.ClientPos where clientType=#{clientType}",
+        Map map = Db.selectOne("select clientType,ratio,isLog from login.dbo.ClientPos where clientType=#{clientType}",
                 CMap.init().set("clientType", cid));
         if (map==null){
             return fail("包id错误");
         }
         // 获取包中游戏  blade_dict 56
-        List<Map> games = Db.selectList("select id,sort,state,gameId,name,(select name from blade_dict where a.type=id) as type " +
+        List<Map> games = Db.selectList("select id,sort,state,gameId,name,icon,(select name from blade_dict where a.type=id) as type " +
                 "from [RYPlatformManagerDB].[dbo].[game_conf] as a where isOpen=1 and clientType=#{clientType} order by sort", CMap.init().set("clientType", cid));
         map.put("games",games);
         return json(map);

@@ -12,12 +12,13 @@
 	
 	function initGrid(){
 		var grid_url = ctx+"/${code}/list";//查询列表接口
-		var _colnames=[ "<span class='sort-cols'>ID</span>","包名称","金币比率","备注"];
+		var _colnames=[ "<span class='sort-cols'>ID</span>","包名称","金币比率","备注","是否开启日志"];
 		var _colmodel=[   
 		                  {name:"clientType", index:"clientType"},
 		                  {name:"name", sortable:false},
 		                  {name:"ratio", sortable:false},
-		                  {name:"remarks", sortable:false}
+		                  {name:"remarks", sortable:false},
+		                  {name:"isLog", sortable:false,formatter:rowShow},
 						];
 		
 		jQuery(grid_selector).jqGrid({
@@ -31,6 +32,17 @@
 			rowNum:100,
 			height: 'auto'
 		});
+	}
+	function rowShow(cellvalue, options, rowObject) {
+		var html = "";
+		if (options.colModel.name === 'isLog') {
+			if (cellvalue === 0) {
+				html = '<span class="label label-default">否</span>';
+			} else if (cellvalue === 1) {
+				html = '<span class="label label-success">是</span>';
+			}
+		}
+		return html;
 	}
 </script>
 	<!-- 配置grid -->

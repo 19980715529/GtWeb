@@ -2,43 +2,30 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
-import com.smallchill.core.annotation.Json;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import static com.smallchill.core.constant.ConstKey.*;
 
-import com.smallchill.core.toolbox.kit.ThreadKit;
 import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.*;
 import com.smallchill.system.treasure.utils.*;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
-import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-
-import static com.smallchill.core.constant.ConstEmail.*;
 
 /**
  * @Description TODO
@@ -361,7 +348,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5OmoVerification(param);
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,OMOM_KEY);
         if (!temp){
             return "fail";
         }
@@ -403,7 +390,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5OmoVerification(param);
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,OMOM_KEY);
         if (!temp){
             return "fail";
         }
@@ -521,7 +508,6 @@ public class CallbackDockingController extends BaseController implements ConstSh
             exchangeReview.setStatus(6);
             exchangeReview.setEndTime(new Date());
             // 兑换失败，发送邮件是在退回的时候进行发送
-
         }else {
             // 不做处理
             return "ok";
@@ -632,7 +618,13 @@ public class CallbackDockingController extends BaseController implements ConstSh
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param);
+        String merchant = param.get("merchant").toString();
+        boolean temp = false;
+        if ("88052".equals(merchant)){
+            temp= HttpClientUtils.Md5GalaxyVerification(param,CLOUDPAY_KEY);
+        }else {
+            temp= HttpClientUtils.Md5GalaxyVerification(param,MHDPAY_KEY);
+        }
         if (!temp){
             return "fail";
         }
@@ -672,7 +664,13 @@ public class CallbackDockingController extends BaseController implements ConstSh
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param);
+        String merchant = param.get("merchant").toString();
+        boolean temp = false;
+        if ("88052".equals(merchant)){
+            temp= HttpClientUtils.Md5GalaxyVerification(param,CLOUDPAY_KEY);
+        }else {
+            temp= HttpClientUtils.Md5GalaxyVerification(param,MHDPAY_KEY);
+        }
         if (!temp){
             return "fail";
         }
@@ -705,23 +703,104 @@ public class CallbackDockingController extends BaseController implements ConstSh
         blade.update(exchangeReview);
         return "success";
     }
+    @PostMapping("/recharge_letspay_callback")
+    public String rechargeLetsPayCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,LETSPAY_KEY);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("orderNo");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "success";
+        }
+        // 1 支付中,2 成功,5 失效,-1 失败
+        int status = params.getIntValue("status");
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        if (status==2){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "success";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else if (status==5||status==-1){
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecords.setEndTime(new Date());
+            blade.update(rechargeRecords);
+        }
+        return "success";
+    }
+
+    @PostMapping("/exchange_letspay_callback")
+    public String exchangeLetsPayCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        // 去除msg,不参与签名
+        String msg = param.remove("msg").toString();
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,LETSPAY_KEY);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("mchTransNo");
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "success";
+        }
+        // 获取订单状态 2； 成功，3：失败 1:处理中
+        int status = params.getIntValue("status");
+        if (status==2){
+            if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
+                return "success";
+            }
+            // 回调成功
+            successExcExecuted(exchangeReview);
+        }else if (status==3){
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            exchangeReview.setMsg(msg);
+        }else {
+            // 处理中不操作
+            exchangeReview.setEndTime(new Date());
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "success";
+    }
 
     // 执行存储过程
-    public Object storedProcedure(Map<String,Object> map){
+    public void storedProcedure(Map<String,Object> map){
         SQLManager dao = Blade.dao("gameroomitemdb");
         Object o = dao.executeOnConnection(new OnConnection<Object>() {
             @Override
             public Object call(Connection connection) throws SQLException {
                 try {
                     CallableStatement callableStatement = connection.prepareCall("{call [QPServerInfoDB].[dbo].[RechargeRecord](?,?,?,?,?)}");
-                    callableStatement.setInt("UserID",Integer.valueOf(map.get("userId").toString()));
-                    callableStatement.setInt("Gold",Integer.valueOf(map.get("Gold").toString()));
-                    callableStatement.setInt("GameCoin",Integer.valueOf(map.get("GameCoin").toString()));
-                    int type = Integer.valueOf(map.get("type").toString());
+                    callableStatement.setInt("UserID",Integer.parseInt(map.get("userId").toString()));
+                    callableStatement.setInt("Gold",Integer.parseInt(map.get("Gold").toString()));
+                    callableStatement.setInt("GameCoin",Integer.parseInt(map.get("GameCoin").toString()));
+                    int type = Integer.parseInt(map.get("type").toString());
                     callableStatement.setInt("Type",type);
-                    callableStatement.setString("OrderNum","");
+//                    callableStatement.setString("OrderNum","");
                     callableStatement.setString("OrderNum",map.get("OrderNum").toString());
-                    callableStatement.executeQuery();
+                    callableStatement.execute();
                     return "";
                 }catch (Exception e){
                     LOGGER.error(e.getMessage());
@@ -729,7 +808,6 @@ public class CallbackDockingController extends BaseController implements ConstSh
                 }
             }
         });
-        return o;
     }
 
     // 充值成功需要执行的存储过程 SharePlayerRechargeRebate
@@ -742,7 +820,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
                     CallableStatement callableStatement = connection.prepareCall("{call [QPGameUserDB].[dbo].[SharePlayerRechargeRebate](?,?)}");
                     callableStatement.setInt("UserID", Integer.valueOf(map.get("userId").toString()));
                     callableStatement.setInt("RechargeGold", Integer.valueOf(map.get("GameCoin").toString()));
-                    callableStatement.executeQuery();
+                    callableStatement.execute();
                     return "";
                 }catch (Exception e){
                     LOGGER.error(e.getMessage());

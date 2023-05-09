@@ -20,6 +20,7 @@ public class ClientPos extends BaseModel {
 	private BigDecimal ratio ;
 	private Integer clientType ;
 	private String remarks;
+	private Integer isLog;
 
 	public String getName() {
 		return name;
@@ -51,5 +52,13 @@ public class ClientPos extends BaseModel {
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	public Integer getIsLog() {
+		return isLog;
+	}
+
+	public void setIsLog(Integer isLog) {
+		this.isLog = isLog;
 	}
 }

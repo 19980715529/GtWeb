@@ -39,6 +39,7 @@ public class Utils {
         return localDate + randomNumeric + str;
     }
 
+
     // 生成拼接成请求的Sign格式
     public static String getSign(Map<String,Object> map,String appkey){
         String sign =null;
@@ -189,7 +190,7 @@ public class Utils {
             // 此 MessageDigest 类为应用程序提供信息摘要算法的功能
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             // 转换为MD5码
-            byte[] digest = md5.digest(str.getBytes("utf-8"));
+            byte[] digest = md5.digest(str.getBytes(StandardCharsets.UTF_8));
             hexStr = byteToHexString(digest);
         } catch (Exception e) {
             e.printStackTrace();

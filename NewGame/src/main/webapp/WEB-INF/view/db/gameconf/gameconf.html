@@ -13,7 +13,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames = ["id","包来源","游戏id", "游戏名称", "是否开启", "排序", "界面状态", "类别", "类别排序"];
+        var _colnames = ["id","包来源","游戏id", "游戏名称", "是否开启", "排序", "界面状态", "类别", "类别排序","图标大小"];
         var _colmodel = [
             {name: "id", sortable: false, hidden: true},
             {name: "clientType", sortable: false,},
@@ -23,7 +23,8 @@
             {name: "sort", sortable: false},
             {name: "state", sortable: false,formatter:rowShow},
             {name: "type", sortable: false},
-            {name: "typeSort", sortable: false}
+            {name: "typeSort", sortable: false},
+            {name: "icon", sortable: false,formatter:rowIcon}
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -53,6 +54,18 @@
         return html;
     }
 
+    function rowIcon(cellvalue, options, rowObject) {
+        var html = "";
+        if (options.colModel.name === 'icon') {
+            if (cellvalue === 0) {
+                html = '小';
+            } else if (cellvalue === 1) {
+                html = '大';
+            }
+        }
+        return html;
+    }
+
     function rowText(cellvalue, options, rowObject) {
         var html = "";
         if (options.colModel.name === 'isOpen') {
@@ -75,6 +88,17 @@
     <!-- 简单查询按钮 -->
     <label class="">
         <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+    </label>
+    <span>
+        <label class=""> 要配置的包： </label>
+        <select id="param1"></select>
+    </span>
+    <span>
+        <label class=""> 要使用的包配置： </label>
+        <select id="param2"></select>
+    </span>
+    <label class="">
+        <button class="btn btn-sx btn-white btn-search" type="button" onclick="uses()">使用</button>
     </label>
     <div class="col-xs-12 tb-grid">
         <button class="btn btn-sx btn-white btn-search hide" id="gotoSearch">查询</button>
@@ -102,8 +126,34 @@
                 html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
             }
             $("#ptypeid").html(html);
+            $("#param1").html(html);
+            $("#param2").html(html);
         }
     }).start();
+    function uses() {
+        var param1 = $("#param1").val();
+        var param2 = $("#param2").val();
+        var wheres = {};
+
+        if (BladeTool.isNotEmpty(param1)){
+            wheres['param1'] = param1;
+        }
+        if (BladeTool.isNotEmpty(param2)){
+            wheres['param2'] = param2;
+        }
+        if (param1===param2){
+            layer.alert("选择的两个包是相同的，请重新选择")
+        }
+        new Ajax("${ctxPath}/gameconf/useConf?param1="+param1+"&param2="+param2, function (data) {
+            console.log(data);
+            if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+                layer.alert(data.message)
+            }else {
+                layer.alert(data.message)
+            }
+        }).start();
+
+    }
 
     function goSearch() {
         var clientType = $("#ptypeid").val();

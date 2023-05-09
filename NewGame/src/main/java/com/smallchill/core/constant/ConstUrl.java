@@ -137,6 +137,25 @@ public interface ConstUrl {
     String RECHARGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_galaxy_callback";
     // GALAXY 兑换回调地址
     String EXCHANGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_galaxy_callback";
+    /**
+     * LetsPay
+     */
+    // 充值
+    String RECHARGE_LETSPAY_URL = "http://api.letspayfast.com/apipay";
+    // 兑换地址
+    String EXCHANGE_LETSPAY_URL="http://api.letspayfast.com/apitrans";
 
+    // GALAXY 充值回调地址
+    String RECHARGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_letspay_callback";
+    // GALAXY 兑换回调地址
+    String EXCHANGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_letspay_callback";
+
+    /**
+     * MHDpay
+     */
+    // 充值
+    String RECHARGE_MHDPAY_URL = "https://apimhd.xxxx.cash/api/transfer";
+    // 兑换
+    String EXCHANGE_MHDPAY_URL = "https://apimhd.xxxx.cash/api/daifu";
 }
 

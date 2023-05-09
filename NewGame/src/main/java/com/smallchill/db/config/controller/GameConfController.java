@@ -7,6 +7,7 @@ import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
 import com.smallchill.db.config.meta.intercept.GameConfValidator;
@@ -155,5 +156,39 @@ public class GameConfController extends BaseController implements ConstShiro {
     public AjaxResult getGameType(){
         List<Map> maps = Db.selectList("select id,name from blade_dict where pid = 56", null);
         return json(maps);
+    }
+
+    /**
+     * 使用配置
+     */
+    @Json
+    @RequestMapping("/useConf")
+    @Permission(ADMINISTRATOR)
+    public AjaxResult useConf(@RequestParam int param1,@RequestParam int param2) {
+        if (param1==param2){
+            return fail("选择的两个包是相同的，请重新选择");
+        }
+        // 判断包param1的数据是否为空
+        Integer count = Db.queryInt("select count(1) from [RYPlatformManagerDB].[dbo].[game_conf] where clientType=#{clientType}",
+                CMap.init().set("clientType", param1));
+        if (count>0){
+            return fail("请先删除包"+param1+"的其他配置，在使用其他包的配置");
+        }
+        // 查询包param2的所有数据
+        List<Map> maps = Db.selectList("select isOpen,sort,state,typeSort,gameId,name,clientType,icon,type" +
+                " from [RYPlatformManagerDB].[dbo].[game_conf] where clientType=#{clientType}", CMap.init().set("clientType", param2));
+        if (maps.size()>0){
+            try {
+                for (Map map:maps){
+                    map.put("clientType",param1);
+                    Blade.create(GameConf.class).saveRtId(map);
+                }
+            }catch (Exception e){
+                return fail("配置失败");
+            }
+            return success("使用配置成功");
+        }else {
+            return fail("服务器异常");
+        }
     }
 }

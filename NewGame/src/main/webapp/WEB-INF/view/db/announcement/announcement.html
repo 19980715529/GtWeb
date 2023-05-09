@@ -36,11 +36,11 @@
     }
     function rowShow(cellvalue,options,rowObject) {
         var html = "";
-        if(options.colModel.name ==='RewardType') {
-            if(cellvalue === 1){
-                html = "金币";
-            }else if (cellvalue === 2){
-                html = "转盘奖励";
+        if(options.colModel.name ==='isLog') {
+            if(cellvalue === 0){
+                html = "未开启";
+            }else if (cellvalue === 1){
+                html = "开启";
             }
         }
         return html;

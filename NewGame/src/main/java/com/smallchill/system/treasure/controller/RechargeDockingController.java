@@ -33,6 +33,10 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
+import static com.smallchill.core.constant.ConstKey.*;
+import static com.smallchill.core.constant.ConstUrl.RECHARGE_GALAXY_URL;
+import static com.smallchill.core.constant.ConstUrl.RECHARGE_MHDPAY_URL;
+
 @Controller
 @RequestMapping("/rechargeDock")
 public class RechargeDockingController extends BaseController implements ConstShiro {
@@ -157,8 +161,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // WePay
                 return rechargeWePay(rechargeRecords, resultMap);
             case 32:
-                // 银河系统
-                return rechargeGalaxy(rechargeRecords,resultMap);
+                // CloudPay支付
+                return rechargeGalaxy(rechargeRecords,resultMap,CLOUDPAY_APPID,CLOUDPAY_KEY,RECHARGE_GALAXY_URL);
+            case 35:
+                // LetsPay支付
+                return rechargeLetsPay(rechargeRecords,resultMap);
+            case 38:
+                // 银河系统CloudPay
+                return rechargeGalaxy(rechargeRecords,resultMap,MHDPAY_APPID,MHDPAY_KEY,RECHARGE_MHDPAY_URL);
             default:
                 return json(resultMap,"Recharge application failed",1);
         }
@@ -181,6 +191,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
         String userId = HttpKit.getRequest().getParameter("exchange.userId");
         BigDecimal examouont = new BigDecimal(HttpKit.getRequest().getParameter("exchange.exchangeAmount"));
         ExchangeReview exchangeReview = mapping("exchange", ExchangeReview.class);
+        String name = exchangeReview.getCardholder().trim();
+        exchangeReview.setCardholder(name);
         exchangeReview.setAmount(examouont);
         // 根据用户id查询用户数据
         HashMap<String, Object> user_map = new HashMap<>();
@@ -216,68 +228,50 @@ public class RechargeDockingController extends BaseController implements ConstSh
         if (amount.intValue()<min.intValue() || amount.intValue()>max.intValue()){
             return json(null,"兑换的金额不满足渠道条件",2);
         }
-        // 获取总赢配置
-        String winConfig = channel.get("winConf").toString();
-        exchangeReview.setCreateTime(new Date());
-        // 判断总赢是否满足条件 兑换金额*金币比例*金币倍率*总赢倍率；
-        BigDecimal win = amount.multiply(new BigDecimal(goldPr)).multiply(new BigDecimal(winConfig)).setScale(0,RoundingMode.DOWN);
-        // 查询用户的总赢
-        BigDecimal user_totalWin = RechargeExchangeCommon.getUserWin(exchangeReview.getUserId());
-        if (user_totalWin.longValue()<win.longValue()){
-            return json(null,"你的总赢小于:"+win,2);
-        }
-        // 判断用户的金币是否满足条件
-        // 获取用户金币
-        String gold1 = getGold(exchangeReview.getUserId());
-        if ("".equals(gold1)){
-            return json(resultMap,"用户不存在",1);
-        }
-        // 用户金币数值
-        BigDecimal gold = new BigDecimal(gold1).setScale(0,RoundingMode.DOWN);
-        // 计算需要消耗的金币   changeGold
+        // 计算兑换金币
         BigDecimal changeGolds=amount.multiply(new BigDecimal(goldPr)).setScale(0,RoundingMode.DOWN);
-        // gold<golds
-        if (gold.longValue()<changeGolds.longValue()){
-            return json(null,"你的金币不够兑换",2);
-        }
-        // 扣除消耗金币
-        BigDecimal gold_db = gold.subtract(changeGolds);
-        // 扣除消耗的
-        BigDecimal db_win = user_totalWin.subtract(win);
-        // 将消耗的总赢存储到数据库
+        // 获取总赢配置
+        BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
+        // 计算消耗的总赢兑换金额*金币比例*金币倍率*总赢倍率；
+        BigDecimal win = amount.multiply(new BigDecimal(goldPr)).multiply(winConfig).setScale(0,RoundingMode.DOWN);
         exchangeReview.setConsumptionCode(win.longValue());
         exchangeReview.setGold(changeGolds.longValue());
-        // 记录兑换记录 发起兑换时金币为负数
-        RechargeExchangeCommon.AddGoldChangeRecords(exchangeReview.getUserId(),206,-changeGolds.longValue());
-        // 将改变后的金币保存到数据库
-        Map<String, Object> map = new HashMap<>();
-        map.put("UserId",exchangeReview.getUserId());
-        map.put("Amount",gold_db.longValue());
-        Blade.create(UserWin.class).updateBy("Amount=#{Amount}","User_Id = #{UserId} and Prop_Id = 1",map);
+        int code;
         try {
-            // 生成兑换订单
-            String orderNo = Utils.getOrderNum(Integer.valueOf(userId));
-            // 设置为待审核
-            exchangeReview.setOrderNumber(orderNo);
-            exchangeReview.setStatus(2);
-            // 生成兑换订单
-            exchangeReviewService.saveRtId(exchangeReview);
+            int i = winConfig.multiply(new BigDecimal("10000")).intValue();
+            code = RechargeExchangeCommon.ExchangeAmount(exchangeReview.getUserId(), changeGolds.longValue(), i);
         }catch (Exception e){
-            return json(null,e.getMessage(),1);
+            LOGGER.error(e.getMessage());
+            return fail("");
         }
-        // 根据总赢计算用户扣除后的钱
-        int win_money = db_win.divide(new BigDecimal(goldPr),RoundingMode.DOWN).divide(new BigDecimal(winConfig),RoundingMode.DOWN).intValue();
-        // 根据金币计算用户扣除后的钱
-        int gold_money = gold_db.divide(new BigDecimal(goldPr),RoundingMode.DOWN).intValue();
-        int money=Math.min(win_money, gold_money);
-        if (money<0.01){
-            money = 0;
+        switch (code){
+            case 0:
+                try {
+                    // 生成兑换订单
+                    String orderNo = Utils.getOrderNum(Integer.valueOf(userId));
+                    // 设置为待审核
+                    exchangeReview.setOrderNumber(orderNo);
+                    exchangeReview.setCreateTime(new Date());
+                    exchangeReview.setStatus(2);
+                    // 生成兑换订单
+                    exchangeReviewService.saveRtId(exchangeReview);
+                }catch (Exception e){
+                    return json(null,e.getMessage(),1);
+                }
+                // 发送请求提示前端刷新金币
+                SendHttp.sendGame1003(exchangeReview.getUserId());
+                return json(resultMap);
+            case 1:
+                return fail("Userid does not exist");
+            case 2:
+                return fail("Unbound phone");
+            case 3:
+                return fail("Insufficient exchange quota");
+            case 4:
+                return fail("Lack of player gold");
+            default:
+                return fail("");
         }
-        // 设置响应结果
-        resultMap.put("money", money);
-        // 发送请求提示前端刷新金币
-        SendHttp.sendGame1003(exchangeReview.getUserId());
-        return json(resultMap);
     }
 
     /**
@@ -437,12 +431,46 @@ public class RechargeDockingController extends BaseController implements ConstSh
         return json(first);
     }
     /**
-     * 银河系统支付逻辑
+     * LetsPay充值逻辑
      */
-    private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap) {
+    private AjaxResult rechargeLetsPay(RechargeRecords rechargeRecords, JSONObject resultMap) {
         JSONObject jsonObject;
         String response;
-        response = SendHttp.sendRechargeGalaxy(rechargeRecords);
+        response = SendHttp.sendRechargeLetsPay(rechargeRecords);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        String retCode = jsonObject.getString("retCode");
+        // 1：成功，0:失败
+        if ("SUCCESS".equals(retCode)) {
+            // 获取支付链接
+            String payUrl = jsonObject.getString("payUrl");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 平台订单号
+            String PfOrderNum = jsonObject.getString("platOrder");
+            rechargeRecords.setPfOrderNum(PfOrderNum);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("message"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+    /**
+     * 银河系统支付逻辑
+     */
+    private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap,String appid,String key,String url) {
+        JSONObject jsonObject;
+        String response;
+//        response = SendHttp.sendRechargeGalaxy(rechargeRecords,GALAXY_KEY,RECHARGE_GALAXY_URL);
+        response = SendHttp.sendRechargeGalaxy(rechargeRecords,appid,key,url);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
@@ -545,9 +573,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
 
     /**
      * Omo支付逻辑
-     * @param rechargeRecords
-     * @param resultMap
-     * @return
      */
     private AjaxResult rechargeOmo(RechargeRecords rechargeRecords, JSONObject resultMap) {
         JSONObject jsonObject;

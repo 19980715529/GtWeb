@@ -75,22 +75,21 @@ public class ClientTypePaymentChannelController extends BaseController implement
     @RequestMapping(KEY_EDIT + "/{id}")
     @Permission(ADMINISTRATOR)
     public String edit(@PathVariable Integer id, ModelMap mm) {
-        Map map = new HashMap();
-        map.put("id", id);
-        Map channel = commonService.getInfoByOne("payment_channel.by_id_one_channel", map);
-        mm.put("channel", channel);
+        Map paymentChannel = commonService.getInfoByOne("payment_channel.find_one", CMap.init().set("id", id));
+        System.out.println(paymentChannel);
+        mm.put("paymentChannel", paymentChannel);
         mm.put("code", CODE);
         return BASE_PATH + "paymentChannel_edit.html";
     }
-    /*
-    删除
+    /**
+     *删除
      */
     @Json
     @RequestMapping(KEY_REMOVE)
     @Permission(ADMINISTRATOR)
     public AjaxResult remove(@RequestParam String ids) {
-        int cnt = service.deleteByIds(ids);
-        if (cnt > 0) {
+        int temp = Blade.create(PaymentChannel.class).deleteByIds(ids);
+        if (temp > 0) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
         } else {
@@ -99,13 +98,13 @@ public class ClientTypePaymentChannelController extends BaseController implement
     }
 
     @Json
-    @Before(ChannelEditValidator.class)
+    @Before(PaymentChannelValidator.class)
     @RequestMapping(KEY_UPDATE)
     @Permission(ADMINISTRATOR)
     public AjaxResult update() {
-        Channel channel = mapping(PREFIX, Channel.class);
+        PaymentChannel channel = mapping(PREFIX, PaymentChannel.class);
         CMap parse = CMap.parse(channel);
-        int temp = Db.update("Channel", "id", parse);
+        int temp = Db.update("paymentChannel", "id", parse);
         if (temp>0) {
             CacheKit.removeAll(SYS_CACHE);
             return success(UPDATE_SUCCESS_MSG);

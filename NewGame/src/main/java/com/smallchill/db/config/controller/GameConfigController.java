@@ -46,8 +46,7 @@ public class GameConfigController extends BaseController implements ConstShiro {
 	@RequestMapping(KEY_LIST)
 	@Permission(ADMINISTRATOR)
 	public Object list() {
-		Object gird = paginateBySelf(LIST_SOURCE);
-		return gird;
+		return paginateBySelf(LIST_SOURCE);
 	}
 	
 	@RequestMapping(KEY_ADD)

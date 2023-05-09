@@ -1,6 +1,6 @@
 new_list
 ===
-    select id,isOpen,sort,state,typeSort,gameId,name,clientType,(select name from blade_dict where a.type=id) as type
+    select id,isOpen,sort,state,typeSort,gameId,name,clientType,icon,(select name from blade_dict where a.type=id) as type
     from [RYPlatformManagerDB].[dbo].[game_conf] as a where 1=1
     @if(!isEmpty(clientType)){
        and clientType = #{clientType}

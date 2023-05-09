@@ -4,7 +4,10 @@ import com.smallchill.core.plugins.dao.Blade;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
 
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class utils {
 
@@ -34,4 +37,5 @@ public class utils {
         });
         return re;
     }
+
 }

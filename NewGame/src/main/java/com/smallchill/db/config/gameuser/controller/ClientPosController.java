@@ -49,8 +49,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 	@RequestMapping(KEY_LIST)
 	@Permission(ADMINISTRATOR)
 	public Object list() {
-		Object gird = paginateBySelf(LIST_SOURCE);
-		return gird;
+		return paginateBySelf(LIST_SOURCE);
 	}
 	
 	@RequestMapping(KEY_ADD)
@@ -67,7 +66,7 @@ public class ClientPosController extends BaseController implements ConstShiro {
 	@Permission(ADMINISTRATOR)
 	public AjaxResult save() {
 		ClientPos boxItem = mapping(PREFIX, ClientPos.class);
-		int temp = Db.insert("insert into [login].[dbo].[ClientPos] (clientType,ratio,name,remarks) values (#{clientType},#{ratio},#{name},#{remarks})", boxItem);
+		int temp = Db.insert("insert into [login].[dbo].[ClientPos] (clientType,ratio,name,remarks,isLog) values (#{clientType},#{ratio},#{name},#{remarks},#{isLog})", boxItem);
 		if (temp>0) {
 			return success(SAVE_SUCCESS_MSG);
 		} else {

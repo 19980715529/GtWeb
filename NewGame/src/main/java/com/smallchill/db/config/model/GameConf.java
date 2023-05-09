@@ -22,6 +22,7 @@ public class GameConf extends BaseModel {
     private Integer typeSort;
     private Integer gameId;
     private Integer clientType;
+    private Integer icon;
 
     public Integer getGameId() {
         return gameId;
@@ -93,5 +94,13 @@ public class GameConf extends BaseModel {
 
     public void setClientType(Integer clientType) {
         this.clientType = clientType;
+    }
+
+    public Integer getIcon() {
+        return icon;
+    }
+
+    public void setIcon(Integer icon) {
+        this.icon = icon;
     }
 }

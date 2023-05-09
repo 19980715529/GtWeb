@@ -38,8 +38,7 @@ public class HttpClientUtils {
             StringEntity entity = new StringEntity(json, ContentType.APPLICATION_JSON);
             httpPost.setEntity(entity);
             response = httpClient.execute(httpPost);
-            String resp = EntityUtils.toString(response.getEntity(), "utf-8");
-            return resp;
+            return EntityUtils.toString(response.getEntity(), "utf-8");
         } catch (Exception e) {
             return e.getMessage();
         }finally {
@@ -115,13 +114,13 @@ public class HttpClientUtils {
     /** Omo签名校验
      *verification
      */
-    public static Boolean Md5OmoVerification(Map<String, Object> requestParams) {
+    public static Boolean Md5OmoOrLetsPayVerification(Map<String, Object> requestParams,String key) {
         try {
             String sign = requestParams.remove("sign").toString();
             if (sign==null){
                 return false;
             }
-            String sign1 = Utils.getSign(requestParams, OMOM_KEY);
+            String sign1 = Utils.getSign(requestParams,key);
             if (sign.equals(sign1.toUpperCase())){
                 return true;
             }
@@ -151,13 +150,13 @@ public class HttpClientUtils {
     /**
      * safe 密钥校验 Md5RarpVerification
      */
-    public static Boolean Md5GalaxyVerification(Map<String,Object> map){
+    public static Boolean Md5GalaxyVerification(Map<String,Object> map,String key){
         try {
             String sign = map.remove("sign").toString();
             if (sign  == null){
                 return false;
             }
-            String sign1 = Utils.getSign(map, GALAXY_KEY);
+            String sign1 = Utils.getSign(map, key);
             return sign.equals(sign1);
         }catch (Exception e){
          return false;

@@ -91,7 +91,22 @@ public interface ConstKey {
      * 银河系统
      */
     // 商户号
-    String GALAXY_APPID = "88052";
+    String CLOUDPAY_APPID = "88052";
     // 密钥
-    String GALAXY_KEY = "f0bff0f0c0e3b25257677a79fc2e9fb2";
+    String CLOUDPAY_KEY = "f0bff0f0c0e3b25257677a79fc2e9fb2";
+    /**
+     * LetsPay
+     */
+    // 商户号
+    String LETSPAY_APPID = "1683279488703";
+    // 密钥
+    String LETSPAY_KEY = "LLMORHLEWPMCAVZKVLHKACMX1V6IY3ZDLRHXGZS8AZY1KQDVOYR1XLPFFLBKLMTPZWYB7ZUHLGBQR3MSP5GRRNXGSWRQQZDRA3YXVKHHGXVL4UJ5CN4G2FKJDCBXX8PE";
+
+    /**
+     * MHDPay
+     */
+    String MHDPAY_APPID = "GTgame";
+
+    String MHDPAY_KEY = "4f66c7999f88ec70f2c8bd27b9dda6e2";
+
 }

@@ -23,26 +23,42 @@ public class PaymentChannelValidator extends BladeValidator {
         validateInteger("paymentChannel.goldProportion","请填写正确金币倍率数据");
         validateInteger("paymentChannel.sort","请填写排序");
         validateRequired("paymentChannel.isOpen","请选择是否开启");
+        String id = request.getParameter("paymentChannel.id");
         validateType();
         // 判断选择的包中排序是否存在
         int cid = Integer.parseInt(request.getParameter("paymentChannel.cid"));
         int clientType = Integer.parseInt(request.getParameter("paymentChannel.clientType"));
         int sort = Integer.parseInt(request.getParameter("paymentChannel.sort"));
-        validateIsExist(cid,clientType,sort);
+        validateIsExist(id,cid,clientType,sort);
     }
 
-    private void validateIsExist(Integer cid,Integer clientType,Integer sort) {
-        // 判断当前包中是否存在该渠道
-        Integer i = Db.queryInt("select count(1) from paymentChannel where cid=#{cid} and clientType=#{clientType}",
-                CMap.init().set("cid", cid).set("clientType", clientType));
-        if (i>0){
-            addError("包"+clientType+"已经存在该渠道");
+    private void validateIsExist(String id,Integer cid,Integer clientType,Integer sort) {
+        if (id==null){
+            // 判断当前包中是否存在该渠道
+            Integer i = Db.queryInt("select count(1) from paymentChannel where cid=#{cid} and clientType=#{clientType}",
+                    CMap.init().set("cid", cid).set("clientType", clientType));
+            if (i>0){
+                addError("包"+clientType+"已经存在该渠道");
+            }
+            Integer j = Db.queryInt("select count(1) from paymentChannel where clientType=#{clientType} and sort=#{sort}",
+                    CMap.init().set("clientType", clientType).set("sort",sort));
+            if (j>0){
+                addError("排序重复");
+            }
+        }else {
+            // 判断当前包中是否存在该渠道
+            Integer i = Db.queryInt("select count(1) from paymentChannel where cid=#{cid} and clientType=#{clientType} and id!=#{id}",
+                    CMap.init().set("cid", cid).set("clientType", clientType).set("id",id));
+            if (i>0){
+                addError("包"+clientType+"已经存在该渠道");
+            }
+            Integer j = Db.queryInt("select count(1) from paymentChannel where clientType=#{clientType} and sort=#{sort} and id!=#{id}",
+                    CMap.init().set("clientType", clientType).set("sort",sort).set("id",id));
+            if (j>0){
+                addError("排序重复");
+            }
         }
-        Integer j = Db.queryInt("select count(1) from paymentChannel where clientType=#{clientType} and sort=#{sort}",
-                CMap.init().set("clientType", clientType).set("sort",sort));
-        if (j>0){
-            addError("排序重复");
-        }
+
     }
 
     protected void validateMinLeMax(){
