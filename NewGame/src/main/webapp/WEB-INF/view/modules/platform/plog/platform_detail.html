@@ -15,13 +15,14 @@
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
 
-        var _colnames = ["id","日期", "新增用户","游客", "注册用户", "登录人数","充值人数","今日充值金额", "新增充值总额", "新充值人数", "充值总额","充值次数","今日兑换人数", "今日兑换金额", "充提差", "充值率", "充值ARPU",
+        var _colnames = ["id","日期", "新增用户","游客", "注册用户", "登录人数","充值人数","今日充值金额", "新增充值总额", "新充值人数", "充值总额","充值次数","今日兑换人数", "今日兑换金额", "充提差",
+            "充值率", "充值ARPU","ARPPU",
             "转盘金币奖励","充值返利金币奖励","分享代理金币金币奖励","绑定手机奖励","转盘使用次数", "吞吐率", "最高在线","付费登录", "税收", "系统输赢","当日点控值"];
         var _colmodel = [
             // 单日数据
             { name : "id", sortable:false,hidden:true },
             // 日期
-            { name : "createTime", sortable:false},
+            { name : "writeTime", sortable:false},
             // 新增用户
             { name : "newUserCount", sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
             // 游客
@@ -52,6 +53,8 @@
             { name : "rechargeRate", sortable:false, formatter:"integer", formatoptions:{decimalPlaces: 2,suffix : "%"}  },
             // 充值ARPU
             { name : "rechargeArpu", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:2}  },
+            // ARPPU
+            { name : "ARPPU", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:2}  },
             // 转盘金币奖励
             { name : "turntableAwardCoins", sortable:false, formatter:"currency", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}  },
             // 充值返利金币奖励

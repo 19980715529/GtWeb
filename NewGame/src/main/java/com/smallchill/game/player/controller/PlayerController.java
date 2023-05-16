@@ -1,5 +1,6 @@
 package com.smallchill.game.player.controller;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,7 @@ public class PlayerController extends BaseController implements ConstShiro {
 	private static String BASE_PATH = "/gameplayer/";
 	private static String CODE = "player";
 	
-	@Autowired
+	@Resource
 	private HttpServletRequest request;
 	@DoControllerLog(name="进入玩家搜索页面")
 	@RequestMapping("/")
@@ -45,7 +46,7 @@ public class PlayerController extends BaseController implements ConstShiro {
 			return gird;
 		}
 //		gird = paginateBySelf("player_search.list");
-		gird = paginateBySelf("player_search.new_list");
+		gird = paginateBySelf("player_search.new_list1");
 		return gird;
 	}
 	

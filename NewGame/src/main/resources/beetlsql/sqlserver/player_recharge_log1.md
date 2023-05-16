@@ -125,16 +125,19 @@ recharge_unstatistics
 	@if(!isEmpty(UserID)){
     	 and userId =#{UserID}
     @}
+    @if(!isEmpty(clientType)){
+    	 and packageName =#{clientType}
+    @}
     @if(!isEmpty(orderStatus)){
     	 and orderStatus =#{orderStatus}
     @}else{
         and orderStatus in (1,3)
     @}
-	@if(!isEmpty(ApplyDate_dategt)){
-        and DATEDIFF(DAY,createTime,#{ApplyDate_dategt})<=0
+	@if(!isEmpty(EndTime)){
+        and DATEDIFF(DAY,createTime,#{StartTime})<=0
     @}
-    @if(!isEmpty(ApplyDate_datelt)){
-        and DATEDIFF(DAY,createTime,#{ApplyDate_datelt})>=0
+    @if(!isEmpty(EndTime)){
+        and DATEDIFF(DAY,createTime,#{EndTime})>=0
     @}
 recharge_unstatistics_total
 ===
@@ -142,3 +145,58 @@ recharge_unstatistics_total
 	from [QPGameUserDB].[dbo].[AA_Recharge_Buy_No_APPStore] with (nolock)
 	where [TradeSerialNo] in ('201801052316466401332','201801061839360631811','201801062216025801909','201801062312557331938','201801062331128031947','201801070118360501985','201801070211509201999','201801070237198172003','201801070304412732013','201801071958187102278','201801072333232802366','201801080415543202429','2017122919293635727','20180104163835823570')
 
+query_list
+===
+    select isnull(SUM([topUpAmount]),0) as TotalRecMoney,count(distinct userId) as TotalRecUserNum
+    from [RYPlatformManagerDB].[dbo].[Recharge_records] as r where orderStatus=2
+    @if(!isEmpty(UserID)){
+	 and r.userId =#{UserID}
+	@}
+	  @if(!isEmpty(ChannelID)){
+	 and r.channelPid =#{ChannelID}
+	@}
+    @if(!isEmpty(moneyMin)){
+	 and r.topUpAmount >=#{moneyMin}
+	@}
+    @if(!isEmpty(moneyMax)){
+	    and r.topUpAmount <=#{moneyMax}
+	@}
+    @if(!isEmpty(recType)){
+        and r.isThatTay=#{recType}
+    @}
+    @if(!isEmpty(clientType)){
+        and r.packageName=#{clientType}
+    @}
+    @if(!isEmpty(createTime)){
+		and DATEDIFF(DAY,createTime,#{createTime})<=0
+	@}
+	@if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{endTime})>=0
+	@}
+
+query_exc_list
+===
+    select isnull(SUM([amount]),0) as TotalNewExcMoney,count(distinct userId) as TotalNewExcUserNum
+    from [RYPlatformManagerDB].[dbo].[Exchange_review] as e inner join  [RYPlatformManagerDB].[dbo].[Channel] as c on e.channelId = c.id
+    where status in (3,4)
+    @if(!isEmpty(UserID)){
+	 and r.userId =#{UserID}
+	@}
+    @if(!isEmpty(ChannelID)){
+	    and c.id =#{ChannelID}
+	@}
+    @if(!isEmpty(moneyMin)){
+	 and r.amount >=#{moneyMin}
+	@}
+    @if(!isEmpty(moneyMax)){
+	    and r.amount <=#{moneyMax}
+	@}
+    @if(!isEmpty(clientType)){
+        and r.sourcePlatform=#{clientType}
+    @}
+    @if(!isEmpty(createTime)){
+		and DATEDIFF(DAY,createTime,#{createTime})<=0
+	@}
+	@if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{endTime})>=0
+	@}

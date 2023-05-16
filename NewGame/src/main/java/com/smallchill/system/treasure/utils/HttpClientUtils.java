@@ -159,7 +159,7 @@ public class HttpClientUtils {
             String sign1 = Utils.getSign(map, key);
             return sign.equals(sign1);
         }catch (Exception e){
-         return false;
+            return false;
         }
     }
 

@@ -69,7 +69,7 @@ public class RegisterStatisticsController extends BaseController implements Cons
 		LOGGER.info("注册统计->获取当日注册数据查询参数：-------------------");
 		LOGGER.info(parameter);
 		Map paras = JSON.parseObject(parameter, Map.class);
-		Object gird = commonService.getInfoList("charts_register_statistics.new_package_list", paras);
+		Object gird = commonService.getInfoList("charts_register_statistics.new_package_list1", paras);
 		return gird;
 	}
 	

@@ -24,7 +24,8 @@ new_list
 new_package_list
 ===
 	SELECT (SELECT name FROM login.dbo.ClientPos where clientType=a.ClientType) as AccountTypeName,
-	COUNT(userid) AS RegisterCount FROM QPGameUserDB.dbo.AccountsInfo a
+	COUNT(userid) AS RegisterCount 
+    FROM QPGameUserDB.dbo.AccountsInfo a
 	  where isRobit=0
 	  @if(!isEmpty(StartTime_datelt)){
 	  	and DATEDIFF(day, #{StartTime_datelt}, RegisterDate)>=0
@@ -45,7 +46,7 @@ day_reg
 
 new_list1
 ===
-	  SELECT id,CONVERT(VARCHAR(10), writedate, 120) writedate,totalNewUser,totalNewRec,totalTourist,newRecUser,newExcUser,notRoom 
+	  SELECT id,CONVERT(VARCHAR(10), writedate, 120) writedate,totalNewUser,totalNewRec,totalTourist,newRecUser,newExcUser,notRoom,drainCount,undrainCount 
         FROM [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] where 1=1
 	  @if(!isEmpty(StartTime_datelt)){
 	  	and DATEDIFF(day, #{StartTime_datelt}, writedate)>=0
@@ -61,3 +62,48 @@ new_list1
 	  @}else {
 		  order by writedate desc
 	  @}
+
+new_package_list1
+===
+	select c.name AccountTypeName,
+    (SELECT COUNT(userid) FROM QPGameUserDB.dbo.AccountsInfo a where isRobit=0 and a.clientType=c.clientType
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, a.RegisterDate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, a.RegisterDate)<=0
+	  @}
+    ) as RegisterCount,
+    (SELECT COUNT(userid) FROM QPGameUserDB.dbo.AccountsInfo a where isRobit=0 and a.clientType=c.clientType and a.BindPhone!=''
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, a.RegisterDate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, a.RegisterDate)<=0
+	  @}
+    ) as bindCount,
+    (SELECT COUNT(userid) FROM QPGameUserDB.dbo.AccountsInfo a where isRobit=0 and a.clientType=c.clientType and a.BindPhone=''
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, a.RegisterDate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, a.RegisterDate)<=0
+	  @}
+    ) as touristCount,
+    (SELECT COUNT(userid) FROM QPGameUserDB.dbo.AccountsInfo a where isRobit=0 and a.clientType=c.clientType and a.IsDrain=0
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, a.RegisterDate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, a.RegisterDate)<=0
+	  @}
+    ) as undrainCount,
+    (SELECT COUNT(userid) FROM QPGameUserDB.dbo.AccountsInfo a where isRobit=0 and a.clientType=c.clientType and a.IsDrain=1
+	  @if(!isEmpty(StartTime_datelt)){
+	  	and DATEDIFF(day, #{StartTime_datelt}, a.RegisterDate)>=0
+	  @}
+	  @if(!isEmpty(EndTime_dategt)){
+	  	and DATEDIFF(day, #{EndTime_dategt}, a.RegisterDate)<=0
+	  @}
+    ) as drainCount
+    from login.dbo.ClientPos as c

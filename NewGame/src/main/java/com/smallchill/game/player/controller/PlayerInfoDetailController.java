@@ -71,13 +71,12 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		Map channel = Db.findById("Channel", 3);
 		BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
 		// 用户的总赢
-		BigDecimal totalWin = new BigDecimal(infoByOne.get("TotalWin").toString());
-		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("goldProportion").toString())).divide(winConfig, RoundingMode.DOWN);
-		// 用户总金币
-		BigDecimal gold = new BigDecimal(infoByOne.get("Score").toString());
-		BigDecimal fee1 = gold.divide(new BigDecimal(channel.get("goldProportion").toString()),RoundingMode.DOWN);
-		int min = Math.min(fee.intValue(), fee1.intValue());
-		infoByOne.put("money",min);
+		BigDecimal totalWin = RechargeExchangeCommon.getUserWin(id);
+		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("goldProportion").toString()),RoundingMode.DOWN).divide(winConfig, RoundingMode.DOWN);
+		if (fee.doubleValue()<=0.1){
+			fee = new BigDecimal("0");
+		}
+		infoByOne.put("money",fee);
 		mm.put("LastLoginIp", ip);
 		mm.put("user", infoByOne);
 		mm.put("mobile", mobile);
@@ -120,7 +119,9 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		// 打码
 		Map codeData = Db.selectOne("select isnull(sum(Daya),0) gold,count(id) num from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] where Userid=#{UserID} and UseType=3 and ClaimType=1", paras);
 		mm.put("codeData",codeData);
-
+		// 分析代理金币
+		Map shareMap = Db.selectOne("select isnull(sum(Amount),0) gold from [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] where User_Id=#{UserID} and ChangeType_Id in (212,213)", paras);
+		mm.put("share",Long.parseLong(shareMap.get("gold").toString()));
 		mm.put("reMobile", reMobile);
 		mm.put("LastLogonMachine", LastLogonMachine);
 		mm.put("sumMachine",MacqueryInt);

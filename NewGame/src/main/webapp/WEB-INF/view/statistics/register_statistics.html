@@ -40,7 +40,7 @@
 	
 	function initHomeTable() {
 		var grid_url = ctx + "/${code}/dglist";
-		var _colNames = ["日期","总新增","总注册","总游客","新充值","新兑换","未进房间"];
+		var _colNames = ["日期","总新增","总注册","总游客","新充值","新兑换","未进房间","引流量","非引流量"];
 		var _colModel = [
 				            {name : "writedate", width : 100, sortable:false,align:'center'},
 				            {name : "totalNewUser", width : 100, sortable:false,align:'center'},
@@ -48,7 +48,9 @@
             				{name : "totalTourist", width : 100, sortable:false,align:'center'},
 				            {name : "newRecUser", width : 100, sortable:false,align:'center'},
 				            {name : "newExcUser", width : 100, sortable:false,align:'center'},
-				            {name : "notRoom", width : 100, sortable:false,align:'center'}
+				            {name : "notRoom", width : 100, sortable:false,align:'center'},
+				            {name : "drainCount", width : 100, sortable:false,align:'center'},
+				            {name : "undrainCount", width : 100, sortable:false,align:'center'}
 				           ];
 		var data = {
 			where:_filter,
@@ -62,10 +64,14 @@
 		_filter = '{"StartTime_datelt":"' +getBeforeDate(0) +'","EndTime_dategt":"' +getBeforeDate(0)+'"}';
 		_filter = encodeURI(_filter);
 		var grid_url = ctx + "/${code}/nglist";
-		var _colNames = ["游戏主包","总注册"];
+		var _colNames = ["游戏主包","总新增","注册","游客","引流量","非引流量"];
 		var _colModel = [
 				            {name : "AccountTypeName", width : 100, sortable:false,align:'center'}, 
-				            {name : "RegisterCount", width : 100, sortable:false,align:'center'}
+				            {name : "RegisterCount", width : 100, sortable:false,align:'center'},
+				            {name : "bindCount", width : 100, sortable:false,align:'center'},
+				            {name : "touristCount", width : 100, sortable:false,align:'center'},
+				            {name : "drainCount", width : 100, sortable:false,align:'center'},
+				            {name : "undrainCount", width : 100, sortable:false,align:'center'}
 				            ];
 		var data = {
 				where:_filter

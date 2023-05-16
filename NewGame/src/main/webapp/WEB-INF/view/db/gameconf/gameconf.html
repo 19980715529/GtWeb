@@ -34,7 +34,7 @@
             colModel: _colmodel,
             jsonReader: {id: "id"},
             pager: pager_selector,
-            postData: {where: _filter},
+            postData: {where: _filter,sort: "sort", order: "asc"},
             rowNum: 100,
             height: 'auto'
         });

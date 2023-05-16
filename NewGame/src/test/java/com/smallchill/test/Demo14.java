@@ -107,8 +107,8 @@ public class Demo14 extends BaseTest {
         exchangeReview.setBankNumber("1246646555");
         exchangeReview.setCardholder("Tom");
         exchangeReview.setOrderNumber(Utils.getOrderNum(12345));
-        String s = SendHttp.sendExchangeAIPay(exchangeReview);
-        System.out.println(s);
+//        String s = SendHttp.sendExchangeAIPay(exchangeReview);
+//        System.out.println(s);
     }
 
     @Test

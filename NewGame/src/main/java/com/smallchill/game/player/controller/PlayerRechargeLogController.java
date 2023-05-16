@@ -1,11 +1,14 @@
 package com.smallchill.game.player.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alibaba.fastjson.JSONObject;
 import com.smallchill.core.aop.SystemControllerLog;
 import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -52,19 +55,18 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	@Json
 	@RequestMapping("unstatisticsList")
 	public Object unstatisticsList() {
-		Object gird = null;
-		String parameter = HttpKit.getRequest().getParameter("where");
-		if(StrKit.isBlank(parameter)) {
-			return paginateBySelf("player_recharge_log1.recharge_unstatistics");
-		}
-		if(parameter.contains("%")){
-			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
-		}
-		// 解析查询条件
-		LOGGER.error(parameter);
-		Map paras = JSON.parseObject(parameter, Map.class);
-		gird = commonService.getInfoList("player_recharge_log1.recharge_unstatistics",paras);
-		return gird;
+//		Object gird = null;
+//		String parameter = HttpKit.getRequest().getParameter("where");
+//		if(StrKit.isBlank(parameter)) {
+//			return paginateBySelf("player_recharge_log1.recharge_unstatistics");
+//		}
+//		if(parameter.contains("%")){
+//			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
+//		}
+//		// 解析查询条件
+//		LOGGER.error(parameter);
+//		Map paras = JSON.parseObject(parameter, Map.class);
+		return paginateBySelf("player_recharge_log1.recharge_unstatistics");
 	}
 
 	//	@SystemControllerLog(description = "充值记录列表")
@@ -90,33 +92,8 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	@Json
 	@RequestMapping("/getTotalRecharge")
 	public AjaxResult getTotalRecharge() {
-		// 获当天取所有充值成功的人数和总收益
-		Map currentrecharge = commonService.getInfoByOne("player_recharge_log1.current_recharge",null);
-		// 获取当天新增添加的人数
-		Map newrecharge = commonService.getInfoByOne("player_recharge_log1.new_recharge",null);
-		// 当天兑换成功的金额和人数
-		Map current_girds = commonService.getInfoByOne("exchange_records.current_exchange_success_list", null);
-		BigDecimal recharge_money = new BigDecimal(currentrecharge.get("money").toString());
-		BigDecimal exchange_money = new BigDecimal(current_girds.get("current_moneys").toString());
-		BigDecimal difference = recharge_money.subtract(exchange_money);
-		currentrecharge.put("difference",difference.setScale(2));
-		// 获取所有充值成功的
-		Map recharge = commonService.getInfoByOne("player_recharge_log1.all_recharge",null);
-		// 获取所有新增充值
-		Map recharges = commonService.getInfoByOne("player_recharge_log1.all_recharges",null);
-		// 所有兑换成功的金额和人数
-		Map girds = commonService.getInfoByOne("exchange_records.exchange_success_list", null);
-		BigDecimal recharge_moneys = new BigDecimal(recharge.get("money").toString());
-		BigDecimal exchange_moneys = new BigDecimal(girds.get("moneys").toString());
-		BigDecimal differences = recharge_moneys.subtract(exchange_moneys);
-		recharge.put("difference",differences.setScale(2));
-
-		Map result = new HashMap();
-		result.put("currentrecharge", currentrecharge);
-		result.put("newrecharge", newrecharge);
-		result.put("recharges",recharges);
-		result.put("recharge",recharge);
-		return json(result);
+		Map<String, Object> stringObjectMap = RechargeExchangeCommon.OrderStatistics();
+		return json(stringObjectMap);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -133,5 +110,45 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	public AjaxResult getChannel(){
 		Object channel = paginateBySelf("recharge_channel.find_all_parent");
 		return json(channel);
+	}
+	@Json
+	@RequestMapping("/query/list")
+	public AjaxResult query(){
+		Object gird = new Object();
+		String parameter = HttpKit.getRequest().getParameter("where");
+//		LOGGER.error(parameter);
+		if(StrKit.isBlank(parameter)) {
+			return json(gird);
+		}
+		if(parameter.contains("%")){
+			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
+		}
+		// 根据条件=查询 总充值人数：, 新增充值人数：, 总充值额：, 新增充值总额：, 兑换总额：,    充提差：, ARPPU：;
+		JSONObject jsonObject = JSON.parseObject(parameter);
+		HashMap<String, Object> map = new HashMap<>();
+		// 充值人数，充值金额
+		Map o = commonService.getInfoByOne("player_recharge_log1.query_list",jsonObject);
+		BigDecimal totalRecMoney = new BigDecimal(o.get("TotalRecMoney").toString());
+		map.put("TotalRecMoney",totalRecMoney.longValue());
+		BigDecimal totalRecUserNum = new BigDecimal(o.get("TotalRecUserNum").toString());
+		map.put("TotalRecUserNum",totalRecUserNum.longValue());
+		// arpu
+		if (totalRecUserNum.longValue()!=0){
+			map.put("ARPU",totalRecMoney.divide(totalRecUserNum,2,RoundingMode.UP));
+		}else {
+			map.put("ARPU",0);
+		}
+		// 新增充值人数，新增充值金额
+		jsonObject.put("recType",1);
+		Map a = commonService.getInfoByOne("player_recharge_log1.query_list",jsonObject);
+		map.put("TotalNewRecMoney",a.get("TotalRecMoney"));
+		map.put("TotalNewRecUserNum",a.get("TotalRecUserNum"));
+		// 兑换总额 recType
+		Map e = commonService.getInfoByOne("player_recharge_log1.query_exc_list",jsonObject);
+		BigDecimal totalExcMoney = new BigDecimal(e.get("TotalNewExcMoney").toString());
+		map.put("TotalExcMoney",totalExcMoney.longValue());
+		map.put("TotalExcUserNum",e.get("TotalNewExcUserNum").toString());
+		map.put("RE",totalRecMoney.subtract(totalExcMoney));
+		return json(map);
 	}
 }

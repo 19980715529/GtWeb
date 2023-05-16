@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.smallchill.core.constant.ConstUrl.RARP_EXCHANGE_GCASH_URL;
+
 
 /**
  * @Description TODO
@@ -38,19 +40,22 @@ public class Demo9 {
     }
 
     private static void extracted() {
-//        RechargeRecords rechargeRecords = new RechargeRecords();
-//        rechargeRecords.setTopUpAmount(new BigDecimal(23521529));
+        RechargeRecords rechargeRecords = new RechargeRecords();
+        rechargeRecords.setTopUpAmount(new BigDecimal(23521529));
         String orderNum = Utils.getOrderNum(45555);
-//        rechargeRecords.setOrderNumber("A20230327175936GzFYUN");
-//        HashMap<String, Object> map = new HashMap<>();
+        rechargeRecords.setOrderNumber("A20230327175936GzFYUN");
+
 //        map.put("code","test");
-        ExchangeReview exchangeReview = new ExchangeReview();
-        exchangeReview.setAmount(new BigDecimal("100"));
-        exchangeReview.setBankNumber("yuexia");
-        exchangeReview.setOrderNumber(orderNum);
-        exchangeReview.setMoney(new BigDecimal("100"));
+//        ExchangeReview exchangeReview = new ExchangeReview();
+//        exchangeReview.setAmount(new BigDecimal("100"));
+//        exchangeReview.setBankNumber("yuexia");
+//        exchangeReview.setOrderNumber(orderNum);
+//        exchangeReview.setMoney(new BigDecimal("100"));
 //        String res = SendHttp.sendExchangeSafe(exchangeReview, map);
-        String res = SendHttp.sendExchangeRarp(exchangeReview);
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("code","paymaya");
+//        String res = SendHttp.sendExchangeRarp(exchangeReview,map,RARP_EXCHANGE_GCASH_URL);
+        String res = SendHttp.sendRechargeRarp(rechargeRecords,map,RARP_EXCHANGE_GCASH_URL);
         System.out.println(res);
     }
 }

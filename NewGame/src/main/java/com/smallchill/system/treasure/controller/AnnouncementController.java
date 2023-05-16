@@ -1,5 +1,6 @@
 package com.smallchill.system.treasure.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
@@ -7,6 +8,9 @@ import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.system.treasure.entity.RarPay;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -23,14 +27,17 @@ import java.util.Map;
 @RestController
 @RequestMapping("/info")
 public class AnnouncementController extends BaseController implements ConstShiro {
+
+    @Resource
+    private RarPay rarPay;
     /**
      * 公告接口
      */
     @Resource
     private CommonService commonService;
     @PostMapping("/notice")
-    public AjaxResult notice(){
-        List<Map> infoList = commonService.getInfoList("db_announcement.all_list", null);
+    public AjaxResult notice(@RequestParam(value = "cid",required = false,defaultValue = "6") Integer cid){
+        List<Map> infoList = commonService.getInfoList("db_announcement.all_list", CMap.init().set("clientType",cid));
         return json(infoList);
     }
     /**
@@ -85,5 +92,12 @@ public class AnnouncementController extends BaseController implements ConstShiro
             return "fail";
         }
 
+    }
+    @GetMapping("/test")
+    public AjaxResult test(){
+//        ApplicationContext appContext = new ClassPathXmlApplicationContext("spring/applicationContext-PayConfig.xml");
+//        RarPay rarPay = appContext.getBean(RarPay.class);
+        LOGGER.error(JSON.toJSONString(rarPay));
+        return json(rarPay);
     }
 }

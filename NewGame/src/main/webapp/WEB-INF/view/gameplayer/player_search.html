@@ -15,31 +15,47 @@
 
 	function initGrid() {
 		var grid_url = ctx + "/${code}/list";//查询列表接口
-		var _colnames = ["UserID", "玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "登录时间", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>",
-			"<span class=\"text-blue\">金币</span>","银行金币", "接收金币", "赠送金币", "奖券", "充值金额", "充值次数", "首选游戏", "游戏状态", "类型", "账号状态","作弊率",
+		var _colnames = ["UserID", "玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "登录时间","手机号", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>",
+			"<span class=\"text-blue\">金币</span>","奖励金币","充值金额", "充值次数","兑换金额","兑换次数","充提差", "首选游戏", "游戏状态", "账号状态","账户类型","作弊率",
 			"<span class=\"text-blue\">最后作弊完成时间</span>"];
 		var _colmodel = [ 
-		                  {name : "UserID",sortable:false,hidden:true}, 
-		                  {name : "UserID",sortable:false, formatter:genLink}, 
-		                  {name : "NickName",sortable:false, formatter:genLink}, 
-		                  {name : "RegisterDate",index : "RegisterDate"}, 
-		                  {name : "LastLogonDate",sortable:false}, 
-		                  {name : "TotalWaste",index : "TotalWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "DayWaste",index : "DayWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "Score",index : "Score", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "InsureScore",index : "InsureScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "RcvScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "SendScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "UserMedal",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "RechargeNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+			{name : "UserID",sortable:false,hidden:true},
+			{name : "UserID",sortable:false, formatter:genLink},
+			{name : "NickName",sortable:false, formatter:genLink},
+			{name : "RegisterDate",index : "RegisterDate"},
+				// 登录时间
+			{name : "LastLogonDate",sortable:false},
+			// 电话号
+			{name : "BindPhone",sortable:false},
+				// 总输赢
+			{name : "TotalScore",index : "TotalScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 当日输赢
+			{name : "TodayScore",index : "TodayScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 金币
+			{name : "Score",index : "Score", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 奖励金币
+			{name : "rewardGold",index : "rewardGold", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+
+			{name : "TotalRecharge", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
 						// 充值次数
-		                  {name : "RechargeCountNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "FirstEnterKindName",sortable:false}, 
-						  {name : "OnlineServerName",sortable:false}, 
-						  {name : "TypeName",sortable:false, formatter:rowShow}, 
-						  {name : "NullityName",sortable:false},
-						  {name : "CheatRate",hidden:true},
-						  {name : "lastEndCheatTime",index : "lastEndCheatTime"}
+			{name : "RechargeCount", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 兑换金额
+			{name : "TotalExchange", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 兑换次数
+			{name : "ExchangeCount", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 充提差
+			{name : "RE", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+				// 首选游戏
+			{name : "FirstEnterKindName",sortable:false},
+				// 在线状态
+			{name : "OnlineServerName",sortable:false},
+				//
+			{name : "TypeName",sortable:false, formatter:rowShow},
+				// 账户类型
+			{name : "isDrain",sortable:false},
+				// 作弊率
+			{name : "CheatRate",hidden:true},
+			{name : "lastEndCheatTime",index : "lastEndCheatTime"}
 						  ];
 
 		var totalcoin = 0;
@@ -63,11 +79,11 @@
 						$('#'+rowid).addClass('bg-b0f30b');
 					}
 				}
-				if(BladeTool.isNotEmpty(rowdata['TotalWaste']) && rowdata['TotalWaste']>0) {
-					$('#'+rowid+' td[aria-describedby=grid-table_TotalWaste]').addClass('text-red');
+				if(BladeTool.isNotEmpty(rowdata['TotalScore']) && rowdata['TotalScore']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_TotalScore]').addClass('text-red');
 				}
-				if(BladeTool.isNotEmpty(rowdata['DayWaste']) && rowdata['DayWaste']>0) {
-					$('#'+rowid+' td[aria-describedby=grid-table_DayWaste]').addClass('text-red');
+				if(BladeTool.isNotEmpty(rowdata['TodayScore']) && rowdata['TodayScore']>0) {
+					$('#'+rowid+' td[aria-describedby=grid-table_TodayScore]').addClass('text-red');
 				}
 			}
 		});
@@ -153,23 +169,23 @@
 		<div class="form-group">
 			<label class="col-sm-1 control-label no-padding-right" > 充提差： </label>
 			<div class="col-sm-4">
-				<input type="text" id="recv_start" value=""/>-
-				<input type="text" id="recv_end" value=""/>
+				<input type="text" id="re_start" value=""/>-
+				<input type="text" id="re_end" value=""/>
 			</div>
 		
 			<label class="col-sm-1 control-label no-padding-right" > 兑换金额： </label>
 			<div class="col-sm-4">
-				<input type="text" id="send_start" value=""/>-
-				<input type="text" id="send_end" value=""/>
+				<input type="text" id="Exchange_start" value=""/>-
+				<input type="text" id="Exchange_end" value=""/>
 			</div>
 		</div>
 		
 		<div class="form-group">
-<!--			<label class="col-sm-1 control-label no-padding-right" > 金币赠送差(接收-赠送)： </label>-->
-<!--			<div class="col-sm-4">-->
-<!--				<input type="text" id="rs_start" value=""/>- -->
-<!--				<input type="text" id="rs_end" value=""/>-->
-<!--			</div>-->
+			<label class="col-sm-1 control-label no-padding-right" > 奖励金币： </label>
+			<div class="col-sm-4">
+				<input type="text" id="gold_start" value=""/>-
+				<input type="text" id="gold_end" value=""/>
+			</div>
 		
 			<label class="col-sm-1 control-label no-padding-right" > 充值金额： </label>
 			<div class="col-sm-4">
@@ -178,10 +194,16 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="col-sm-1 control-label no-padding-right" > 奖励金币(转盘,活动)： </label>
+			<label class="col-sm-1 control-label no-padding-right" > 账户类型： </label>
 			<div class="col-sm-4">
-				<input type="text" id="coupon_start" value=""/>-
-				<input type="text" id="coupon_end" value=""/>
+<!--				<input type="text" id="coupon_start" value=""/>- -->
+<!--				<input type="text" id="coupon_end" value=""/>-->
+<!--				是否引流量 0:不是 1:是-->
+				<select id="isDrain">
+					<option value="">请选择</option>
+					<option value="1">引流</option>
+					<option value="0">非引流</option>
+				</select>
 			</div>
 		
 			<label class="col-sm-1 control-label no-padding-right" > 总输赢： </label>
@@ -191,9 +213,9 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="col-sm-1 control-label no-padding-right" > 密保手机： </label>
+			<label class="col-sm-1 control-label no-padding-right" > 手机号： </label>
 			<div class="col-sm-4">
-				<input type="text" id="secret_mobile" value=""/>
+				<input type="text" id="mobile_phone" value=""/>
 			</div>
 	
 			<label class="col-sm-1 control-label no-padding-right" > 登录IP或注册IP： </label>
@@ -219,28 +241,10 @@
 			</div>
 		</div>
 		<div class="form-group">
-			<label class="col-sm-1 control-label no-padding-right" > 账户类型： </label>
-			<div class="col-sm-4">
-				<select id="MemberType">
-					<option value="">请选择</option>
-					<option value="0">普通用户</option>
-					<option value="1">VIP1</option>
-					<option value="2">VIP2</option>
-					<option value="3">VIP3</option>
-					<option value="4">VIP4</option>
-					<option value="5">VIP5</option>
-					<option value="6">VIP6</option>
-					<option value="-1">所有VIP</option>
-					<option value="-2">至尊VIP</option>
-				</select>
-			</div>
-		
-			<label class="col-sm-1 control-label no-padding-right" > 游戏平台： </label>
+			<label class="col-sm-1 control-label no-padding-right" > 包来源： </label>
 			<div class="col-sm-4">
 				<select id="ptypeid"></select>
 			</div>
-		</div>
-		<div class="form-group">
 			<label class="col-sm-1 control-label no-padding-right" >是否绑定手机： </label>
 			<div class="col-sm-4">
 				<select id="isBindMobile">
@@ -249,28 +253,25 @@
 					<option value="0">否</option>
 				</select>
 			</div>
-			
-			<label class="col-sm-1 control-label no-padding-right" > 银行金币： </label>
-			<div class="col-sm-4">
-				<input type="text" id="bank_coin_start" value=""/>-
-				<input type="text" id="bank_coin_end" value=""/>
-			</div>
 		</div>
+<!--		<div class="form-group">-->
+<!--			-->
+<!--		</div>-->
 	
 		<script src="${ctxPath}/static/laydate/laydate.js"></script>	
 		<div class="space-4"></div>
 		<!-- 按钮 -->
 		<div class="clearfix form-actions center" style="margin-top:15px;margin-bottom:5px;">
 			<div class="col-md-offset-1 col-md-10">
-			  	<button class="btn btn-info" type="button" id="btn_save">
+				<button class="btn btn-info" type="button" id="btn_save">
 					<i class="ace-icon fa fa-check bigger-110"></i>
 					搜索
 				</button>
-			  	<button class="btn btn-info" type="button" id="btn_trade">
+				<button class="btn btn-info" type="button" id="btn_trade">
 					<i class="ace-icon fa fa-check bigger-110"></i>
 					批量锁定交易
 				</button>
-			  	<button class="btn btn-info" type="button" id="btn_lock">
+				<button class="btn btn-info" type="button" id="btn_lock">
 					<i class="ace-icon fa fa-check bigger-110"></i>
 					批量锁定账号
 				</button>
@@ -414,42 +415,32 @@
 				wheres['CoinEnd'] = coin_end;
 			}
 
-			// 银行金币范围
-			var bank_coin_start = $("#bank_coin_start").val();
-			var bank_coin_end = $("#bank_coin_end").val();
-			if(BladeTool.isNotEmpty(bank_coin_start)) {
-				wheres['BankCoinStart'] = bank_coin_start;
-			}
-			if(BladeTool.isNotEmpty(bank_coin_end)) {
-				wheres['BankCoinEnd'] = bank_coin_end;
-			}
-			
 			// 接收范围
-			var recv_start = $("#recv_start").val();
-			var recv_end = $("#recv_end").val();
-			if(BladeTool.isNotEmpty(recv_start)) {
-				wheres['RcvScoreStart'] = recv_start;
+			var re_start = $("#re_start").val();
+			var re_end = $("#re_end").val();
+			if(BladeTool.isNotEmpty(re_start)) {
+				wheres['ReStart'] = re_start;
 			}
-			if(BladeTool.isNotEmpty(recv_end)) {
-				wheres['RcvScoreEnd'] = recv_end;
+			if(BladeTool.isNotEmpty(re_end)) {
+				wheres['ReEnd'] = re_end;
 			}
 			// 赠送范围
-			var send_start = $("#send_start").val();
-			var send_end = $("#send_end").val();
-			if(BladeTool.isNotEmpty(send_start)) {
-				wheres['SendScoreStart'] = send_start;
+			var Exchange_start = $("#Exchange_start").val();
+			var Exchange_end = $("#Exchange_end").val();
+			if(BladeTool.isNotEmpty(Exchange_start)) {
+				wheres['ExchangeStart'] = Exchange_start;
 			}
-			if(BladeTool.isNotEmpty(send_end)) {
-				wheres['SendScoreEnd'] = send_end;
+			if(BladeTool.isNotEmpty(Exchange_end)) {
+				wheres['ExchangeEnd'] = Exchange_end;
 			}
-			// 赠送差值范围
-			var rs_start = $("#rs_start").val();
-			var rs_end = $("#rs_end").val();
-			if(BladeTool.isNotEmpty(rs_start)) {
-				wheres['RSStart'] = rs_start;
+			// 奖励金币
+			var gold_start = $("#gold_start").val();
+			var gold_end = $("#gold_end").val();
+			if(BladeTool.isNotEmpty(gold_start)) {
+				wheres['GoldStart'] = gold_start;
 			}
-			if(BladeTool.isNotEmpty(rs_end)) {
-				wheres['RSEnd'] = rs_end;
+			if(BladeTool.isNotEmpty(gold_end)) {
+				wheres['GoldEnd'] = gold_end;
 			}
 			// 充值范围
 			var recharge_start = $("#recharge_start").val();
@@ -460,15 +451,15 @@
 			if(BladeTool.isNotEmpty(recharge_end)) {
 				wheres['RechargeEnd'] = recharge_end;
 			}
-			// 奖券范围
-			var coupon_start = $("#coupon_start").val();
-			var coupon_end = $("#coupon_end").val();
-			if(BladeTool.isNotEmpty(coupon_start)) {
-				wheres['CouponStart'] = coupon_start;
+			// 是否引流
+			var isDrain = $("#isDrain").val();
+			// var coupon_end = $("#coupon_end").val();
+			if(BladeTool.isNotEmpty(isDrain)) {
+				wheres['isDrain'] = isDrain;
 			}
-			if(BladeTool.isNotEmpty(coupon_end)) {
-				wheres['CouponEnd'] = coupon_end;
-			}
+			// if(BladeTool.isNotEmpty(coupon_end)) {
+			// 	wheres['CouponEnd'] = coupon_end;
+			// }
 			// 输赢范围
 			var win_start = $("#win_start").val();
 			var win_end = $("#win_end").val();
@@ -479,9 +470,9 @@
 				wheres['WinEnd'] = win_end;
 			}
 			// 密保手机
-			var secret_mobile = $("#secret_mobile").val();
-			if(BladeTool.isNotEmpty(secret_mobile)) {
-				wheres['SecretMobilePhone'] = secret_mobile;
+			var mobile_phone = $("#mobile_phone").val();
+			if(BladeTool.isNotEmpty(mobile_phone)) {
+				wheres['BindPhone'] = mobile_phone;
 			}
 			// 登录IP或注册IP
 			var ip = $("#ip").val();
@@ -503,7 +494,7 @@
 			if(BladeTool.isNotEmpty(MemberType)) {
 				wheres['MemberTypeID'] = MemberType;
 			}
-			// 平台类型
+			// 包来源
 			var PlatformID = $("#ptypeid").val();
 			if(BladeTool.isNotEmpty(PlatformID)) {
 				wheres['PlatformID'] = PlatformID;

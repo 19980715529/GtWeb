@@ -2,6 +2,9 @@ all_list
 ===
     select * FROM [RYPlatformManagerDB].[dbo].[Exchange_review]
     where (status = 4 or status = 3)
+    @if(!isEmpty(clientType)){
+        and sourcePlatform=#{clientType}
+    @}
     @if(!isEmpty(StartTime)){
          and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)
       @}

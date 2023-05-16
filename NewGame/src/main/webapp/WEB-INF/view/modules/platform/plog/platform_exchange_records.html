@@ -94,7 +94,8 @@
                 <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
                 -
                 <input type="text" id="end_time" value="" class="" />
-
+                <label class=""> 包来源： </label>
+                <select id="clientType"></select>
                 <!-- 简单查询按钮 -->
                 <label class="">
                     <button class="btn btn-sx btn-white" type="button" onclick="search()">查询</button>
@@ -143,7 +144,18 @@
             /*   alert('得到：'+datas); */
         }
     });
-
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
     $(function(){
         // 获取当月第一天
         $('#start_time').val(getBeforeDate(0));
@@ -179,6 +191,7 @@
         var wheres = {};
         var start_time = $("#start_time").val();
         var end_time = $("#end_time").val();
+        var clientType=$("#clientType").val();
         if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
             layer_alert('请输入开始时间!', "warn");
             return;
@@ -192,8 +205,9 @@
                 $("#end_time").val(getBeforeDate(0));
             }
         }
-        start_time = $("#start_time").val();
-        end_time = $("#end_time").val();
+        if(BladeTool.isNotEmpty(clientType)){
+            wheres["clientType"]=clientType;
+        }
         if(BladeTool.isNotEmpty(end_time) && BladeTool.isNotEmpty(start_time)) {
             if(start_time>end_time){
                 layer_alert('开始时间不能大于结束时间!', "warn");
@@ -232,7 +246,8 @@
     }
     function resetForm() {
         $("input").val("");
-        reloadGrid();
+        $('#start_time').val(getBeforeDate(0));
+        $('#end_time').val(getBeforeDate(0));
     }
 </script>
 

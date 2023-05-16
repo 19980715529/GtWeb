@@ -49,7 +49,7 @@ public class ClientTypePaymentChannelController extends BaseController implement
 
     /**
      *
-     * 获取充值列表
+     * 获取渠道分包充值列表
      */
     @Json
     @RequestMapping(KEY_LIST)

@@ -2,6 +2,8 @@ package com.smallchill.system.treasure.utils;
 
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import javax.net.ssl.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -12,8 +14,7 @@ import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 
 public class Utils {
@@ -114,6 +115,7 @@ public class Utils {
             if (url.getProtocol().toLowerCase().equals("https"))
             {
                 HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+                https.setConnectTimeout(5000);
                 https.setHostnameVerifier(DO_NOT_VERIFY);
                 conn = https;
             }else{

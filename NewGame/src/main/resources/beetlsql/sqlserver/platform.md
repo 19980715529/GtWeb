@@ -86,7 +86,7 @@ old_list
 
 record_list
 ===
-    select * FROM [QPGameRecordDB].[dbo].[DailyGameStats]
+    select CONVERT(VARCHAR(10), createTime, 23) writeTime,* FROM [QPGameRecordDB].[dbo].[DailyGameStats]
     where 1=1
     @if(!isEmpty(StartTime)){
     and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)

@@ -50,13 +50,19 @@ public class RechargeExchangeCommon {
     public static BigDecimal getUserWin(Integer userId){
         CMap cMap=CMap.init().set("userId", userId);
         String user_win = Db.queryStr("select TotalWin from [QPGameUserDB].[dbo].[PlayerSocreInfo] where Userid=#{userId}", cMap);
+        if (user_win==null){
+            user_win="0";
+        }
         // 查询用户消耗的总赢    1：待支付，2：待审合，3：完成已关闭，4：已完成,5：已退回，6: 支付失败，7：退回关闭，8：待发送
         String consume = Db.queryStr("select isnull(sum(consumptionCode),0) from RYPlatformManagerDB.dbo.Exchange_review " +
                         "where userId=#{userId} and status in (1,2,3,4,6,8)", cMap);
+        //
+        if (consume==null){
+            consume="0";
+        }
         // 用户的最终总赢
-        BigDecimal user_totalWin = new BigDecimal(String.valueOf(user_win)).subtract(new BigDecimal(consume)).setScale(0, RoundingMode.FLOOR);
-        System.out.println(consume+"user_TotalWin"+user_totalWin);
-        return user_totalWin;
+        System.out.println(consume+"user_TotalWin"+user_win);
+        return new BigDecimal(user_win).subtract(new BigDecimal(consume)).setScale(0, RoundingMode.FLOOR);
     }
 
     /**
@@ -103,6 +109,57 @@ public class RechargeExchangeCommon {
                 statement.setInt(4, TotalWinRate);
                 statement.execute();
                 return statement.getInt(1);
+            }
+        });
+    }
+
+    /**
+     * 订单记录统计
+     */
+    public static Map<String,Object> OrderStatistics(){
+        SQLManager dao = Blade.dao();
+        return dao.executeOnConnection(new OnConnection<Map<String, Object>>() {
+            @Override
+            public Map<String, Object> call(Connection connection) throws SQLException {
+                CallableStatement statement = connection.prepareCall("{call [RYPlatformManagerDB].[dbo].[TodayOrderStatistics]}");
+                ResultSet res = statement.executeQuery();
+                HashMap<String, Object> map = new HashMap<>();
+                while (res.next()){
+                    // 当日充值人数
+                    map.put("drRecUserCount",res.getLong("drRecUserCount"));
+                    // 当日充值金额
+                    map.put("drRecMoney",res.getLong("drRecMoney"));
+                    // 新增充值人数
+                    map.put("drNewRecUserCount",res.getLong("drNewRecUserCount"));
+                    // 新增充值金额
+                    map.put("drNewRecMoney",res.getLong("drNewRecMoney"));
+                    // 当日兑换人数
+                    map.put("drExcUserCount",res.getLong("drExcUserCount"));
+                    // 当日兑换金额
+                    map.put("drExcMoney",res.getLong("drExcMoney"));
+                    // 所有充值成功人数
+                    map.put("totalRecUserCount",res.getLong("totalRecUserCount"));
+                    // 总充值金额
+                    map.put("totalRecMoney",res.getLong("totalRecMoney"));
+                    // 总充值次数
+                    map.put("totalRecCount",res.getLong("totalRecCount"));
+                    // 总兑换金额
+                    map.put("totalExcMoney",res.getLong("totalExcMoney"));
+                    // 总兑换人数
+                    map.put("totalExcUserCount",res.getLong("totalExcUserCount"));
+                    // 总兑换次数
+                    map.put("totalExcCount",res.getLong("totalExcCount"));
+                    // 当日充提差
+                    map.put("drRE",res.getLong("drRE"));
+                    // 总充提差
+                    map.put("RE",res.getLong("RE"));
+                    // 当日arpu
+                    map.put("drarpu",res.getBigDecimal("drarpu"));
+                    // 总arpu
+                    map.put("arpu",res.getBigDecimal("arpu"));
+
+                }
+                return map;
             }
         });
     }

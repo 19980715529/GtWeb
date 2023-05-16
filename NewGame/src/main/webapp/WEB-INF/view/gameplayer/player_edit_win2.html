@@ -26,18 +26,27 @@
 						<input type="hidden" name="player.CheatingScoreNow" value="${player.LimitScore!0}"/>
 					</td>
 				</tr>
-				<tr>
-					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">作弊状态: </td>
-					<td>
-						<input type="radio" name="status" onchange="changeStatus(this)" value="" checked="checked"/>输
-						<input type="radio" name="status" onchange="changeStatus(this)" value="-" />赢
-					</td>
-				</tr>
+<!--				<tr>-->
+<!--					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">作弊状态: </td>-->
+<!--					<td>-->
+<!--						<input type="radio" name="status" onchange="changeStatus(this)" value="" checked="checked"/>输-->
+<!--						<input type="radio" name="status" onchange="changeStatus(this)" value="-" />赢-->
+<!--					</td>-->
+<!--				</tr>-->
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">设置作弊率: </td>
 					<td>
-						<input value="0" id="CheatingRateSet"/>
-						<input name="player.CheatingRateSet" value="0" id="CheatingRateValue" type="hidden"/>
+<!--						<input value="0" id="CheatingRateSet"/>-->
+<!--						<input name="player.CheatingRateSet" value="0" id="CheatingRateValue" type="hidden"/>-->
+						<select name="player.CheatingRateSet">
+							<option value="1000">小输1000</option>
+							<option value="2000">中输2000</option>
+							<option value="3000">大输3000</option>
+							<option value="-1000">小赢-1000</option>
+							<option value="-2000">中赢-2000</option>
+							<option value="-3000">大赢-3000</option>
+							<option value="0">清空作弊率</option>
+						</select>
 						<span class="text-red">*该值为万分比且>0，最大值为30000</span>
 					</td>
 				</tr>

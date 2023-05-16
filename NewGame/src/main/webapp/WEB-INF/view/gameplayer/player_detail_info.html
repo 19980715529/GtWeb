@@ -147,13 +147,7 @@
 						</span>,
                     领取的奖励数额：
                     <span class="text-red">
-                        @if(!isEmpty(user.RotaryReward) || !isEmpty(user.CodeReward)){
-                            @{ var rr = numberHandle(user.RotaryReward!0 +user.CodeReward!0);
-                                ${rr}
-                            @}
-                        @}else{
-							0
-						@}
+                        ${onlineData.gold+dailyData.gold+codeData.gold+share}
                     </span>
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">奖券:</td>
@@ -388,7 +382,8 @@
                     使用转盘获得总金币：<span class="text-red">${onlineData.gold+dailyData.gold+codeData.gold}</span>;
                     在线奖励金币数：<span class="text-red">${onlineData.gold}</span>;
                     每日签到金币数：<span class="text-red">${dailyData.gold}</span>;
-                    打码返利金币数：<span class="text-red">${codeData.gold}</span>
+                    打码返利金币数：<span class="text-red">${codeData.gold}</span>;
+                    分享代理金币：<span class="text-red">${share}</span>;
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">转盘使用次数:</td>
                 <td>

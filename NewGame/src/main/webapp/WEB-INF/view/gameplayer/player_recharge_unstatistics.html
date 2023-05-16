@@ -5,7 +5,7 @@
 	var ctx = "${ctxPath}";
 	var grid_selector = "#grid-table";
 	var pager_selector = "#grid-pager";
-	var _filter = '';
+	var _filter = '{"StartTime":"' +getBeforeDate(0) +'","EndTime":"' +getBeforeDate(0)+'"}';
 
 	$(function() {
 		backDom('未统计充值记录','recharge_unstatistics');
@@ -81,16 +81,6 @@
 		}
 	}
 
-	// function getTotalRecharge(where){
-	// 	new Ajax("${ctxPath}/player/getUnstatisticsTotalRecharge", function (data) {
-	//         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-	//         	var temp = data.data;
-	//         	$("#totalRecharge").text(temp.recharge.UnitRMB);
-	//         	$("#totalUser").text(temp.recharge.UserCount);
-	//         }
-	//     }).start();
-	// }
-	
 	function goNewTab(id) {
 		window.top.addTabs({
 	        id: 'player_showdetail_' + id,
@@ -125,6 +115,8 @@
 				<option value="3">已关闭</option>
 			</select>
 
+			<label class=""> 包来源： </label>
+			<select id="clientType"></select>
 
 			<!-- 简单查询按钮 -->
 			<label class="">
@@ -140,6 +132,18 @@
 </div>
 <script src="${ctxPath}/static/laydate/laydate.js"></script>
 <script>
+	// 获取平台列表
+	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+		console.log(data);
+		if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+			var type = data.data;
+			var html = '<option value="">请选择</option>';
+			for (var i = 0; i < type.length; i++) {
+				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			}
+			$("#clientType").html(html);
+		}
+	}).start();
     laydate({
         elem : '#start_time',
         format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
@@ -157,6 +161,9 @@
     });
     function goSearch() {
         var UserID = $("#UserID").val();
+		var clientType = $("#clientType").val();
+		var start_time = $("#start_time").val();
+		var end_time = $("#end_time").val();
         var wheres = {};
 
         if(BladeTool.isNotEmpty(UserID)) {
@@ -166,11 +173,17 @@
 		if (BladeTool.isNotEmpty(orderStatus)){
 			wheres['orderStatus'] = orderStatus;
 		}
-        var start_time = $("#start_time").val();
-        var end_time = $("#end_time").val();
+		if(BladeTool.isNotEmpty(clientType)) {
+			wheres['clientType'] = clientType;
+		}
 
-        wheres['ApplyDate_datelt'] = end_time;
-        wheres['ApplyDate_dategt'] = start_time;
+
+		if(BladeTool.isNotEmpty(end_time)) {
+			wheres['EndTime'] = end_time;
+		}
+        if (BladeTool.isNotEmpty(start_time)){
+			wheres['StartTime'] = start_time;
+		}
 
         var filter = "";
         if (typeof (_filter) != "undefined") {
@@ -202,8 +215,14 @@
     }
 	function resetForm() {
 		$("input").val("");
-		reloadGrid();
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+		// reloadGrid();
 	}
+	$(function(){
+		$('#start_time').val(getBeforeDate(0));
+		$('#end_time').val(getBeforeDate(0));
+	});
 </script>
 <!-- 引入列表页所需js -->
 @include("/common/_listscript.html"){}

@@ -1,6 +1,7 @@
 list
 ===
-    select id,title,content,isOpen,(select name from login.dbo.ClientPos where clientType=a.clientType) as name from announcement_management as a where 1=1
+    select id,title,content,isOpen,(select name from login.dbo.ClientPos where clientType=a.clientType) as name 
+    from announcement_management as a where 1=1
     @if(!isEmpty(clientType)){
 	  and clientType=#{clientType}
 	@}
@@ -10,3 +11,6 @@ announcement_one
 all_list
 ===
     select id,title,content from announcement_management where isOpen!=0
+    @if(!isEmpty(clientType)){
+	  and clientType=#{clientType}
+	@}

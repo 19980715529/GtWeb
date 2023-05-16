@@ -144,7 +144,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             switch (pid) {
                 case 1:
                     // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
-                    response = SendHttp.sendExchangeRarp(exchangeReview);
+                    response = SendHttp.sendExchangeRarp(exchangeReview,channel,RARP_EXCHANGE_GCASH_URL);
                     // rarp      Gcash account format error   SIGN_ERROR
                     LOGGER.error(response);
                     if ("".equals(response)) {
@@ -196,7 +196,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 20:
-                    response = SendHttp.sendExchangeMetaPay(exchangeReview);
+                    response = SendHttp.sendExchangeMetaPay(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -220,7 +220,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                 case 23:
                     // omom 请求的金额必须是整数这里进行处理
                     exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
-                    response = SendHttp.sendExchangeOmom(exchangeReview);
+                    response = SendHttp.sendExchangeOmom(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -241,7 +241,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 26:
-                    response = SendHttp.sendExchangeAIPay(exchangeReview);
+                    response = SendHttp.sendExchangeAIPay(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -261,7 +261,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 29:
-                    response = SendHttp.sendExchangeWePay(exchangeReview);
+                    response = SendHttp.sendExchangeWePay(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -281,7 +281,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 32:
-                    response = SendHttp.sendExchangeGalaxy(exchangeReview,CLOUDPAY_APPID,CLOUDPAY_KEY,EXCHANGE_GALAXY_URL);
+                    response = SendHttp.sendExchangeGalaxy(exchangeReview,CLOUDPAY_APPID,CLOUDPAY_KEY,EXCHANGE_CLOUDPAY_URL,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -300,7 +300,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 35:
-                    response = SendHttp.sendExchangeLetsPay(exchangeReview);
+                    response = SendHttp.sendExchangeLetsPay(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -322,7 +322,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 38:
-                    response = SendHttp.sendExchangeGalaxy(exchangeReview,MHDPAY_APPID,MHDPAY_KEY,EXCHANGE_MHDPAY_URL);
+                    response = SendHttp.sendExchangeGalaxy(exchangeReview,MHDPAY_APPID,MHDPAY_KEY,EXCHANGE_MHDPAY_URL,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -336,6 +336,27 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     } else {
                         // 请求失败, 存储失败原因
                         exchangeReview.setMsg(respJson.getString("message"));
+                        // 将状态设置为失败
+                        exchangeReview.setStatus(6);
+                    }
+                    break;
+                case 43:
+                    response = SendHttp.sendExchangeLuckyPay(exchangeReview,channel);
+                    LOGGER.error(response);
+                    if ("".equals(response)) {
+                        return error("fail");
+                    }
+                    respJson = JSONObject.parseObject(response);
+                    statusStr = respJson.getString("code");
+                    // 成功
+                    if ("00".equals(statusStr)) {
+                        // 请求成功 ,获取平台订单号
+                        exchangeReview.setStatus(1);
+                        String sysOrderNo = respJson.getString("sysOrderNo");
+                        exchangeReview.setPfOrderNum(sysOrderNo);
+                    } else {
+                        // 请求失败, 存储失败原因
+                        exchangeReview.setMsg(respJson.getString("msg"));
                         // 将状态设置为失败
                         exchangeReview.setStatus(6);
                     }

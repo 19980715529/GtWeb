@@ -98,7 +98,7 @@ public class Demo13 extends BaseTest {
         exchangeReview.setMoney(new BigDecimal("100"));
         exchangeReview.setCardholder("yue,xiao");
         exchangeReview.setBankNumber("954621335666");
-        String s = SendHttp.sendExchangeOmom(exchangeReview);
-        System.out.println(s);
+//        String s = SendHttp.sendExchangeOmom(exchangeReview);
+//        System.out.println(s);
     }
 }

@@ -91,7 +91,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
     }
 
 
-    @PostMapping("/test")
+//    @PostMapping("/test")
     @Transactional
     public String callbackTest(@RequestParam Map<String,Object> param){
         // 回调需要执行RechargeRecord函数
@@ -783,6 +783,88 @@ public class CallbackDockingController extends BaseController implements ConstSh
         // 修改订单状态
         blade.update(exchangeReview);
         return "success";
+    }
+
+    @PostMapping(value = "/recharge_LuckyPay_callback")
+    public String rechargeLuckyPayCallback(@RequestParam Map<String,Object> param){
+        // 验证签名
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param,PUBLIC_LUCKYPAY_KEY1);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("orderNo");
+        Blade blade = Blade.create(RechargeRecords.class);
+        RechargeRecords rechargeRecords = blade.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum", orderNum));
+        if (rechargeRecords==null){
+            return "SUCCESS";
+        }
+        // 1 支付中,2 成功,5 失效,-1 失败
+        String code = params.getString("code");
+        GlobalDelayQueue globalDelayQueue = new GlobalDelayQueue();
+        if ("00".equals(code)){
+            if (rechargeRecords.getOrderStatus()==2){
+                return "SUCCESS";
+            }
+            successRecExecuted(blade,orderNum,rechargeRecords,globalDelayQueue);
+        }else{
+            // 从延迟队列中移除并且更新状态
+            globalDelayQueue.cancelOrder(orderNum);
+            rechargeRecords.setOrderStatus(3);
+            String msg = params.getString("msg");
+            rechargeRecords.setMsg(msg);
+            rechargeRecords.setEndTime(new Date());
+            blade.update(rechargeRecords);
+        }
+        return "SUCCESS";
+    }
+
+    @PostMapping(value = "/exchange_LuckyPay_callback")
+    public String exchangeLuckyPayCallback(@RequestParam Map<String,Object> param){
+        if (param==null){
+            return "fail";
+        }
+        LOGGER.error(param);
+        Boolean temp = HttpClientUtils.Md5GalaxyVerification(param,PUBLIC_LUCKYPAY_KEY1);
+        if (!temp){
+            return "fail";
+        }
+        LOGGER.error("认证成功");
+        JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        // 获取订单号
+        String orderNum = params.getString("orderNo");
+        Blade blade = Blade.create(ExchangeReview.class);
+        ExchangeReview exchangeReview =blade.findFirstBy("orderNumber = #{orderNumber}", CMap.init().set("orderNumber",orderNum));
+        if (exchangeReview==null){
+            return "SUCCESS";
+        }
+        // 获取订单状态 2； 成功，3：失败 1:处理中
+        String code = params.getString("code");
+        if ("00".equals(code)){
+            if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
+                return "SUCCESS";
+            }
+            int status = params.getIntValue("status");
+            if (status==1){
+                // 回调成功
+                successExcExecuted(exchangeReview);
+            }
+        }else{
+            // 支付失败兑换变为支付失败
+            exchangeReview.setStatus(6);
+            exchangeReview.setEndTime(new Date());
+            String msg = params.getString("msg");
+            exchangeReview.setMsg(msg);
+        }
+        // 修改订单状态
+        blade.update(exchangeReview);
+        return "SUCCESS";
     }
 
     // 执行存储过程

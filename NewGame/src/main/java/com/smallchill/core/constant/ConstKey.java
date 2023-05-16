@@ -11,11 +11,16 @@ public interface ConstKey {
      * 密钥6012A2FF24D0D37CF6A491F5091BEA81
      *正式 9756478D13DED7D003516E38CABD3A67
      */
+    // 正式
     String SECRET_RARP_KEY="9756478D13DED7D003516E38CABD3A67";
+    // 测试
+//    String SECRET_RARP_KEY="6012A2FF24D0D37CF6A491F5091BEA81";
 
     /**RARPAY
      * 商户账号 正式：GTsuperwinner
      */
+//    String ACCOUNT_RARP_NUM="test123456";
+    // 正式
     String ACCOUNT_RARP_NUM="GTsuperwinner";
 
 
@@ -54,7 +59,7 @@ public interface ConstKey {
             "GUGjkN2AUM+vU6HnN8oAxJulggXH0nzCrBj0SUCprx6OM2OASVlrHrKdPhObNvF8R5Q2+WMujMjvov+DNZMe80=";
 
 
-    // 平台公钥
+    // 三方公钥
     String PUBLIC_KEY1 = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDVL4zP+d+CPC7fmNvQyd+jT+DEHwRnr9" +
             "IEYUN+dmEodf6ArN8hxD6wgxxDH2f9SrYVgYg1wfs8+8L3wdXsirSZ5+BknMNBoEW2NoHNVVVBIrDnFSgUH9" +
             "zouUHMskkLH7m2VnqfOAZLj5SUq3xuRJvbEl2blaZDhygCDSacmcTnlQIDAQAB";
@@ -108,5 +113,31 @@ public interface ConstKey {
     String MHDPAY_APPID = "GTgame";
 
     String MHDPAY_KEY = "4f66c7999f88ec70f2c8bd27b9dda6e2";
+
+    /**
+     * LuckyPay 支付
+     */
+    // 商户号
+    String LUCKYPAY_APPID = "ZT23050516105";
+    // 公钥
+    String PUBLIC_LUCKYPAY_KEY = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDccCaYDJH3DEIDUXC7pT+j05e6xRNI8X" +
+            "PRc/JBuVoXPguHobTK4I1Fs452eGhQUuKIzbbG0RBrUmGp/3mA+xLBXDVsQ9Ls0eU47epOrv8uD3joo2AN/" +
+            "wGmZQO/IVHmCAHNT7Tqyi3FURT8V3aqENsTsIHiayONxgRFhCDDUd7gMQIDAQAB";
+
+    // 私钥
+    String PRIVATE_LUCKYPAY_KEY = "MIICeAIBADANBgkqhkiG9w0BAQEFAASCAmIwggJeAgEAAoGBANxwJpgMkfcMQgNRcLulP6PTl" +
+            "7rFE0jxc9Fz8kG5Whc+C4ehtMrgjUWzjnZ4aFBS4ojNtsbREGtSYan/eYD7EsFcNWxD0uzR5Tjt6k6u/y4PeOijYA3/" +
+            "AaZlA78hUeYIAc1PtOrKLcVRFPxXdqoQ2xOwgeJrI43GBEWEIMNR3uAxAgMBAAECgYEAlWxQPPEIYHYmqSkjSY8SPHL" +
+            "JfwjnsaI559i4dmS19NtR5XZvnrXoDT9RamzkCM6mUCVhqBM/FgCZwyoxqoSGiNlxBlZkcVdn89xVp5QvZw7sGdVKDsI" +
+            "CK/KFwBTqO/eA8HpU48WN8YKvGhNs18JqM8JcQkK0LwASS+65qp6xhyECQQDuskDNiy8NvMclyfoH/T9hd6IFQ+He+tmd" +
+            "fTnsUa1rWk16IhQjvZywWxVBavwqU72X+yay4kUgtj+e1qgAXIBnAkEA7GsPY8cTCALyArZSSmVmagiaAbZbijE5jRr/" +
+            "UFNWJx0yIogbmnzvItH8dmdDmGwCQezSIYNWRGR/UgKMxXnbpwJAO+2ZA4H8UFCjF0O8eKEGdqwYi4XdgaQtWrMEBecDy" +
+            "T4k0ZMYx1hlrIlRrtjzcpUPtsahkqvoeywGkRSHnX+b5QJBAOJ+htXuaJsqRzS1+wxvLLi02OZ/EB/KnPpEPQl1bXo3jE" +
+            "ps3xUYT/mp9xZwQ+AIyfjiq0WUD9eh+CBXdQnTfs0CQQDZF5OLGn8R3kitc+dPnouNGSo4wbDaP4cEbP4GpWsA5DZRF/1ADFzPqeCf9qptgVHqGid7r0Ug0mRNyS3K6dnx";
+
+    // 三方公钥
+    String PUBLIC_LUCKYPAY_KEY1 = "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCQ88CLmOfbpHXjYaF1el3i3qa9vBBlae" +
+            "8gyGlK3desGb3uKe2JWGtsRonVa1QIzha2JCjTm0rUzbhttfM3oJ0Jo9+Awmxfjxa0okkxxCnXGlAS/9O" +
+            "vsry0wwKsCAHcu5wd/3oFeOznwX7uvuFo7Y/67y8/PpybU1qyheglSGxSnwIDAQAB";
 
 }
