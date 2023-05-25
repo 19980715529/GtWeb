@@ -520,8 +520,8 @@ new_list1
 	  @if(!isEmpty(EndRegistTime)){
 		 and CONVERT(VARCHAR(100), a.RegisterDate, 20) <= CONVERT(VARCHAR(100), #{EndRegistTime}, 20)
 	  @}
-    @if(!isEmpty(bindPhone)){
-	 and a.bindPhone like '%'+#{bindPhone}+'%'
+    @if(!isEmpty(BindPhone)){
+	 and a.bindPhone like '%'+#{BindPhone}+'%'
 	@}
 	@if(!isEmpty(MemberTypeID)){
 	 	@if(MemberTypeID=='-1'){

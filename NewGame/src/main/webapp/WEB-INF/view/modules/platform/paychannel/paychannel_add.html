@@ -1,0 +1,45 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/paychannel/save" method="post" class="form-horizontal" role="form">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道名称: </td>
+                    <td ><input type="text" name="paychannel.cname"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">挡位: </td>
+                    <td><input type="text" name="paychannel.exchangeGear" value="" /></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+                    <td><input type="text" name="paychannel.sort" value="" /></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充值是否开启: </td>
+                    <td>
+                        <input type="radio" name="paychannel.isRecharge" value="0" checked>关闭</input>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="paychannel.isRecharge" value="1">开启</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">兑换是否开启: </td>
+                    <td>
+                        <input type="radio" name="paychannel.isExchange" value="0" checked>关闭</input>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="paychannel.isExchange" value="1">开启</input>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

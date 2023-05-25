@@ -1,7 +1,6 @@
 package com.smallchill.test;
 
 import com.alibaba.fastjson.JSON;
-import com.smallchill.system.treasure.entity.RarPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.utils.SendHttp;
 import com.smallchill.system.treasure.utils.Utils;
@@ -61,13 +60,5 @@ public class Demo15 extends BaseTest {
         exchangeReview.setBankNumber("9111111111");
 //        String s = SendHttp.sendExchangeLuckyPay(exchangeReview);
 //        System.out.println(s);
-    }
-
-    @Test
-    public void test2(){
-        ApplicationContext appContext = new ClassPathXmlApplicationContext("spring/applicationContext-PayConfig.xml");
-        RarPay bean = appContext.getBean(RarPay.class);
-        System.out.println(JSON.toJSONString(bean));
-
     }
 }

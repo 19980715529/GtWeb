@@ -2,33 +2,39 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.constant.ConstShiro;
-import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
-import com.smallchill.game.newmodel.gameuserdb.AaZzLogPropchange;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.pay.model.bpay.BPay;
+import com.smallchill.pay.model.globalPay.GlobalPay;
+import com.smallchill.pay.model.letsPay.LetsPay;
+import com.smallchill.pay.model.letsPay.LetsSuperPay;
+import com.smallchill.pay.model.rarpPay.RarPay;
+import com.smallchill.pay.utils.bPayUtils.BPayUtils;
+import com.smallchill.pay.utils.globalPayUtils.GlobalPayUtils;
+import com.smallchill.pay.utils.rarPayUtils.RarPayUtils;
 import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.*;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import com.smallchill.system.treasure.utils.SendHttp;
 import com.smallchill.system.treasure.utils.Utils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -46,9 +52,21 @@ public class RechargeDockingController extends BaseController implements ConstSh
     private ExchangeReviewService exchangeReviewService;
     @Autowired
     private CommonService commonService;
+    @Resource
+    private RarPay rarPay;
+
+    @Resource
+    private LetsPay letsPay;
+    @Resource
+    private LetsSuperPay letsSuperPay;
+    @Resource
+    private BPay bPay;
+    @Resource
+    private GlobalPay globalPay;
 
     /**
      * 需要的参数
+     * recharge.isFirstCharge:0普通充值，1首充，2随机充值
      * recharge.userId:用户id
      * recharge.topUpAmount：充值的金额
      * recharge.pid: 父渠道id
@@ -142,7 +160,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
         switch (pid) {
             case 1:
                 // RARP
-                return rechargeRarp(rechargeRecords, resultMap, channel,RARP_RECHARGE_GCASH_URL);
+                return rechargeRar(rechargeRecords, resultMap, channel);
             case 4:
                 // safe
                 return rechargeSafe(rechargeRecords, resultMap, channel);
@@ -165,10 +183,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // LetsPay支付
                 return rechargeLetsPay(rechargeRecords,resultMap,channel);
             case 38:
-                // 银河系统CloudPay
+                // 银河系统MHDPay
                 return rechargeGalaxy(rechargeRecords,resultMap,MHDPAY_APPID,MHDPAY_KEY,RECHARGE_MHDPAY_URL,channel);
             case 43:
                 return rechargeLuckyPay(rechargeRecords,resultMap,channel);
+            case 49:
+                return rechargeBPay(rechargeRecords,resultMap,channel);
+            case 52:
+                return rechargeGlobalPay(rechargeRecords,resultMap,channel);
             default:
                 return json(resultMap,"Recharge application failed",1);
         }
@@ -277,6 +299,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
     /**
      * type:0充值，1：兑换
      * 用户id: UserId
+     * 包id:cid
      * @return 需要手续费fee
      */
     @Json
@@ -315,11 +338,11 @@ public class RechargeDockingController extends BaseController implements ConstSh
         }else {
             // 兑换,需要返回大渠道信息
             // 获取用户金币
-            String amount = getGold(Integer.valueOf(UserId));
+            String amount = RechargeExchangeCommon.getGold(Integer.valueOf(UserId));
             if ("".equals(amount)){
                 return json(null,"用户不存在",1);
             }
-            Integer fee = null;
+            Integer fee;
             // 查询用户的总赢兑换需总赢计算：兑换金额*金币比例*金币倍率*总赢倍率
             // 查询用户用户总赢
             BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
@@ -334,7 +357,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 }
                 RechargeChannel channel =new RechargeChannel();
                 Map cha = commonService.getInfoByOne("recharge_channel.find_all_child", ch);
-                // 根据大渠道查询渠道区间最小值和最大值，渠道最大值
+                // 根据大渠道查询渠道区间最大值和最大值，渠道最大值
                 Map infoByOne = commonService.getInfoByOne("recharge_channel.find_one_channel", ch);
                 infoByOne.put("name",ch.get("channelName"));
                 infoByOne.put("isLabel",cha.get("isLabel"));
@@ -347,11 +370,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 根据用户金币计算能够兑换的钱  用户金币/金币倍率
                 BigDecimal am = new BigDecimal(amount).divide(gpt,RoundingMode.DOWN);
                 System.out.println(fee1);
-                if (fee1.longValue()>=am.longValue()){
-                    fee=am.intValue();
-                }else {
-                    fee=fee1.intValue();
-                }
+                fee = Math.min(fee1.intValue(), am.intValue());
                 if (fee<0.01){
                     fee = 0;
                 }
@@ -366,19 +385,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         return json(channels);
     }
 
-    /**
-     * 获取用户金币
-     * @param userId
-     * @return
-     */
-    private String getGold(Integer userId) {
-        String amount = Db.queryStr("SELECT Amount FROM [QPGameUserDB].[dbo].[AA_Shop_Prop_UserProp] where User_Id = #{UserId} and Prop_Id = 1",
-                CMap.init().set("UserId",userId));
-        if (amount == null){
-            return "";
-        }
-        return amount;
-    }
 
     /**
      * 查询充值记录
@@ -431,6 +437,69 @@ public class RechargeDockingController extends BaseController implements ConstSh
         return json(first);
     }
 
+    private AjaxResult rechargeGlobalPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
+        String code;
+        String PfOrderNum;
+        String response;
+        JSONObject jsonObject;
+        response = GlobalPayUtils.sendRecharge(rechargeRecords,channel, globalPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        code = jsonObject.getString("code");
+        if ("10000".equals(code)) {
+            // 获取支付链接
+            String payUrl = jsonObject.getString("payUrl");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 设置平台订单号
+            PfOrderNum = jsonObject.getString("outTradeNo");
+            rechargeRecords.setPfOrderNum(PfOrderNum);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("msg"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
+
+    private AjaxResult rechargeBPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
+        String code;
+        String PfOrderNum;
+        String response;
+        JSONObject jsonObject;
+        response = BPayUtils.sendRechargeBPay(rechargeRecords,channel,bPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return json(resultMap, "Recharge application failed", 1);
+        }
+        jsonObject = JSON.parseObject(response);
+        code = jsonObject.getString("code");
+        if ("200".equals(code)) {
+            // 获取支付链接
+            String payUrl = jsonObject.getJSONObject("data").getString("paymentUrl");
+            resultMap.put("urlPay", payUrl);
+            rechargeRecords.setUrlPay(payUrl);
+            // 设置平台订单号
+            PfOrderNum = jsonObject.getJSONObject("data").getString("orderNo");
+            rechargeRecords.setPfOrderNum(PfOrderNum);
+            // 将订单加入到未支付队列中
+            GlobalDelayQueue.orderQueue.add(rechargeRecords);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application success");
+        } else {
+            rechargeRecords.setMsg(jsonObject.getString("message"));
+            rechargeRecords.setOrderStatus(3);
+            rechargeRecordsService.saveRtId(rechargeRecords);
+            return json(resultMap, "Recharge application failed", 1);
+        }
+    }
     /**
      * LuckyPay支付处理
      * @param rechargeRecords
@@ -474,7 +543,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
     private AjaxResult rechargeLetsPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
         JSONObject jsonObject;
         String response;
-        response = SendHttp.sendRechargeLetsPay(rechargeRecords,channel);
+        String channelName = channel.get("channelName").toString();
+        Map<String, String> param;
+        if ("super".equals(channelName)){
+            param = JSON.parseObject(JSON.toJSONString(letsSuperPay), new TypeReference<Map<String, String>>(){});
+        }else {
+            param = JSON.parseObject(JSON.toJSONString(letsPay), new TypeReference<Map<String, String>>(){});
+        }
+        response = SendHttp.sendRechargeLetsPay(rechargeRecords,channel,param);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
@@ -507,7 +583,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
     private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap,String appid,String key,String url,Map<String,Object> channel) {
         JSONObject jsonObject;
         String response;
-//        response = SendHttp.sendRechargeGalaxy(rechargeRecords,GALAXY_KEY,RECHARGE_GALAXY_URL);
         response = SendHttp.sendRechargeGalaxy(rechargeRecords,appid,key,url,channel);
         LOGGER.error(response);
         if ("".equals(response)) {
@@ -719,11 +794,11 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * @param channel
      * @return
      */
-    private AjaxResult rechargeRarp(RechargeRecords rechargeRecords, JSONObject resultMap, Map channel,String url) {
+    private AjaxResult rechargeRar(RechargeRecords rechargeRecords, JSONObject resultMap, Map channel) {
         String response;
         JSONObject jsonObject = null;
         int code;
-        response = SendHttp.sendRechargeRarp(rechargeRecords, channel,url);
+        response = RarPayUtils.sendRechargeRar(rechargeRecords, channel,rarPay);
         if (response.equals("")) {
             return json(resultMap, "fail", 1);
         }
@@ -748,8 +823,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
             // 获取平台订单号
             String ordernum = jsonObject.getJSONObject("data").getString("ordernum");
             rechargeRecords.setPfOrderNum(ordernum);
-
-//                    int status = jsonObject.getJSONObject("data").getIntValue("status");
             // 生成订单记录
             rechargeRecordsService.saveRtId(rechargeRecords);
             String PayUrl = jsonObject.getJSONObject("data").getString("pay_url");

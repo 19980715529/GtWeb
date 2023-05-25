@@ -178,6 +178,17 @@ public interface ConstUrl {
     String RECHARGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_LuckyPay_callback";
     // Luckypay 兑换回调地址
     String EXCHANGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_LuckyPay_callback";
-
+    /**
+     * BPay支付回调地址地址
+     */
+    String RECHARGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/BPay/callback/recharge";
+    // BPay 回调地址
+    String EXCHANGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/BPay/callback/exchange";
+    /**
+     * GlobalPay回调地址
+     */
+    String RECHARGE_GLOBALPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/GlobalPay/recharge";
+    // GlobalPay 回调地址
+    String EXCHANGE_GLOBALPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/GlobalPay/exchange";
 }
 

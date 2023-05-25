@@ -55,7 +55,7 @@ public class Demo9 {
         HashMap<String, Object> map = new HashMap<>();
         map.put("code","paymaya");
 //        String res = SendHttp.sendExchangeRarp(exchangeReview,map,RARP_EXCHANGE_GCASH_URL);
-        String res = SendHttp.sendRechargeRarp(rechargeRecords,map,RARP_EXCHANGE_GCASH_URL);
-        System.out.println(res);
+//        String res = SendHttp.sendRechargeRarp(rechargeRecords,map,RARP_EXCHANGE_GCASH_URL);
+//        System.out.println(res);
     }
 }

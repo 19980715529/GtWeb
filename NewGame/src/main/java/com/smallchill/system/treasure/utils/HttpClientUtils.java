@@ -1,5 +1,6 @@
 package com.smallchill.system.treasure.utils;
 
+import com.smallchill.pay.model.rarpPay.RarPay;
 import okhttp3.Request;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -90,12 +91,12 @@ public class HttpClientUtils {
     /**
      *verification
      */
-    public static Boolean Md5RarpVerification(Map<String, Object> requestParams) {
+    public static Boolean Md5RarpVerification(Map<String, Object> requestParams, RarPay rarPay) {
         String sign = requestParams.remove("sign").toString();
         if (sign==null){
             return false;
         }
-        String sign1 = Utils.getSign(requestParams, SECRET_RARP_KEY);
+        String sign1 = Utils.getSign(requestParams, rarPay.getKey());
         System.out.println("sign:"+sign1);
         return sign.equals(sign1);
     }

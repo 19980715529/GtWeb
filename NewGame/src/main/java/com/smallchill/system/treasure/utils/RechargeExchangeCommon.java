@@ -11,9 +11,8 @@ import org.beetl.sql.core.SQLManager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @Description 充值兑换公共类
@@ -22,6 +21,19 @@ import java.util.Map;
  * @Version 1.0
  **/
 public class RechargeExchangeCommon {
+    /**
+     * 获取用户金币
+     * @param userId
+     * @return
+     */
+    public static String getGold(Integer userId) {
+        String amount = Db.queryStr("SELECT Amount FROM [QPGameUserDB].[dbo].[AA_Shop_Prop_UserProp] where User_Id = #{UserId} and Prop_Id = 1",
+                CMap.init().set("UserId",userId));
+        if (amount == null){
+            return "";
+        }
+        return amount;
+    }
     /**
      * 查询发送成功邮件
      */
@@ -60,7 +72,7 @@ public class RechargeExchangeCommon {
         if (consume==null){
             consume="0";
         }
-        // 用户的最终总赢
+        // 用户的最终总赢 2680000
         System.out.println(consume+"user_TotalWin"+user_win);
         return new BigDecimal(user_win).subtract(new BigDecimal(consume)).setScale(0, RoundingMode.FLOOR);
     }
@@ -91,7 +103,7 @@ public class RechargeExchangeCommon {
         return o;
     }
     /**
-     *  @UserID int,
+     * @UserID int,
      * @ExchangeGold bigint,			--兑换金币
      * @TotalWinRate float				--总赢倍率
      */
@@ -131,6 +143,8 @@ public class RechargeExchangeCommon {
                     map.put("drRecMoney",res.getLong("drRecMoney"));
                     // 新增充值人数
                     map.put("drNewRecUserCount",res.getLong("drNewRecUserCount"));
+                    // 当日充值次数
+                    map.put("drTotalRecCount",res.getLong("drTotalRecCount"));
                     // 新增充值金额
                     map.put("drNewRecMoney",res.getLong("drNewRecMoney"));
                     // 当日兑换人数
@@ -160,6 +174,54 @@ public class RechargeExchangeCommon {
 
                 }
                 return map;
+            }
+        });
+    }
+
+
+    /**
+     * 获取随机用户名
+     */
+    public static String RandomUsername(){
+        List<String> list = Arrays.asList("Cecile,Darell,Jayden","Filimena,Borna,Alina","Suellen,Posey,Johnny","Sarra,Rolph,Arvin","Hiram,Brahm,Joyce",
+                "Eurydice,Tabor,Dream","Alessandra,Bol,Feo","Daan,Titus,Aquinnah","Chanelle,Tiege,Acadia","Morag,Alford,Vaeda","Hari,Uhl,Vanessa","Bituin,Nicanor,Wynne","Delaney,Acadia,Charmaine");
+        Random random = new Random();
+        int size = list.size();
+        int randomIndex = random.nextInt(size);
+        return list.get(randomIndex);
+    }
+
+    /**
+     * 获取随机邮箱
+     * @return
+     */
+    public static String RandomEmail(){
+        List<String> list = Arrays.asList("Kalim1997@163.com","Russell1996@139.com","Devonte2003@Yeah.com","Recto2006@139.com","Ulises2014@bing.com",
+                "Jude2017@Outlook.com","Balbutin2019@189.com","Alarico1990@Yeah.com","Tyson1992@263.com","Lavares1998@Hotmail.com","Elmer2000@163.com","Meneses2001@gmail.com","Sanqui2005@263.com");
+        Random random = new Random();
+        int size = list.size();
+        int randomIndex = random.nextInt(size);
+        return list.get(randomIndex);
+    }
+    /**
+     * 充值回调成功需要执行的代码
+     */
+    public static Integer successRecExecute(String orderNum){
+        SQLManager dao = Blade.dao();
+        return dao.executeOnConnection(new OnConnection<Integer>() {
+            @Override
+            public Integer call(Connection connection){
+                try {
+                    CallableStatement statement = connection.prepareCall("{? = call [RYPlatformManagerDB].[dbo].[SuccessRecExecute](?)}");
+                    // 注册输出参数
+                    statement.registerOutParameter(1, Types.INTEGER);
+                    // 设置参数
+                    statement.setString(2, orderNum);
+                    statement.execute();
+                    return statement.getInt(1);
+                }catch (Exception e){
+                    return 3;
+                }
             }
         });
     }

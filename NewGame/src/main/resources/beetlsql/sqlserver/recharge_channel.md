@@ -26,7 +26,7 @@ first_list
     select amount,gold,give_gold,type from [RYPlatformManagerDB].[dbo].[First_charge_config]
 all_parent_list
 ===
-    SELECT id,mcName FROM [RYPlatformManagerDB].[dbo].[Channel] where pid = 0 and isOpen=1
+    SELECT id,mcName FROM [RYPlatformManagerDB].[dbo].[Channel] where pid = 0
 all_child_list
 ===
     SELECT id,name,pid,min,max,channelTaxRate,sort,give,fee,goldProportion FROM [RYPlatformManagerDB].[dbo].[Channel] where pid != 0 and type = #{type}
@@ -39,7 +39,7 @@ all_child
     where pid!=0 and isOpen=1 and type=#{type} and channelName=#{channelName} order by sort
 all_exchange_channel_min
 ===
-    select id,name from [RYPlatformManagerDB].[dbo].[Channel] where pid != 0 and isOpen=1 and type=1
+    select id,name from [RYPlatformManagerDB].[dbo].[Channel] where pid != 0 and isOpen=1 and type=1 and channelName=#{channelName}
 find_all_parent
 ===
     SELECT id,mcName FROM Channel WHERE pid=0

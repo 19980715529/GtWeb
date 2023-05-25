@@ -1,0 +1,167 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var _filter = '{"type":"","clientType":"6"}';
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('充值渠道管理','channellist');
+        initGrid();
+        initMenuBtn("btns","channellist");
+    });
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["渠道id","包来源","商户名", "大渠道名称","小渠道","是否关闭","充值是否显示标签","游戏中排的排序","游戏单次充值最小",
+            "渠道单次充值最大","渠道税率","固定费用","金币倍率","总赢倍率","渠道额外赠送","单位","充值/兑换"];
+        var _colmodel=[
+            {name:"id",index:"id",hidden:true},
+            {name:"clientType",sortable:false},
+            {name:"mcName",index:"mcName"},
+            {name:"cname", sortable:false},
+            {name:"name", sortable:false},
+            {name:"isOpen", sortable:false,formatter:rowShow},
+            {name:"isLabel", sortable:false,formatter:hotShow},
+            {name:"sort",sortable:false},
+            {name:"minLimit", sortable:false},
+            {name:"maxLimit", sortable:false},
+            {name:"channelTax", sortable:false},
+            {name:"fee", sortable:false},
+            {name:"exchangeRatio", sortable:false},
+            {name:"winConf", sortable:false},
+            {name:"giveRatio", sortable:false},
+            {name:"currencyType", sortable:false},
+            {name:"type", formatter:rowType}
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {where: _filter,sort: "sort", order: "asc"},
+            rowNum:100,
+            height: 'auto'
+        });
+
+
+    }
+    function rowShow(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isOpen') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">开启</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">关闭</span>';
+            }
+        }
+        return html;
+    }
+    function hotShow(cellvalue,options,rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isLabel') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">NEW</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">否</span>';
+            }else {
+                html += '<span class="label label-info">HOT</span>';
+            }
+        }
+        return html;
+    }
+    function rowType(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='type') {
+            if(rowObject.type === 1) {
+                html += '<span class="label label-info">兑换</span>';
+            } else if(rowObject.type === 0) {
+                html += '<span class="label label-warning">充值</span>';
+            }
+        }
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <span id="GameTypeForm">
+        <label class=""> 渠道类型： </label>
+        <select id="ptypeid">
+            <option value="">全部</option>
+            <option value="0">充值</option>
+            <option value="1">兑换</option>
+        </select>
+        <label>包来源：</label>
+    <select id="clientType">
+    </select>
+    </span>
+    <!-- 简单查询按钮 -->
+    <label class="">
+        <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+    </label>
+    <div class="col-xs-12 tb-grid">
+        <!-- 按钮组 -->
+        <div class="welljq well-sm" id="btns"></div>
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script>
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
+    function goSearch() {
+        var type = $("#ptypeid").val();
+        var clientType = $("#clientType").val();
+        var wheres = {};
+
+        if(BladeTool.isNotEmpty(type)) {
+            wheres['type'] = type;
+        }
+        if(BladeTool.isNotEmpty(clientType)) {
+            wheres['clientType'] = clientType;
+        }
+        var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        var pageNum = $jqGrid.getGridParam('page');
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                where : where
+            },
+            page: (isAutoPage) ? pageNum : 1,
+        }).trigger("reloadGrid");
+    }
+</script>
+@include("/common/_listscript.html"){}
+@}

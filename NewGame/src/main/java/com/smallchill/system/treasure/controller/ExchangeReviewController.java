@@ -2,6 +2,7 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.vo.ShiroUser;
 import com.smallchill.core.annotation.Before;
@@ -21,6 +22,14 @@ import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.kit.URLKit;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.pay.model.bpay.BPay;
+import com.smallchill.pay.model.globalPay.GlobalPay;
+import com.smallchill.pay.model.letsPay.LetsPay;
+import com.smallchill.pay.model.letsPay.LetsSuperPay;
+import com.smallchill.pay.model.rarpPay.RarPay;
+import com.smallchill.pay.utils.bPayUtils.BPayUtils;
+import com.smallchill.pay.utils.globalPayUtils.GlobalPayUtils;
+import com.smallchill.pay.utils.rarPayUtils.RarPayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.service.ExchangeReviewService;
@@ -37,6 +46,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -62,6 +72,16 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     private CommonService commonService;
     @Autowired
     private ExchangeReviewService service;
+    @Resource
+    private RarPay rarPay;
+    @Resource
+    private LetsPay letsPay;
+    @Resource
+    private LetsSuperPay letsSuperPay;
+    @Resource
+    private BPay bPay;
+    @Resource
+    private GlobalPay globalPay;
     private static String BASE_PATH = "/system/exchangereview/";
     private static String CODE = "exchangereview";
     private static String LIST_SOURCE = "exchange_review.all_list";
@@ -72,8 +92,8 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         mm.put("code", CODE);
         return "/modules/platform/plog/platform_exchange_review.html";
     }
-    /*
-    查询兑换列表
+    /**
+     *查询兑换列表
      */
     @Json
     @RequestMapping(KEY_LIST)
@@ -129,13 +149,13 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             cond.put("id", exchangeReview.getChannelId());
             //
             Map channel = commonService.getInfoByOne("recharge_channel.get_channel", cond);
+            BigDecimal fee = new BigDecimal(channel.get("fee").toString());
             Integer pid = Integer.valueOf(channel.get("pid").toString());
             // 计算需要发送到第三方的钱 兑换的钱*（1-渠道税率）
             BigDecimal amount = exchangeReview.getAmount();
             BigDecimal taxRate = new BigDecimal(channel.get("channelTaxRate").toString());
             BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
-            //
-            exchangeReview.setMoney(money.setScale(2, RoundingMode.FLOOR));
+            exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
             JSONObject respJson;
             int code;
             int status;
@@ -144,7 +164,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             switch (pid) {
                 case 1:
                     // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
-                    response = SendHttp.sendExchangeRarp(exchangeReview,channel,RARP_EXCHANGE_GCASH_URL);
+                    response = RarPayUtils.sendExchangeRar(exchangeReview,channel,rarPay);
                     // rarp      Gcash account format error   SIGN_ERROR
                     LOGGER.error(response);
                     if ("".equals(response)) {
@@ -300,7 +320,14 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 35:
-                    response = SendHttp.sendExchangeLetsPay(exchangeReview,channel);
+                    String channelName = channel.get("channelName").toString();
+                    Map<String, String> param;
+                    if ("super".equals(channelName)){
+                        param = JSON.parseObject(JSON.toJSONString(letsSuperPay), new TypeReference<Map<String, String>>(){});
+                    }else {
+                        param = JSON.parseObject(JSON.toJSONString(letsPay), new TypeReference<Map<String, String>>(){});
+                    }
+                    response = SendHttp.sendExchangeLetsPay(exchangeReview,channel,param);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -353,6 +380,47 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                         // 请求成功 ,获取平台订单号
                         exchangeReview.setStatus(1);
                         String sysOrderNo = respJson.getString("sysOrderNo");
+                        exchangeReview.setPfOrderNum(sysOrderNo);
+                    } else {
+                        // 请求失败, 存储失败原因
+                        exchangeReview.setMsg(respJson.getString("msg"));
+                        // 将状态设置为失败
+                        exchangeReview.setStatus(6);
+                    }
+                    break;
+                case 49:
+                    response = BPayUtils.sendExchangeBPay(exchangeReview, channel, bPay);
+                    if ("".equals(response)){
+                        return error("fail");
+                    }
+                    respJson = JSONObject.parseObject(response);
+                    statusStr = respJson.getString("code");
+                    // 成功
+                    if ("200".equals(statusStr)) {
+                        // 请求成功 ,获取平台订单号
+                        exchangeReview.setStatus(1);
+                        String sysOrderNo = respJson.getJSONObject("data").getString("orderNo");
+                        exchangeReview.setPfOrderNum(sysOrderNo);
+                    } else {
+                        // 请求失败, 存储失败原因
+                        exchangeReview.setMsg(respJson.getString("message"));
+                        // 将状态设置为失败
+                        exchangeReview.setStatus(6);
+                    }
+                    break;
+                case 52:
+                    //GlobalPay
+                    response = GlobalPayUtils.sendExchange(exchangeReview, channel, globalPay);
+                    if ("".equals(response)){
+                        return error("faila");
+                    }
+                    respJson = JSONObject.parseObject(response);
+                    statusStr = respJson.getString("code");
+                    // 成功
+                    if ("10000".equals(statusStr)) {
+                        // 请求成功 ,获取平台订单号
+                        exchangeReview.setStatus(1);
+                        String sysOrderNo = respJson.getString("outTradeNo");
                         exchangeReview.setPfOrderNum(sysOrderNo);
                     } else {
                         // 请求失败, 存储失败原因

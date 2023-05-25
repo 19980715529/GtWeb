@@ -1,22 +1,28 @@
 package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.plugins.dao.Redis;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
+import com.smallchill.core.toolbox.redis.IJedis;
 import com.smallchill.game.service.CommonService;
-import com.smallchill.system.treasure.entity.RarPay;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import com.smallchill.pay.model.bpay.BPay;
+import com.smallchill.pay.model.letsPay.LetsSuperPay;
+import com.smallchill.pay.model.rarpPay.RarPay;
+import com.smallchill.system.treasure.model.ChannelVo;
+import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @Description TODO
@@ -28,8 +34,6 @@ import java.util.Map;
 @RequestMapping("/info")
 public class AnnouncementController extends BaseController implements ConstShiro {
 
-    @Resource
-    private RarPay rarPay;
     /**
      * 公告接口
      */
@@ -93,11 +97,94 @@ public class AnnouncementController extends BaseController implements ConstShiro
         }
 
     }
-    @GetMapping("/test")
-    public AjaxResult test(){
-//        ApplicationContext appContext = new ClassPathXmlApplicationContext("spring/applicationContext-PayConfig.xml");
-//        RarPay rarPay = appContext.getBean(RarPay.class);
-        LOGGER.error(JSON.toJSONString(rarPay));
-        return json(rarPay);
+    @GetMapping("/redis/set")
+    public AjaxResult setRedisKey(@RequestParam String key,@RequestParam String value){
+        IJedis cache = Redis.init("cache");
+        cache.set(key, value);
+        return success("添加成功");
+    }
+    @GetMapping("/redis/get")
+    public AjaxResult getRedisKey(@RequestParam String key){
+        IJedis cache = Redis.init("cache");
+        String value = cache.get(key);
+        Map<String, String> map = new HashMap<>();
+        map.put(key,value);
+        return json(map);
+    }
+
+    /**
+     * 充值兑换渠道获取
+     * @param UserId
+     * @param type
+     * @param cid
+     * @return
+     */
+    @PostMapping("/all_channel")
+    public AjaxResult getAllChannel(@RequestParam Integer UserId,@RequestParam Integer type,@RequestParam Integer cid){
+        //判断用户是否存在
+        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserId",UserId));
+        if (user==null){
+            // 用户不存在
+            return fail("Userid does not exist");
+        }
+        ArrayList<ChannelVo> channelVos = new ArrayList<>();
+        // 获取大渠道 Pay_Channel
+        if (type==1){
+            // 查询用户用户总赢
+            BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
+            String amount = RechargeExchangeCommon.getGold(Integer.valueOf(UserId));
+            if ("".equals(amount)){
+                return json(null,"用户不存在",1);
+            }
+            List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear,isRecharge,isExchange from Pay_Channel order by sort");
+            for (Map map:payChannel) {
+                ChannelVo channelVo = JSON.parseObject(JSON.toJSONString(map), ChannelVo.class);
+                // 兑换时需要兑换比率
+                String exchangeGear = map.get("exchangeGear").toString().trim();
+                String[] split = exchangeGear.split(",");
+                List<Integer> gear = Arrays.stream(split)
+                        .map(Integer::valueOf)
+                        .collect(Collectors.toList());
+                channelVo.setExchangeGear(gear);
+                channelVos.add(channelVo);
+                // 获取最大参数
+                CMap param =CMap.init().set("clientType", cid).set("type", type).set("cid", map.get("id"));
+                Map max_param = commonService.getInfoByOne("channel_list.param_max", param);
+                if (max_param==null){
+                    continue;
+                }
+                // 获取其中一条
+                Map ch = commonService.getInfoByOne("channel_list.param_one", param);
+                if (ch==null){
+                    continue;
+                }
+                max_param.put("name",map.get("channel_name"));
+                max_param.put("isLabel",ch.get("isLabel"));
+                max_param.put("unit",ch.get("unit"));
+                max_param.put("mcName",ch.get("mcName"));
+                // 获取金币
+                BigDecimal gpt = new BigDecimal(max_param.get("goldProportion").toString());
+                // 根据用户总赢计算可以兑换的钱  用户总赢/10000/1.5
+                BigDecimal fee1 = totalWin.divide(gpt, RoundingMode.DOWN).divide(new BigDecimal(max_param.get("winConf").toString()), RoundingMode.DOWN);
+                // 根据用户金币计算能够兑换的钱  用户金币/金币倍率
+                BigDecimal am = new BigDecimal(amount).divide(gpt,RoundingMode.DOWN);
+                int fee = Math.min(fee1.intValue(), am.intValue());
+                if (fee<0.01){
+                    fee = 0;
+                }
+                max_param.put("money",fee);
+                channelVo.getTypes().add(max_param);
+            }
+        }else {
+            List<Map> payChannel = Db.selectList("select id,cname channel_name,isRecharge,isExchange from Pay_Channel order by sort");
+            for (Map map:payChannel) {
+                ChannelVo channelVo = JSON.parseObject(JSON.toJSONString(map), ChannelVo.class);
+                // 根据订单类型，包id进行查询
+                List<Map> infoList = commonService.getInfoList("channel_list.new_list", CMap.init().set("clientType",cid).set("type",type).set("cid",map.get("id")));
+                channelVo.setTypes(infoList);
+                channelVos.add(channelVo);
+            }
+        }
+        return json(channelVos);
     }
 }

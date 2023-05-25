@@ -116,7 +116,6 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	public AjaxResult query(){
 		Object gird = new Object();
 		String parameter = HttpKit.getRequest().getParameter("where");
-//		LOGGER.error(parameter);
 		if(StrKit.isBlank(parameter)) {
 			return json(gird);
 		}
@@ -129,6 +128,7 @@ public class PlayerRechargeLogController extends BaseController implements Const
 		// 充值人数，充值金额
 		Map o = commonService.getInfoByOne("player_recharge_log1.query_list",jsonObject);
 		BigDecimal totalRecMoney = new BigDecimal(o.get("TotalRecMoney").toString());
+		map.put("TotalRecNum",new BigDecimal(o.get("TotalRecNum").toString()));
 		map.put("TotalRecMoney",totalRecMoney.longValue());
 		BigDecimal totalRecUserNum = new BigDecimal(o.get("TotalRecUserNum").toString());
 		map.put("TotalRecUserNum",totalRecUserNum.longValue());

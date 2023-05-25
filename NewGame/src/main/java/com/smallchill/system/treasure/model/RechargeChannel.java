@@ -14,7 +14,8 @@ import java.util.Map;
 @BindID(name = "id")
 public class RechargeChannel extends BaseModel {
     private Integer id; // 渠道id
-    private String channel_name; //渠道名称
+    private Integer isLabel;
+    private String channel_name; //大渠道名称
 
     private List<Map>  types = new ArrayList<>();
 
@@ -40,5 +41,13 @@ public class RechargeChannel extends BaseModel {
 
     public void setTypes(List<Map> types) {
         this.types = types;
+    }
+
+    public Integer getIsLabel() {
+        return isLabel;
+    }
+
+    public void setIsLabel(Integer isLabel) {
+        this.isLabel = isLabel;
     }
 }

@@ -1,0 +1,118 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/channellist/update" method="post" class="form-horizontal" role="form">
+            <input type="hidden" name="channellist.id" value="${channellist.id}" readonly/>
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户名: </td>
+                    <td>
+                        <input type="hidden" id="mcId" value="${channellist.chPoolId}" readonly/>
+                        <select type="text" id="ChannelID" name="channellist.chPoolId"></select>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
+                    <td>
+                        <input type="hidden" id="clientType" value="${channellist.clientType}"/>
+                        <select id="clientTypes" name="channellist.clientType"></select>
+                    </td>
+                    </td>
+                </tr>
+                <tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最小值: </td>
+                    <td><input type="text" name="channellist.minLimit" value="${channellist.minLimit}" /></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最大值: </td>
+                    <td><input type="text" name="channellist.maxLimit" value="${channellist.maxLimit}"/></td>
+                </tr>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道外赠送: </td>
+                    <td>
+                        <input type="text" name="channellist.giveRatio" value="${channellist.giveRatio}" />
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道税率: </td>
+                    <td><input type="text" name="channellist.channelTax" value="${channellist.channelTax}"></input></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">游戏中的排序: </td>
+                    <td>
+                        <input type="text" name="channellist.sort" value="${channellist.sort}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">金币倍率: </td>
+                    <td>
+                        <input type="text" name="channellist.exchangeRatio" value="${channellist.exchangeRatio}"></input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+                    <td>
+                        <input type="radio" name="channellist.isOpen" value="1" ${channellist.isOpen==1?"checked":""}>开启</input>&nbsp;&nbsp;
+                        <input type="radio" name="channellist.isOpen" value="0" ${channellist.isOpen==0?"checked":""}>关闭</input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否显示标签: </td>
+                    <td>
+                        <input type="radio" name="channellist.isLabel" value="0" ${channellist.isLabel==0?"checked":""}>否</input>&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="channellist.isLabel" value="1" ${channellist.isLabel==1?"checked":""}>NEW</input>&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="channellist.isLabel" value="2" ${channellist.isLabel==2?"checked":""}>HOT</input>&nbsp;&nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">总赢倍率: </td>
+                    <td>
+                        <input type="text" name="channellist.winConf" value="${channellist.winConf}"></input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定费用: </td>
+                    <td>
+                        <input type="text" name="channellist.fee" value="${channellist.fee}"></input>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    var ctx="${ctxPath}";
+    $(function (){
+        new Ajax(ctx + "/channellist/getChannel", function (data) {
+            if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+                var type = data.data;
+                var mcId = parseInt($("#mcId").val())
+                var html = '';
+                for (var i = 0; i < type.length; i++) {
+                    var temp = type[i]['id']
+                    console.log(mcId,temp)
+                    if (mcId===temp){
+                        html='<option value="' + temp + '">' + type[i]['name'] + '</option>'+html;
+                    }else {
+                        html += '<option value="' + temp + '">' + type[i]['name'] + '</option>';
+                    }
+                }
+                $("#ChannelID").html(html);
+            }
+        }).start();
+    })
+    // 获取包来源列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            var clientType = parseInt($("#clientType").val())
+            for (var i = 0; i < type.length; i++) {
+                var temp=type[i]['clientType']
+                if (temp===clientType){
+                    html = '<option value="' + temp + '">' + type[i]['name'] + '</option>'+html;
+                }else {
+                    html += '<option value="' + temp + '">' + type[i]['name'] + '</option>';
+                }
+            }
+            $("#clientTypes").html(html);
+        }
+    }).start();
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

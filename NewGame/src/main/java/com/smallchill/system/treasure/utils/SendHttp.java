@@ -2,12 +2,15 @@ package com.smallchill.system.treasure.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.pay.model.rarpPay.RarPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -31,7 +34,6 @@ public class SendHttp {
      */
     public static String sendRechargeSafe(RechargeRecords rechargeRecords, Map<String,Object> channel){
         Map<String, Object> params = new HashMap<>();
-//        JSONObject params = JSON.parseObject(channel.get("params").toString());
         params.put("currency", "PHP");
         params.put("mer_no", ACCOUNT_SAFE_NUM);
         params.put("order_amount", rechargeRecords.getTopUpAmount());
@@ -51,15 +53,12 @@ public class SendHttp {
         params.put("sign", sign);
         LOGGER.error(JSON.toJSONString(params));
         return HttpClientUtils.sendPostJson(SAFE_URL, JSON.toJSONString(params));
-//        LOGGER.error(params.toJSONString());
-//        return HttpClientUtils.sendPostJson(SAFE_URL, params.toJSONString());
     }
     /**
      * 兑换请求safe
      */
     public static String sendExchangeSafe(ExchangeReview exchangeReview,Map<String,Object> channel){
         Map<String, Object> params = new HashMap<>();
-//        JSONObject params = JSON.parseObject(channel.get("params").toString());
         params.put("currency", "PHP");
         params.put("mer_no", ACCOUNT_SAFE_NUM);
         params.put("order_amount", exchangeReview.getMoney().toString());
@@ -74,74 +73,12 @@ public class SendHttp {
         params.put("sign", sign);
         LOGGER.error(JSON.toJSONString(params));
         return HttpClientUtils.sendPostJson(SAFE_URL, JSON.toJSONString(params));
-//        LOGGER.error(params.toJSONString());
-//        return HttpClientUtils.sendPostJson(SAFE_URL, params.toJSONString());
-
-    }
-    /**
-     * 充值rpra
-     */
-    public static String sendRechargeRarp(RechargeRecords rechargeRecords, Map<String,Object> channel,String url){
-        // 生成请求条件
-        String response;
-//        JSONObject params = JSON.parseObject(channel.get("params").toString());
-        Date date = new Date();
-        String dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        HashMap<String, Object> params = new HashMap<>();
-        params.put("mchNo", ACCOUNT_RARP_NUM);
-        params.put("time", dateFormat);
-        params.put("type", channel.get("code"));
-        params.put("fee", rechargeRecords.getTopUpAmount());
-        params.put("orderNo", rechargeRecords.getOrderNumber());
-        params.put("notifyUrl", RECHARGE_RARP_CALLBACK_URL);// 回调地址
-        // 获取签名
-        String sign  = Utils.getSign(params, SECRET_RARP_KEY);
-        params.put("sign", sign);
-        LOGGER.error(JSON.toJSONString(params));
-        response = Utils.post(url, params);
-        return response;
-    }
-    /**
-     * rarp兑换
-     */
-
-    public static String sendExchangeRarp(ExchangeReview exchangeReview,Map<String,Object> channel,String url){
-        String response="";
-        Date date = new Date();
-        String dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-        Map<String, Object> map = new HashMap<>();
-        Map<String, Object> extra = new HashMap<>();
-        // 通过请求过后向地三方发起代付请求
-        map.put("mchNo",ACCOUNT_RARP_NUM);
-        map.put("time",dateFormat);
-        map.put("type",channel.get("code"));
-        map.put("orderNo", exchangeReview.getOrderNumber());
-        map.put("notifyUrl",EXCHANGE_RARP_CALLBACK_URL);
-        map.put("fee",exchangeReview.getMoney());
-        map.put("bankCode","gcash");
-        map.put("bankAccount",exchangeReview.getBankNumber());
-        map.put("ifsc","no");
-        map.put("customerName",exchangeReview.getBankNumber());
-        extra.put("custPhone", exchangeReview.getBankNumber());
-        extra.put("bank_province", "no");
-        extra.put("to_city", "no");
-        map.put("extra", Utils.parseExtInfo(extra));
-        // 获取签名
-        String sign = Utils.getSign(map, SECRET_RARP_KEY);
-        if ("".equals(sign)){
-            return response;
-        }
-        map.put("sign",sign);
-        LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(url, map);
-        return response;
     }
 
     // MetaPay代收
     public static String sendRechargeMetaPay(RechargeRecords records,Map<String,Object> channel){
         String response="";
         HashMap<String, Object> params = new HashMap<>();
-//        JSONObject params = JSON.parseObject(channel.get("params").toString());
         params.put("appId",META_APPID);
         // 代收渠道
         params.put("channel",3);
@@ -428,7 +365,7 @@ public class SendHttp {
         // 订单号
         map.put("order_id", rechargeRecords.getOrderNumber());
         // 银行代码
-        map.put("bank_code", "gcash");
+        map.put("bank_code", channel.get("code").toString());
         // 回调地址
         map.put("callback_url", RECHARGE_GALAXY_CALLBACK_URL);
         // 跳转地址
@@ -468,41 +405,49 @@ public class SendHttp {
         return response;
     }
 
-    public static String sendRechargeLetsPay(RechargeRecords rechargeRecords,Map<String,Object> channel){
+    /**
+     * Pay++
+     * @param rechargeRecords
+     * @param channel
+     * @return
+     */
+    public static String sendRechargeLetsPay(RechargeRecords rechargeRecords,Map<String,Object> channel,Map<String,String> param){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 商户号
-        map.put("mchId", LETSPAY_APPID);
+        map.put("mchId", param.get("mchId"));
         // 订单号
         map.put("orderNo", rechargeRecords.getOrderNumber());
         // 金额
         map.put("amount", rechargeRecords.getTopUpAmount().toString());
         // 产品号
-        map.put("product", "philiwallet");
-        // 银河代号
-        map.put("bankcode", "gcash");
+        map.put("product", param.get("product"));
+        // 银行代号  phqr
+        map.put("bankcode", param.get("bankCode"));
         // 物品说明
-        map.put("goods", "email:520155@gmail.com/name:tom/phone:"+rechargeRecords.getPhone());
+        String username = RechargeExchangeCommon.RandomUsername();
+        String email = RechargeExchangeCommon.RandomEmail();
+        map.put("goods", "email:"+email+"/name:"+username+"/phone:"+rechargeRecords.getPhone());
         // 异步通知地址
         map.put("notifyUrl", RECHARGE_LETSPAY_CALLBACK_URL);
         // 跳转地址
         map.put("returnUrl", "https://www.baidu.com");
         // 生成签名
-        String sign = Utils.getSign(map, LETSPAY_KEY);
+        String sign = Utils.getSign(map, param.get("key"));
         // 生成签名全部大写
         map.put("sign", sign.toUpperCase());
         LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(RECHARGE_LETSPAY_URL, map);
+        response = Utils.post(param.get("payUrl"), map);
         return response;
-    }
+}
 
-    public static String sendExchangeLetsPay(ExchangeReview exchangeReview,Map<String,Object> channel){
+    public static String sendExchangeLetsPay(ExchangeReview exchangeReview,Map<String,Object> channel,Map<String,String> param){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 转账类型
-        map.put("type","api");
+        map.put("type",param.get("type"));
         // 商户号
-        map.put("mchId",LETSPAY_APPID);
+        map.put("mchId",param.get("mchId"));
         // 订单号
         map.put("mchTransNo",exchangeReview.getOrderNumber());
         // 金额
@@ -516,12 +461,13 @@ public class SendHttp {
         // 银行代码
         map.put("bankCode","Gcash");
         // 备注
-        map.put("remarkInfo","email:520155@gmail.com/phone:"+exchangeReview.getPhone()+"/mode:wallet");
+        String email = RechargeExchangeCommon.RandomEmail();
+        map.put("remarkInfo","email:"+email+"/phone:"+exchangeReview.getPhone()+"/mode:wallet");
         // 生成签名全部大写
-        String sign = Utils.getSign(map, LETSPAY_KEY);
+        String sign = Utils.getSign(map, param.get("key"));
         map.put("sign",sign.toUpperCase());
         LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(EXCHANGE_LETSPAY_URL, map);
+        response = Utils.post(param.get("payOutUrl"), map);
         return response;
     }
 

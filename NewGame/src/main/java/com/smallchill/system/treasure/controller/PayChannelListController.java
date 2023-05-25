@@ -1,5 +1,4 @@
 package com.smallchill.system.treasure.controller;
-
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.annotation.Before;
 import com.smallchill.core.annotation.DoControllerLog;
@@ -14,37 +13,33 @@ import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.service.ExchangeReviewService;
-import com.smallchill.system.treasure.meta.intercept.ChannelAddValidator;
-import com.smallchill.system.treasure.meta.intercept.ChannelEditValidator;
-import com.smallchill.system.treasure.meta.intercept.PaymentChannelValidator;
-import com.smallchill.system.treasure.model.Channel;
-import com.smallchill.system.treasure.model.PaymentChannel;
+import com.smallchill.system.treasure.meta.intercept.PayChannelListValidator;
+import com.smallchill.system.treasure.model.PayChannelList;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-
 import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/paymentChannel")
-public class ClientTypePaymentChannelController extends BaseController implements ConstShiro {
+@RequestMapping("/channellist")
+public class PayChannelListController extends BaseController implements ConstShiro {
     @Resource
     private CommonService commonService;
     @Resource
     private ExchangeReviewService service;
-    private static String BASE_PATH = "/modules/platform/paymentChannel/";
-    private static String CODE = "paymentChannel";
-    private static String LIST_SOURCE = "payment_channel.all_list";
-    private static String PREFIX = "paymentChannel";
+    private static String BASE_PATH = "/modules/platform/channellist/";
+    private static String CODE = "channellist";
+    private static String LIST_SOURCE = "channel_list.all_list";
+    private static String PREFIX = "channellist";
 
     @RequestMapping("/")
     public String index(ModelMap mm){
         mm.put("code",CODE);
-        return BASE_PATH+"paymentChannel.html";
+        return BASE_PATH+"channellist.html";
     }
 
     /**
@@ -66,7 +61,7 @@ public class ClientTypePaymentChannelController extends BaseController implement
             return REDIRECT_UNAUTH;
         }
         mm.put("code", CODE);
-        return BASE_PATH+"paymentChannel_add.html";
+        return BASE_PATH+"channellist_add.html";
     }
 
     /**
@@ -75,11 +70,11 @@ public class ClientTypePaymentChannelController extends BaseController implement
     @RequestMapping(KEY_EDIT + "/{id}")
     @Permission(ADMINISTRATOR)
     public String edit(@PathVariable Integer id, ModelMap mm) {
-        Map paymentChannel = commonService.getInfoByOne("payment_channel.find_one", CMap.init().set("id", id));
-        System.out.println(paymentChannel);
-        mm.put("paymentChannel", paymentChannel);
+        Blade blade = Blade.create(PayChannelList.class);
+        Object channel_list = blade.findById(id);
+        mm.put("channellist", channel_list);
         mm.put("code", CODE);
-        return BASE_PATH + "paymentChannel_edit.html";
+        return BASE_PATH + "channellist_edit.html";
     }
     /**
      *删除
@@ -88,7 +83,7 @@ public class ClientTypePaymentChannelController extends BaseController implement
     @RequestMapping(KEY_REMOVE)
     @Permission(ADMINISTRATOR)
     public AjaxResult remove(@RequestParam String ids) {
-        int temp = Blade.create(PaymentChannel.class).deleteByIds(ids);
+        int temp = Blade.create(PayChannelList.class).deleteByIds(ids);
         if (temp > 0) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
@@ -98,13 +93,13 @@ public class ClientTypePaymentChannelController extends BaseController implement
     }
 
     @Json
-    @Before(PaymentChannelValidator.class)
+    @Before(PayChannelListValidator.class)
     @RequestMapping(KEY_UPDATE)
     @Permission(ADMINISTRATOR)
     public AjaxResult update() {
-        PaymentChannel channel = mapping(PREFIX, PaymentChannel.class);
+        PayChannelList channel = mapping(PREFIX, PayChannelList.class);
         CMap parse = CMap.parse(channel);
-        int temp = Db.update("paymentChannel", "id", parse);
+        int temp = Db.update("Pay_channelList", "id", parse);
         if (temp>0) {
             CacheKit.removeAll(SYS_CACHE);
             return success(UPDATE_SUCCESS_MSG);
@@ -115,11 +110,11 @@ public class ClientTypePaymentChannelController extends BaseController implement
     // 添加保存
     @Json
     @RequestMapping(KEY_SAVE)
-    @Before(PaymentChannelValidator.class)
+    @Before(PayChannelListValidator.class)
     @Permission(ADMINISTRATOR)
     public AjaxResult save() {
-        PaymentChannel paymentChannel = mapping(PREFIX, PaymentChannel.class);
-        boolean save = Blade.create(PaymentChannel.class).save(paymentChannel);
+        PayChannelList channel = mapping(PREFIX, PayChannelList.class);
+        boolean save = Blade.create(PayChannelList.class).save(channel);
         if (save){
             return success(SAVE_SUCCESS_MSG);
         }else {
@@ -146,7 +141,7 @@ public class ClientTypePaymentChannelController extends BaseController implement
     @Json
     @RequestMapping("/getChannel")
     public AjaxResult getChannel(){
-        Object channel = paginateBySelf("payment_channel.find_channel");
+        Object channel = commonService.getInfoList("channel_list.find_channel",null);
         return json(channel);
     }
 }

@@ -138,7 +138,7 @@ public class RechargeChannelController extends BaseController implements ConstSh
         int temp =0;
         if(channel.getPid() == 0){
             // 为空代表新商户
-            channel.setIsOpen(1);
+            channel.setIsOpen(0);
             channel.setPid(0);
             CMap parse = CMap.parse(channel);
             temp = Db.save("Channel", "id", parse);
@@ -149,7 +149,7 @@ public class RechargeChannelController extends BaseController implements ConstSh
             if (sortMap==null){
                 sorts=0;
             }
-            sorts = Integer.valueOf(sortMap.get("sorts").toString())+1;
+            sorts = Integer.parseInt(sortMap.get("sorts").toString())+1;
             channel.setSort(sorts);
             channel.setName(channel.getChannelName()+sorts);
             // 查询商户名
@@ -185,7 +185,7 @@ public class RechargeChannelController extends BaseController implements ConstSh
     @Json
     @RequestMapping("/getChannel")
     public AjaxResult getChannel(){
-        Object channel = paginateBySelf("recharge_channel.all_parent_list");
+        Object channel = commonService.getInfoList("recharge_channel.all_parent_list",null);
         return json(channel);
     }
     /**
@@ -193,8 +193,8 @@ public class RechargeChannelController extends BaseController implements ConstSh
      */
     @Json
     @RequestMapping("/getExchangeChannelMin")
-    public AjaxResult getExchangeChannelMin(){
-        Object channel = paginateBySelf("recharge_channel.all_exchange_channel_min");
+    public AjaxResult getExchangeChannelMin(@RequestParam String channelName){
+        Object channel = commonService.getInfoList("recharge_channel.all_exchange_channel_min",CMap.init().set("channelName",channelName));
         return json(channel);
     }
 }

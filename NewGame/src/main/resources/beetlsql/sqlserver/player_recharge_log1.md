@@ -147,7 +147,7 @@ recharge_unstatistics_total
 
 query_list
 ===
-    select isnull(SUM([topUpAmount]),0) as TotalRecMoney,count(distinct userId) as TotalRecUserNum
+    select isnull(SUM([topUpAmount]),0) as TotalRecMoney,count(distinct userId) as TotalRecUserNum,count(1) as TotalRecNum
     from [RYPlatformManagerDB].[dbo].[Recharge_records] as r where orderStatus=2
     @if(!isEmpty(UserID)){
 	 and r.userId =#{UserID}
@@ -186,13 +186,13 @@ query_exc_list
 	    and c.id =#{ChannelID}
 	@}
     @if(!isEmpty(moneyMin)){
-	 and r.amount >=#{moneyMin}
+	 and amount >=#{moneyMin}
 	@}
     @if(!isEmpty(moneyMax)){
-	    and r.amount <=#{moneyMax}
+	    and amount <=#{moneyMax}
 	@}
     @if(!isEmpty(clientType)){
-        and r.sourcePlatform=#{clientType}
+        and sourcePlatform=#{clientType}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,createTime,#{createTime})<=0

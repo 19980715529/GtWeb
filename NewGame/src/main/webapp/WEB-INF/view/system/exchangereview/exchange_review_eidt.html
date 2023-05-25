@@ -9,7 +9,7 @@
             <table class="table table-bordered">
                 <tbody>
                 <tr>
-                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">渠道类型: </td>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">小渠道类型: </td>
                     <td>
                         <input type="text" id="channel" name="exchange_review.channelId1" value="${exchange.channel}" readonly />
                     </td>
@@ -25,11 +25,10 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户反馈信息: </td>
+                    <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">大渠道类型: </td>
                     <td>
-                        <textarea rows="2" cols="20" name="exchange_review.msg" readonly>${exchange.msg}</textarea>
+                        <input type="text" id="channelName" name="exchange_review.channelName" value="${exchange.channelName}" readonly />
                     </td>
-
                     <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">银行号: </td>
                     <td>
                         <input type="text" name="exchange_review.bankNumber" value="${exchange.bankNumber}" readonly />
@@ -81,6 +80,12 @@
                     </td>
                     <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">小渠道: </td>
                     <td id="channelId"></td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户反馈信息: </td>
+                    <td colspan="5">
+                        <textarea rows="1" cols="90" name="exchange_review.msg" readonly>${exchange.msg}</textarea>
+                    </td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">反馈: </td>
@@ -141,9 +146,10 @@
     var ctx="${ctxPath}";
     // 获取所有兑换小渠道
     function getChannel(){
-        new Ajax(ctx + "/rechargechannel/getExchangeChannelMin", function (data) {
+        var channelName=$("#channelName").val();
+        new Ajax(ctx + "/rechargechannel/getExchangeChannelMin?channelName="+channelName, function (data) {
             if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-                var type = data.data.rows;
+                var type = data.data;
                 var html = '<select name="exchange_review.channelId"><option value="">请选择小渠道</option>';
                 for (var i = 0; i < type.length; i++) {
                     html += '<option value="' + type[i]['id'] + '">' + type[i]['name'] + '</option>';

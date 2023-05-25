@@ -65,7 +65,7 @@ public class Utils {
         try {
             sign = MD5(originStr.toString());
         }catch (Exception e){
-            return sign;
+            return "";
         }
         return sign;
     }

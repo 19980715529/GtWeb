@@ -1,0 +1,97 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/channelpool/update" method="post" class="form-horizontal" role="form">
+            <input type="hidden" name="channelpool.id" value="${channelpool.id}" readonly/>
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户名: </td>
+                    <td>
+                        <input type="hidden" id="pay_id" value="${channelpool.mcId}"/>
+                        <select name="channelpool.mcId" id="mcId"></select>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">大渠道: </td>
+                    <td>
+                        <input type="hidden" id="channel" value="${channelpool.cid}"/>
+                        <select name="channelpool.cid" id="cid"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单类型: </td>
+                    <td>
+                        <input type="radio" name="channelpool.type" value="0" ${channelpool.type==0?"checked":""}>充值</input>&nbsp;&nbsp;
+                        <input type="radio" name="channelpool.type" value="1" ${channelpool.type==1?"checked":""}>兑换</input>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+                    <td>
+                        <input type="radio" name="channelpool.isOpen" value="1" ${channelpool.isOpen==1?"checked":""}>开启</input>&nbsp;&nbsp;
+                        <input type="radio" name="channelpool.isOpen" value="0" ${channelpool.isOpen==0?"checked":""}>关闭</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">货币类型: </td>
+                    <td>
+                        <input type="text" name="channelpool.currencyType" value="${channelpool.currencyType}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.formalitiesCost" value="${channelpool.formalitiesCost}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.fee" value="${channelpool.fee}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">小渠道名称: </td>
+                    <td>
+                        <input type="text" name="channelpool.name" value="${channelpool.name}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    // 查询大渠道
+    new Ajax("${ctxPath}/paychannel/findChannel", function (data) {
+        var cid = parseInt($("#channel").val())
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                var temp = type[i]['cid'];
+                if (cid===temp){
+                    html='<option value="' + temp + '">' + type[i]['cname'] + '</option>'+html;
+                }else {
+                    html += '<option value="' + temp + '">' + type[i]['cname'] + '</option>';
+                }
+            }
+            $("#cid").html(html);
+        }
+    }).start();
+    // 查询所有商户列表
+    new Ajax("${ctxPath}/channelpool/findMcName", function (data) {
+        console.log(data);
+        var pid = parseInt($("#pay_id").val())
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                var id=type[i]['pay_id'];
+                if (pid===id){
+                    html = '<option value="' + id + '">' + type[i]['mcName'] + '</option>'+html;
+                }else {
+                    html += '<option value="' + id + '">' + type[i]['mcName'] + '</option>';
+                }
+            }
+            $("#mcId").html(html);
+        }
+    }).start();
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

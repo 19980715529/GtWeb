@@ -64,7 +64,7 @@
     $(function (){
         new Ajax(ctx + "/rechargechannel/getChannel", function (data) {
             if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
-                var type = data.data.rows;
+                var type = data.data;
                 var html = '';
                 for (var i = 0; i < type.length; i++) {
                     html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';

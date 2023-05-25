@@ -89,6 +89,10 @@
         <form data-url="" method="post" class="" role="form">
             <!-- 配置查询 -->
             <div class="">
+                <label class=""> 订单号： </label>
+                <input type="text" id="orderNum" placeholder="订单号"/>
+                <label class=""> 用户id： </label>
+                <input type="text" id="userId" placeholder="请输入用户id"/>
                 <!-- 简单查询第一组 -->
                 <label class=""> 时间： </label>
                 <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
@@ -192,6 +196,8 @@
         var start_time = $("#start_time").val();
         var end_time = $("#end_time").val();
         var clientType=$("#clientType").val();
+        var orderNum=$("#orderNum").val();
+        var userId=$("#userId").val();
         if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
             layer_alert('请输入开始时间!', "warn");
             return;
@@ -207,6 +213,12 @@
         }
         if(BladeTool.isNotEmpty(clientType)){
             wheres["clientType"]=clientType;
+        }
+        if(BladeTool.isNotEmpty(orderNum)){
+            wheres["orderNum"]=orderNum;
+        }
+        if(BladeTool.isNotEmpty(userId)){
+            wheres["userId"]=userId;
         }
         if(BladeTool.isNotEmpty(end_time) && BladeTool.isNotEmpty(start_time)) {
             if(start_time>end_time){

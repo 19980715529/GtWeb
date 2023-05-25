@@ -1,0 +1,80 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/channelpool/save" method="post" class="form-horizontal" role="form">
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户名称: </td>
+                    <td ><select type="text" id="mcId" name="channelpool.mcId"></select>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">大渠道: </td>
+                    <td ><select type="text" id="cid" name="channelpool.cid"></select>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单类型: </td>
+                    <td>
+                        <input type="radio" name="channelpool.type" value="0" checked>充值</input>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="channelpool.type" value="1">兑换</input></td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
+                    <td>
+                        <input type="radio" name="channelpool.isOpen" value="0" checked>关闭</input>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="channelpool.isOpen" value="1">开启</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">货币类型: </td>
+                    <td>
+                        <input type="text" name="channelpool.currencyType">&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.formalitiesCost">&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.fee">&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">小渠道名称: </td>
+                    <td>
+                        <input type="text" name="channelpool.name">&nbsp;&nbsp;&nbsp;&nbsp;
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+    // 查询大渠道
+    new Ajax("${ctxPath}/paychannel/findChannel", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['id'] + '">' + type[i]['cname'] + '</option>';
+            }
+            $("#cid").html(html);
+        }
+    }).start();
+    // 查询所有商户列表
+    new Ajax("${ctxPath}/channelpool/findMcName", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
+            }
+            $("#mcId").html(html);
+        }
+    }).start();
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认添加",btn_close:"关闭"}) {}
+@}

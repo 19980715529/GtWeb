@@ -176,7 +176,6 @@
 			<artifactId>fastjson</artifactId>
 			<version>1.2.33</version>
 		</dependency>
-
 		<!-- qrcode -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>

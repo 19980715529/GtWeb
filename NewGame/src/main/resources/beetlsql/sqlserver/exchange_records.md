@@ -2,6 +2,12 @@ all_list
 ===
     select * FROM [RYPlatformManagerDB].[dbo].[Exchange_review]
     where (status = 4 or status = 3)
+    @if(!isEmpty(userId)){
+        and userId=#{userId}
+    @}
+    @if(!isEmpty(orderNum)){
+        and orderNumber=#{orderNum}
+    @}
     @if(!isEmpty(clientType)){
         and sourcePlatform=#{clientType}
     @}
