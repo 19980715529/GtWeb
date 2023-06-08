@@ -250,10 +250,21 @@
 		}
 	}).start();
 
-	// 获取充值渠道
-	new Ajax(ctx + "/${code}/rechargechannel/list", function (data) {
+	// 获取商户
+	// new Ajax(ctx + "${ctxPath}/channelpool/findMcName", function (data) {
+	// 	if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+	// 		var type = data.data;
+	// 		var html = '<option value="">全部</option>';
+	// 		for (var i = 0; i < type.length; i++) {
+	// 			html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
+	// 		}
+	// 		$("#ChannelID").html(html);
+	// 	}
+	// }).start();
+	// 查询所有商户列表
+	new Ajax("${ctxPath}/channelpool/findMcName1", function (data) {
 		if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
-			var type = data.data.rows;
+			var type = data.data;
 			var html = '<option value="">全部</option>';
 			for (var i = 0; i < type.length; i++) {
 				html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
@@ -261,7 +272,6 @@
 			$("#ChannelID").html(html);
 		}
 	}).start();
-
 	function goSearch() {
 		var UserID = $("#UserID").val();
 		var OrderID = $("#OrderID").val();

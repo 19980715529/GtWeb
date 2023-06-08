@@ -1,7 +1,6 @@
 package com.smallchill.system.treasure.utils;
 
-import com.smallchill.pay.model.rarpPay.RarPay;
-import okhttp3.Request;
+import com.smallchill.pay.rarPay.model.RarPay;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -10,19 +9,17 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.net.URLDecoder;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import static com.smallchill.core.constant.ConstKey.*;
 
 public class HttpClientUtils {
-
+    private static final Logger LOGGER = LogManager.getLogger(HttpClientUtils.class);
     public static String sendPostJson(String url, String json) {
         HttpPost httpPost = null;
         RequestConfig defaultRequestConfig = RequestConfig.custom()
@@ -41,7 +38,8 @@ public class HttpClientUtils {
             response = httpClient.execute(httpPost);
             return EntityUtils.toString(response.getEntity(), "utf-8");
         } catch (Exception e) {
-            return e.getMessage();
+            LOGGER.error(e.getMessage());
+            return "";
         }finally {
             if(response!=null){
                 try {

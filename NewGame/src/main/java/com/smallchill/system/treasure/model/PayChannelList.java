@@ -14,15 +14,7 @@ import java.math.BigDecimal;
 public class PayChannelList extends BaseModel {
     private Integer id;
     private Integer chPoolId; // 渠道池id  cPoolId
-    private Integer minLimit;
-    private Integer maxLimit;
-    private BigDecimal channelTax;
     private Integer isOpen;
-    private Integer sort;
-    private BigDecimal exchangeRatio;
-    private BigDecimal giveRatio;
-    private Integer isLabel;
-    private BigDecimal winConf;
     private Integer clientType;
-    private BigDecimal fee; // 固定费用
+    private String chName; // 大渠道名称
 }

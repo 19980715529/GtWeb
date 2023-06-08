@@ -39,7 +39,7 @@ public class ChannelPoolController extends BaseController implements ConstShiro 
     @RequestMapping("/")
     public String index(ModelMap mm) {
         mm.put("code", CODE);
-        return BASE_PATH+"/channelpool.html";
+        return BASE_PATH+"channelpool.html";
     }
     /**
      * 列表查询
@@ -135,6 +135,25 @@ public class ChannelPoolController extends BaseController implements ConstShiro 
     @RequestMapping("/findMcName")
     public AjaxResult findMcName(){
         List<Map> infoList = commonService.getInfoList("channel_pool.mc_list", null);
+        return json(infoList);
+    }
+    /**
+     * 获取所有商户名
+     */
+    @Json
+    @RequestMapping("/findMcName1")
+    public AjaxResult findMcNames(){
+        List<Map> infoList = commonService.getInfoList("channel_pool.mc_list1", null);
+        return json(infoList);
+    }
+    /**
+     * 根据条件获取存在的商户名 query_mc_list
+     */
+    @Json
+    @RequestMapping("/queryMcName")
+    public AjaxResult queryMcName(@RequestParam Integer clientType,@RequestParam String chName){
+        List<Map> infoList = commonService.getInfoList("channel_list.query_min_list",
+                CMap.init().set("clientType",clientType).set("chName",chName));
         return json(infoList);
     }
 }

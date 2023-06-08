@@ -2,6 +2,8 @@ package com.smallchill.common.task;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.cache.CacheKit;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.service.RechargeRecordsService;
@@ -39,10 +41,9 @@ public class GlobalDelayQueue {
     // 订单取消，数据库改变订单状态，DelayQueue容器移除该订单记录
     public void cancelOrder(String orderNum,Integer status){
         // 修改订单状态，根据订单id查询  订单状态，1：待支付，2：已完成，3：已关闭
-        Map<String, Object> map = new HashMap<>();
-        map.put("orderNum",orderNum);
-        Map infoByOne = commonService.getInfoByOne("recharge.query_orderNum", map);
-        RechargeRecords rechargeRecords1 = JSONObject.parseObject(JSONObject.toJSONString(infoByOne), RechargeRecords.class);
+//        Map infoByOne = commonService.getInfoByOne("recharge.query_orderNum", );
+//        RechargeRecords rechargeRecords1 = JSONObject.parseObject(JSONObject.toJSONString(infoByOne), RechargeRecords.class);
+        RechargeRecords rechargeRecords1 = rechargeRecordsService.findFirstBy("orderNumber=#{orderNum}", CMap.init().set("orderNum",orderNum));
         rechargeRecords1.setEndTime(new Date());
         // 设置取消支付
         rechargeRecords1.setOrderStatus(status);
@@ -50,29 +51,17 @@ public class GlobalDelayQueue {
         boolean temp = rechargeRecordsService.update(rechargeRecords1);
         if (temp){
             CacheKit.removeAll("SYS_CACHE");
-            Iterator<RechargeRecords> iterator = orderQueue.iterator();
-            while (iterator.hasNext()){
-                RechargeRecords rechargeRecords = iterator.next();
-                if (rechargeRecords.getOrderNumber().equals(orderNum)){
-                    // 移除超时订单
-                    orderQueue.remove(rechargeRecords);
-                }
-            }
+            // 移除超时订单
+            orderQueue.removeIf(rechargeRecords -> rechargeRecords.getOrderNumber().equals(orderNum));
         }else {
             throw new RuntimeException("执行失败");
         }
 
     }
-    public void cancelOrder(String orderNum){
+    public static void cancelOrder(String orderNum){
         // 修改订单状态，根据订单id查询  订单状态，1：待支付，2：已完成，3：已失败
-        Iterator<RechargeRecords> iterator = orderQueue.iterator();
-        while (iterator.hasNext()){
-            RechargeRecords rechargeRecords = iterator.next();
-            if (rechargeRecords.getOrderNumber().equals(orderNum)){
-                // 移除超时订单
-                orderQueue.remove(rechargeRecords);
-            }
-        }
+        // 移除超时订单
+        orderQueue.removeIf(rechargeRecords -> rechargeRecords.getOrderNumber().equals(orderNum));
     }
     // 往队列中添加订单
     private static void addOrder(RechargeRecords rechargeRecords){
@@ -139,9 +128,9 @@ public class GlobalDelayQueue {
     }
 
     /**
-     * 每秒中执行一次
+     * 每5秒中执行一次
      */
-    @Scheduled(cron = "* * * * * ? ")
+    @Scheduled(cron = "0/5 * * * * ? ")
     public void processOrder() {
         try {
             while (orderQueue.size()>0){
@@ -150,8 +139,18 @@ public class GlobalDelayQueue {
                 records.setEndTime(new Date());
                 // 取消超时订单
                 cancelOrder(records.getOrderNumber(),3);
+                Integer isFirstCharge = records.getIsFirstCharge();
+                if (isFirstCharge==null){
+                    continue;
+                }
+                if (isFirstCharge==2){
+                    // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+                    Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=0 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+                            CMap.init().set("userId",records.getUserId()));
+                }
             }
         }catch (Exception ignored){
+
         }
 
     }

@@ -12,17 +12,10 @@ import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
-import com.smallchill.core.toolbox.kit.CharsetKit;
-import com.smallchill.core.toolbox.kit.HttpKit;
-import com.smallchill.core.toolbox.kit.StrKit;
-import com.smallchill.core.toolbox.kit.URLKit;
 import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.game.service.CommonService;
-import com.smallchill.system.treasure.meta.intercept.ChannelEditValidator;
 import com.smallchill.system.treasure.meta.intercept.PayChannelValidator;
-import com.smallchill.system.treasure.model.Channel;
 import com.smallchill.system.treasure.model.PayChannel;
-import org.beetl.sql.core.SQLManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -124,7 +117,7 @@ public class PayChannelController extends BaseController implements ConstShiro {
         }
     }
 
-    /*
+    /**
     删除
      */
     @Json

@@ -47,7 +47,7 @@
 
                     <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">来源平台: </td>
                     <td>
-                        <input type="text" name="exchange_review.sourcePlatform" value="${exchange.sourcePlatform}" readonly />
+                        <input type="text" id="clientType" name="exchange_review.sourcePlatform" value="${exchange.sourcePlatform}" readonly />
                     </td>
 
                     <td style="vertical-align: middle !important;text-align:center;" class="bg-F5F5F5">兑换金额: </td>
@@ -147,7 +147,8 @@
     // 获取所有兑换小渠道
     function getChannel(){
         var channelName=$("#channelName").val();
-        new Ajax(ctx + "/rechargechannel/getExchangeChannelMin?channelName="+channelName, function (data) {
+        var clientType=$("#clientType").val();
+        new Ajax(ctx + "/channelpool/queryMcName?chName="+channelName+"&clientType="+clientType, function (data) {
             if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
                 var type = data.data;
                 var html = '<select name="exchange_review.channelId"><option value="">请选择小渠道</option>';

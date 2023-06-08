@@ -13,9 +13,10 @@
 
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["公告id", "公告侧边显示","公告内容","是否开启","包名称"];
+        var _colnames=["公告id","公告编码", "公告侧边显示","公告内容","是否开启","包名称"];
         var _colmodel=[
             {name:"id",sortable: false},
+            {name:"code",sortable: false},
             {name:"title",sortable: false},
             {name:"content", sortable:false},
             {name:"isOpen", sortable:false,formatter:rowText},

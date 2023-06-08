@@ -1,16 +1,25 @@
 package com.smallchill.system.treasure.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
+import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.game.service.CommonService;
+import com.smallchill.system.model.User;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.GoldChangeRecord;
+import com.smallchill.system.treasure.model.RechargeRecords;
+import com.smallchill.system.treasure.model.WalletRecords;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.Date;
 
@@ -21,6 +30,7 @@ import java.util.Date;
  * @Version 1.0
  **/
 public class RechargeExchangeCommon {
+    private static final Logger LOGGER = LogManager.getLogger(RechargeExchangeCommon.class);
     /**
      * 获取用户金币
      * @param userId
@@ -184,7 +194,8 @@ public class RechargeExchangeCommon {
      */
     public static String RandomUsername(){
         List<String> list = Arrays.asList("Cecile,Darell,Jayden","Filimena,Borna,Alina","Suellen,Posey,Johnny","Sarra,Rolph,Arvin","Hiram,Brahm,Joyce",
-                "Eurydice,Tabor,Dream","Alessandra,Bol,Feo","Daan,Titus,Aquinnah","Chanelle,Tiege,Acadia","Morag,Alford,Vaeda","Hari,Uhl,Vanessa","Bituin,Nicanor,Wynne","Delaney,Acadia,Charmaine");
+                "Eurydice,Tabor,Dream","Alessandra,Bol,Feo","Daan,Titus,Aquinnah","Chanelle,Tiege,Acadia","Morag,Alford,Vaeda","Hari,Uhl,Vanessa",
+                "Bituin,Nicanor,Wynne","Delaney,Acadia,Charmaine");
         Random random = new Random();
         int size = list.size();
         int randomIndex = random.nextInt(size);
@@ -197,7 +208,8 @@ public class RechargeExchangeCommon {
      */
     public static String RandomEmail(){
         List<String> list = Arrays.asList("Kalim1997@163.com","Russell1996@139.com","Devonte2003@Yeah.com","Recto2006@139.com","Ulises2014@bing.com",
-                "Jude2017@Outlook.com","Balbutin2019@189.com","Alarico1990@Yeah.com","Tyson1992@263.com","Lavares1998@Hotmail.com","Elmer2000@163.com","Meneses2001@gmail.com","Sanqui2005@263.com");
+                "Jude2017@Outlook.com","Balbutin2019@189.com","Alarico1990@Yeah.com","Tyson1992@263.com","Lavares1998@Hotmail.com","Elmer2000@163.com",
+                "Meneses2001@gmail.com","Sanqui2005@263.com");
         Random random = new Random();
         int size = list.size();
         int randomIndex = random.nextInt(size);
@@ -221,6 +233,246 @@ public class RechargeExchangeCommon {
                     return statement.getInt(1);
                 }catch (Exception e){
                     return 3;
+                }
+            }
+        });
+    }
+
+    /**
+     * 充值工具类
+     */
+
+    public static Map<String,Object> recharge(RechargeRecords rechargeRecords, JSONObject resultMap, Map user, CommonService commonService,Integer channelId){
+        Map<String, Object> reMap = new HashMap<>();
+        if (user==null){
+            reMap.put("code",1);
+            reMap.put("msg","user id does not exist");
+            return reMap;
+        }
+        String phone = user.get("bindPhone").toString();
+        if (phone!=null){
+            rechargeRecords.setPhone(phone);
+        }
+        rechargeRecords.setPackageName(Integer.valueOf(user.get("ClientType").toString()));
+        // 用户昵称
+        rechargeRecords.setNickname(String.valueOf(user.get("NickName")));
+//        Map channel = commonService.getInfoByOne("recharge_channel.one_channel", CMap.init().set("id",channelId));
+        Map channel = commonService.getInfoByOne("channel_list.recharge_one",
+                CMap.init().set("id",channelId));
+        // 将渠道数据存储到订单里面
+        rechargeRecords.setChannel_type(String.valueOf(channel.get("name")));
+        // 大渠道
+        rechargeRecords.setChannel(String.valueOf(channel.get("channelName")));
+        BigDecimal fee= rechargeRecords.getTopUpAmount();
+        // 判断是否首充
+        if(rechargeRecords.getIsFirstCharge()==1){
+            // 判断是否已经首充过  QPGameUserDB   AccountsInfo
+            Integer IsFirstRecharge = Db.queryInt("select IsFirstRecharge from [QPGameUserDB].[dbo].[AccountsInfo] where UserID = #{UserId}",
+                    CMap.init().set("UserId", rechargeRecords.getUserId()));
+            if (IsFirstRecharge==1){
+                reMap.put("code",1);
+                reMap.put("msg","The first charge can only be initiated once");
+                return reMap;
+            }
+            // 获取首充配置
+            Map first = commonService.getInfoByOne("recharge_channel.first_list", null);
+            BigDecimal gold = new BigDecimal(String.valueOf(first.get("gold")));
+            BigDecimal gold_give = new BigDecimal(String.valueOf(first.get("give_gold")));
+            rechargeRecords.setGold(gold.add(gold_give).longValue());
+            // 修改
+        }else if (rechargeRecords.getIsFirstCharge()==0){
+            // 普通充值
+            BigDecimal max = new BigDecimal(String.valueOf(channel.get("max")));
+            BigDecimal min = new BigDecimal(String.valueOf(channel.get("min")));
+            // 判断充值的钱是否满足渠道条件
+            if (fee.intValue() <min.intValue() || fee.intValue()>max.intValue()){
+                reMap.put("code",1);
+                reMap.put("msg","The money you recharged does not meet the channel recharge conditions");
+                return reMap;
+            }
+            // 获取渠道外赠送比例
+            BigDecimal give = new BigDecimal(String.valueOf(channel.get("give")));
+            // 渠道倍率goldProportion
+            BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
+            //  充值的钱*金币倍率*赠送比例
+            BigDecimal give_gold = fee.multiply(gpr).multiply(give);
+            //  充值的钱*10000*金币倍率+渠道外赠送
+            BigDecimal get_Gold = fee.multiply(gpr).add(give_gold).setScale(0,RoundingMode.HALF_UP);
+            // 将充值金币存储到订单里面
+            rechargeRecords.setGold(get_Gold.longValue());
+        }else if (rechargeRecords.getIsFirstCharge()==2){
+            // 随机充值，查询随机充值配置
+            Map map = Db.selectOne("select * from [QPGameUserDB].[dbo].[PlayerActiveInfo_RandomRecharge] where UserId=#{userId}",
+                    CMap.init().set("userId",rechargeRecords.getUserId()));
+            // 计算随机充值金额是否正确
+            BigDecimal money = new BigDecimal(map.get("RechargeGold").toString());
+            if (money.intValue()!=rechargeRecords.getTopUpAmount().intValue()){
+                reMap.put("code",1);
+                reMap.put("msg","Wrong order info");
+                return reMap;
+            }
+            // 渠道倍率goldProportion
+            BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
+            // 奖励百分比
+            BigDecimal percentId = new BigDecimal(map.get("PercentId").toString()).divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
+            // 计算获得金币
+            BigDecimal get_gold = money.multiply(gpr).multiply(percentId).setScale(0, RoundingMode.DOWN);
+            rechargeRecords.setGold(get_gold.longValue());
+        }else {
+           reMap.put("code",1);
+           reMap.put("msg","Wrong order info");
+           return reMap;
+        }
+        // 生成订单号
+        String orderNo = Utils.getOrderNum(rechargeRecords.getUserId());
+        // 设置订单号
+        rechargeRecords.setOrderNumber(orderNo);
+        // 设置时间
+        rechargeRecords.setCreateTime(new Date());
+        // 设置响应结果
+        resultMap.put("Userid",rechargeRecords.getUserId());
+        resultMap.put("gameCoin",rechargeRecords.getGold()); //  充值的游戏币
+        resultMap.put("gold",fee.setScale(2,RoundingMode.HALF_UP)); //  充值的钱
+        resultMap.put("type",0);// 充值类型
+        rechargeRecords.setIsThatTay(0);
+        reMap.put("code",0);
+        reMap.put("channel",channel);
+        return reMap;
+    }
+
+    /**
+     * 充值时执行
+     */
+    public static void rec(RechargeRecords rechargeRecords, Map channel){
+        Blade blade = Blade.create(WalletRecords.class);
+        // 生成钱包统计记录
+        HashMap<String, Object> map = new HashMap<>();
+        // 包id
+        map.put("clientType", rechargeRecords.getPackageName());
+        // 大渠道名称
+        map.put("channelName",rechargeRecords.getChannel());
+        // 小渠道名称
+        map.put("mcId",rechargeRecords.getChannelPid());
+        // 今日日期
+        map.put("createTime", LocalDate.now());
+        WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        if (walletRecords!=null){
+            // 存在就进行修改 这里修改代收次数
+            Integer collectNum = walletRecords.getCollectNum();
+            walletRecords.setCollectNum(collectNum+1);
+            blade.update(walletRecords);
+        }else {
+            // 不存在就添加
+            WalletRecords wallet = new WalletRecords();
+            wallet.setClientType(rechargeRecords.getPackageName());
+            wallet.setChannelName(rechargeRecords.getChannel());
+            wallet.setMcId(rechargeRecords.getChannelPid());
+            wallet.setCollectNum(1);
+            wallet.setCollectRate(new BigDecimal(channel.get("collectRate").toString()));
+            wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
+            wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
+            blade.save(wallet);
+        }
+    }
+
+    /**
+     * 发起兑换时执行
+     */
+    public static void exc(ExchangeReview exchangeReview, Map channel){
+        Blade blade = Blade.create(WalletRecords.class);
+        // 生成钱包统计记录
+        HashMap<String, Object> map = new HashMap<>();
+        // 包id
+        map.put("clientType", exchangeReview.getSourcePlatform());
+        // 大渠道名称
+        map.put("channelName",exchangeReview.getChannelName());
+        // 小渠道名称
+        map.put("mcId",exchangeReview.getChannelId());
+        // 今日日期
+        map.put("createTime", LocalDate.now());
+        WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        if (walletRecords==null){
+            // 不存在就添加
+            WalletRecords wallet = new WalletRecords();
+            wallet.setClientType(exchangeReview.getSourcePlatform());
+            wallet.setChannelName(exchangeReview.getChannelName());
+            wallet.setMcId(exchangeReview.getChannelId());
+            wallet.setCollectNum(0);
+            wallet.setCollectRate(new BigDecimal(channel.get("collectRate").toString()));
+            wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
+            wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
+            blade.save(wallet);
+        }
+    }
+    /**
+     * 钱包统计
+     * @param orderNum
+     * @param clientType
+     * @param channelName
+     * @param mcId
+     * @param createTime
+     * @param type
+     */
+    public static void walletStatistics(String orderNum,Integer clientType,String channelName,Integer mcId,String createTime,Integer type){
+        LOGGER.error("orderNum="+orderNum+",clientType="+clientType+",channelName="+channelName+",mcId="+mcId+",createTime="+createTime+",type="+type);
+        SQLManager dao = Blade.dao();
+        dao.executeOnConnection(new OnConnection<Integer>() {
+            @Override
+            public Integer call(Connection connection) throws SQLException {
+                try {
+                    CallableStatement callableStatement = connection.prepareCall("{call [RYPlatformManagerDB].[dbo].[WalletStatistics](?,?,?,?,?,?)}");
+                    callableStatement.setString(1,orderNum);
+                    callableStatement.setInt(2,clientType);
+                    callableStatement.setString(3,channelName);
+                    callableStatement.setInt(4,mcId);
+                    callableStatement.setInt(5,type);
+                    callableStatement.setString(6,createTime);
+                    callableStatement.execute();
+                    return 1;
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                    return 1;
+                }
+            }
+        });
+    }
+
+    public static Map<String,Object> queryWallet(String startTime,String endTime,Integer clientType){
+        SQLManager dao = Blade.dao();
+        return dao.executeOnConnection(new OnConnection<Map<String,Object>>() {
+            @Override
+            public Map<String, Object> call(Connection connection) throws SQLException {
+                HashMap<String, Object> map = new HashMap<>();
+                try {
+                    CallableStatement callableStatement = connection.prepareCall("{call [RYPlatformManagerDB].[dbo].[RealTimeWalletStatistics](?,?,?)}");
+                    callableStatement.setString(1,startTime);
+                    callableStatement.setString(2,endTime);
+                    callableStatement.setInt(3,clientType);
+                    ResultSet resultSet = callableStatement.executeQuery();
+                    while (resultSet.next()){
+                        // 充值金额
+                        map.put("recMoney",resultSet.getBigDecimal("recMoney"));
+                        // 兑换金额
+                        map.put("excMoney",resultSet.getBigDecimal("excMoney"));
+                        // 充提差
+                        map.put("reMoney",resultSet.getBigDecimal("reMoney"));
+                        // 代收费用
+                        map.put("collectAmounts",resultSet.getBigDecimal("collectAmounts"));
+                        // 代付手续费
+                        map.put("collectFees",resultSet.getBigDecimal("collectFees"));
+                        // 代付金额
+                        map.put("paymentAmount",resultSet.getBigDecimal("paymentAmount"));
+                        // 代付手续费
+                        map.put("paymentFees",resultSet.getBigDecimal("paymentFees"));
+                        // 中手续费
+                        map.put("totalFees",resultSet.getBigDecimal("totalFees"));
+                        // 净利润
+                        map.put("netProfits",resultSet.getBigDecimal("netProfits"));
+                    }
+                    return map;
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                    return map;
                 }
             }
         });

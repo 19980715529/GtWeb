@@ -3,22 +3,12 @@ package com.smallchill.test;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.smallchill.common.task.GlobalDelayQueue;
-import com.smallchill.core.plugins.dao.Blade;
-import com.smallchill.core.toolbox.CMap;
-import com.smallchill.pay.model.letsPay.LetsPay;
-import com.smallchill.pay.model.letsPay.LetsSuperPay;
-import com.smallchill.system.treasure.model.RechargeRecords;
+import com.smallchill.pay.payplus.model.PayPlus;
+import com.smallchill.pay.payplus.model.SuperPayPlus;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
-import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
-import com.smallchill.system.treasure.utils.SendHttp;
 import com.smallchill.system.treasure.utils.Utils;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import com.smallchill.core.shiro.ShiroKit;
-import com.smallchill.core.toolbox.kit.AESKit;
 import com.smallchill.test.base.BaseTest;
 import org.springframework.util.Base64Utils;
 
@@ -32,12 +22,10 @@ import java.math.RoundingMode;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.smallchill.core.constant.ConstKey.LETSPAY_KEY;
-import static com.smallchill.system.treasure.utils.CallBackUtils.successRecExecuted;
 
 public class JunitTest extends BaseTest{
 
@@ -118,13 +106,13 @@ public class JunitTest extends BaseTest{
 
 	}
 	@Resource
-	private LetsPay letsPay;
+	private PayPlus payPlus;
 	@Resource
-	private LetsSuperPay letsSuperPay;
+	private SuperPayPlus superPayPlus;
 	@Test
 	public void test6(){
 
-		Map<String, String> map = JSON.parseObject(JSON.toJSONString(letsSuperPay), new TypeReference<Map<String, String>>() {
+		Map<String, String> map = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>() {
 		});
 		System.out.println(map);
 	}

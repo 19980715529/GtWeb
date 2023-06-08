@@ -160,7 +160,7 @@
                 }
             },
             gridComplete: function () {
-                if (searchType == 'home') {
+                if (searchType === 'home') {
 
                     var PlatformID = $("#ptypeid").val();
                     if (BladeTool.isEmpty(PlatformID)) {
@@ -168,7 +168,7 @@
                     }
                     new Ajax("${ctxPath}/statistics/getDayRecharge?PlatformID=" + PlatformID, function (data) {
                         console.log(data);
-                        if (data.code == 0) {
+                        if (data.code === 0) {
                             var temp = data.data;
                             //$("#DayReg").text(fmoney(data.data.RegisterCount,0));//当日总充值
                             var html = '<tr role="row" id="0" tabindex="0" class="ui-widget-content jqgrow ui-row-ltr ui-state-highlight" aria-selected="true">';

@@ -17,38 +17,88 @@
                         <input type="hidden" id="channel" value="${channelpool.cid}"/>
                         <select name="channelpool.cid" id="cid"></select>
                     </td>
-                </tr>
-                <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">订单类型: </td>
                     <td>
                         <input type="radio" name="channelpool.type" value="0" ${channelpool.type==0?"checked":""}>充值</input>&nbsp;&nbsp;
                         <input type="radio" name="channelpool.type" value="1" ${channelpool.type==1?"checked":""}>兑换</input>
                     </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">代收手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.collectRate" value="${channelpool.collectRate}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">代付手续费: </td>
+                    <td>
+                        <input type="text" name="channelpool.paymentRate" value="${channelpool.paymentRate}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定手续费（钱包收取）: </td>
+                    <td>
+                        <input type="text" name="channelpool.money" value="${channelpool.money}"></input>&nbsp;&nbsp;&nbsp;
+                    </td>
+                </tr>
+                <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启: </td>
                     <td>
                         <input type="radio" name="channelpool.isOpen" value="1" ${channelpool.isOpen==1?"checked":""}>开启</input>&nbsp;&nbsp;
                         <input type="radio" name="channelpool.isOpen" value="0" ${channelpool.isOpen==0?"checked":""}>关闭</input>
                     </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">货币类型: </td>
-                    <td>
-                        <input type="text" name="channelpool.currencyType" value="${channelpool.currencyType}"/>
-                    </td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">手续费: </td>
-                    <td>
-                        <input type="text" name="channelpool.formalitiesCost" value="${channelpool.formalitiesCost}"></input>&nbsp;&nbsp;&nbsp;
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定手续费: </td>
-                    <td>
-                        <input type="text" name="channelpool.fee" value="${channelpool.fee}"></input>&nbsp;&nbsp;&nbsp;
-                    </td>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">小渠道名称: </td>
                     <td>
                         <input type="text" name="channelpool.name" value="${channelpool.name}"></input>&nbsp;&nbsp;&nbsp;
                     </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">货币类型: </td>
+                    <td>
+                        <input type="text" name="channelpool.currencyType" value="${channelpool.currencyType}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道最小额度: </td>
+                    <td>
+                        <input type="text" name="channelpool.minLimit" value="${channelpool.minLimit}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道最大额度: </td>
+                    <td>
+                        <input type="text" name="channelpool.maxLimit" value="${channelpool.maxLimit}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">标签状态: </td>
+                    <td>
+                        <input type="radio" name="channelpool.isLabel" value="0" ${channelpool.isLabel==0?"checked":""}>无</input>&nbsp;&nbsp;
+                        <input type="radio" name="channelpool.isLabel" value="1" ${channelpool.isLabel==1?"checked":""}>new</input>
+                        <input type="radio" name="channelpool.isLabel" value="2" ${channelpool.isLabel==2?"checked":""}>hot</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道税率（主动收取）: </td>
+                    <td>
+                        <input type="text" name="channelpool.channelTax" value="${channelpool.channelTax}"/>
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定手续费（主动收取）: </td>
+                    <td>
+                        <input type="text" name="channelpool.fee" value="${channelpool.fee}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">金币兑换比率: </td>
+                    <td>
+                        <input type="text" name="channelpool.exchangeRatio" value="${channelpool.exchangeRatio}"/>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送比率: </td>
+                    <td>
+                        <input type="text" name="channelpool.giveRatio" value="${channelpool.giveRatio}"/>
+                    </td>
+
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
+                    <td>
+                        <input type="text" name="channelpool.sort" value="${channelpool.sort}"/>
+                    </td>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">总赢配置: </td>
+                    <td>
+                        <input type="text" name="channelpool.winConf" value="${channelpool.winConf}"/>
+                    </td>
+
                 </tr>
                 </tbody>
             </table>
@@ -63,7 +113,7 @@
             var type = data.data;
             var html = '';
             for (var i = 0; i < type.length; i++) {
-                var temp = type[i]['cid'];
+                var temp = type[i]['id'];
                 if (cid===temp){
                     html='<option value="' + temp + '">' + type[i]['cname'] + '</option>'+html;
                 }else {
@@ -81,7 +131,7 @@
             var type = data.data;
             var html = '';
             for (var i = 0; i < type.length; i++) {
-                var id=type[i]['pay_id'];
+                var id=type[i]['id'];
                 if (pid===id){
                     html = '<option value="' + id + '">' + type[i]['mcName'] + '</option>'+html;
                 }else {

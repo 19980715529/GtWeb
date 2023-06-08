@@ -1,6 +1,7 @@
 package com.smallchill.test;
 
 import com.alibaba.fastjson.JSON;
+import com.smallchill.pay.luckypay.utils.LuckyPayUtils;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.utils.SendHttp;
 import com.smallchill.system.treasure.utils.Utils;
@@ -11,6 +12,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,13 +54,8 @@ public class Demo15 extends BaseTest {
         System.out.println(res);
     }
     @Test
-    public void test1(){
-        ExchangeReview exchangeReview = new ExchangeReview();
-        exchangeReview.setCardholder("tom");
-        exchangeReview.setOrderNumber(Utils.getOrderNum(12345));
-        exchangeReview.setMoney(new BigDecimal("100.69"));
-        exchangeReview.setBankNumber("9111111111");
-//        String s = SendHttp.sendExchangeLuckyPay(exchangeReview);
-//        System.out.println(s);
+    public void test1() {
+        String randomPhone = LuckyPayUtils.getRandomPhone(10);
+        System.out.println(randomPhone);
     }
 }

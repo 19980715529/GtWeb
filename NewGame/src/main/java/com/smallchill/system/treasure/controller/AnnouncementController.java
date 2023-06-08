@@ -1,7 +1,6 @@
 package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
@@ -11,9 +10,6 @@ import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.redis.IJedis;
 import com.smallchill.game.service.CommonService;
-import com.smallchill.pay.model.bpay.BPay;
-import com.smallchill.pay.model.letsPay.LetsSuperPay;
-import com.smallchill.pay.model.rarpPay.RarPay;
 import com.smallchill.system.treasure.model.ChannelVo;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.web.bind.annotation.*;

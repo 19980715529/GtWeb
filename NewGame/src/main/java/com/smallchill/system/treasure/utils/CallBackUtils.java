@@ -2,14 +2,23 @@ package com.smallchill.system.treasure.utils;
 
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.toolbox.CMap;
+import com.smallchill.core.toolbox.kit.ThreadKit;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
+import com.smallchill.system.treasure.model.WalletRecords;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
 
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -102,63 +111,44 @@ public class CallBackUtils {
 
     /**
      * 成功需要执行的代码
-     * @param blade
      * @param orderNum
      * @param rechargeRecords
-     * @param globalDelayQueue
      */
-
-    public static void successRecExecuted(Blade blade, String orderNum, RechargeRecords rechargeRecords, GlobalDelayQueue globalDelayQueue) {
-//        // 充值成功将状态修改为已完成
-//        rechargeRecords.setOrderStatus(2);
-//        // 执行存储过程
-
-//        // 金币变动记录
-//        if (rechargeRecords.getIsFirstCharge()==1){
-//            RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),207, rechargeRecords.getGold());
-//        }else {
-//            RechargeExchangeCommon.AddGoldChangeRecords(rechargeRecords.getUserId(),5, rechargeRecords.getGold());
-//        }
-//        // 判断是否首充
-//        if (rechargeRecords.getIsFirstCharge()==1){
-//            Db.update("update [QPGameUserDB].[dbo].[AccountsInfo] set IsFirstRecharge=#{IsFirstRecharge} where UserID=#{UserID}",
-//                    CMap.init().set("IsFirstRecharge",1).set("UserID", rechargeRecords.getUserId()));
-//        }
-//        // 判断是否用户第一笔成功的充值
-//        int re = Db.queryInt("select count(1) from Recharge_records where userId=#{userId} and orderStatus=2",
-//                CMap.init().set("userId", rechargeRecords.getUserId()));
-//        if (re<1){
-//            rechargeRecords.setIsThatTay(1);
-//        }
-//        rechargeRecords.setEndTime(new Date());
-//        blade.update(rechargeRecords);
+    public static void successRecExecuted(String orderNum, RechargeRecords rechargeRecords) {
         // 保证原子性将上面放到存储过程中执行
         int status = RechargeExchangeCommon.successRecExecute(orderNum);
         if (status==0){
-            extracted(rechargeRecords);
-            // 回调成功,根据超时订单号将订单从延迟列表中取消
-            globalDelayQueue.cancelOrder(orderNum);
-            // 向游戏服务器发送请求
-            Map<String, Object> gameParam = new HashMap<>();
-            gameParam.put("Userid", rechargeRecords.getUserId());
-            gameParam.put("gameCoin", rechargeRecords.getGold());
-            gameParam.put("gold", rechargeRecords.getTopUpAmount());
-            gameParam.put("Type",0);
-            gameParam.put("IsFirstRecharge",0);
-            // 获取充值成功的邮件
-            Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-            // 普通充值类型
-            emailParam.put("goldType",5);
-            // 判断是否首充
-            if (rechargeRecords.getIsFirstCharge()==1){
-                gameParam.put("IsFirstRecharge",1);
-                // 邮件类型首充
-                emailParam.put("goldType",207);
-            }
-            SendHttp.sendGame1002(gameParam);
-            emailParam.put("gold",0);
-            emailParam.put("toUserid", rechargeRecords.getUserId());
-            SendHttp.sendEmail(emailParam);
+            // 使用后线程执行
+            Runnable runnable = () -> {
+                extracted(rechargeRecords);
+                // 回调成功,根据超时订单号将订单从延迟列表中取消
+                GlobalDelayQueue.cancelOrder(orderNum);
+                // 向游戏服务器发送请求
+                Map<String, Object> gameParam = new HashMap<>();
+                gameParam.put("Userid", rechargeRecords.getUserId());
+                gameParam.put("gameCoin", rechargeRecords.getGold());
+                gameParam.put("gold", rechargeRecords.getTopUpAmount());
+                gameParam.put("Type", 0);
+                gameParam.put("IsFirstRecharge", rechargeRecords.getIsFirstCharge());
+                // 获取充值成功的邮件
+                Map emailParam = RechargeExchangeCommon.getEmailConf(2);
+                // 普通充值类型
+                emailParam.put("goldType", 5);
+                // 判断是否首充
+                if (rechargeRecords.getIsFirstCharge() == 1) {
+                    // 邮件类型首充
+                    emailParam.put("goldType", 207);
+                }
+                SendHttp.sendGame1002(gameParam);
+                emailParam.put("gold", 0);
+                emailParam.put("toUserid", rechargeRecords.getUserId());
+                SendHttp.sendEmail(emailParam);
+                // 修改钱包记录
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),
+                        rechargeRecords.getChannel(),rechargeRecords.getChannelPid(),dateFormat.format(rechargeRecords.getCreateTime()),0);
+            };
+            ThreadKit.excAsync(runnable,false);
         }
 
     }
@@ -179,5 +169,27 @@ public class CallBackUtils {
         emailParam.put("toUserid", exchangeReview.getUserId());
         emailParam.put("goldType",206);
         SendHttp.sendEmail(emailParam);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        RechargeExchangeCommon.walletStatistics(exchangeReview.getOrderNumber(),
+                exchangeReview.getSourcePlatform(),exchangeReview.getChannelName(),exchangeReview.getChannelId(),
+                dateFormat.format(exchangeReview.getCreateTime()),1);
+    }
+
+    /**
+     * 充值回调失败执行
+     */
+    public static void failRecExecuted(RechargeRecords rechargeRecords){
+        // 充值失败将状态修改为已关闭
+        rechargeRecords.setOrderStatus(3);
+        // 将订单从队列中移除
+        GlobalDelayQueue.cancelOrder(rechargeRecords.getOrderNumber());
+        rechargeRecords.setEndTime(new Date());
+        Blade blade = Blade.create(RechargeRecords.class);
+        blade.update(rechargeRecords);
+        if (rechargeRecords.getIsFirstCharge()==2){
+            // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+            Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=0 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+                    CMap.init().set("userId",rechargeRecords.getUserId()));
+        }
     }
 }

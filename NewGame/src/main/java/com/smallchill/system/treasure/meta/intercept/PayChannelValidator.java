@@ -33,7 +33,7 @@ public class PayChannelValidator extends BladeValidator {
             }
         }else {
             // 修改时
-            String sql = "select * FROM Pay_Channel where sort=#{sort} and id!={id}";
+            String sql = "select * FROM Pay_Channel where sort=#{sort} and id!=#{id}";
             boolean temp = Db.isExist(sql, CMap.init().set("sort", sort).set("sort",sort).set("id",id));
             if (temp) {
                 addError("排序重复");

@@ -7,44 +7,14 @@
                 <tbody>
                 <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商户渠道: </td>
-                    <td ><select type="text" id="ChannelID" name="channellist.chPoolId"></select>
+                    <td >
+                        <select type="text" id="ChannelID" name="channellist.chPoolId"></select>
+                        <input type="hidden" id="cid" name="channellist.cHname" value=""/>
                     </td>
+                </tr>
+                <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">包来源: </td>
                     <td ><select type="text" id="clientType" name="channellist.clientType"></select>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最小值: </td>
-                    <td><input type="text" name="channellist.minLimit" value="" /></td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单次充值最大值: </td>
-                    <td><input type="text" name="channellist.maxLimit" value=""/></td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道额为赠送: </td>
-                    <td><input type="text" name="channellist.giveRatio" value="" /></td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">渠道税率: </td>
-                    <td><input type="text" name="channellist.channelTax" value=""></input></td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">金币倍率: </td>
-                    <td>
-                        <input type="text" name="channellist.exchangeRatio"></input>
-                    </td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">总赢倍率: </td>
-                    <td>
-                        <input type="text" name="channellist.winConf"></input>
-                    </td>
-                </tr>
-                <tr>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">排序: </td>
-                    <td>
-                        <input type="text" name="channellist.sort"/>
-                    </td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否显示标签: </td>
-                    <td>
-                        <input type="radio" name="channellist.isLabel" value="0" checked>否</input>&nbsp;&nbsp;
-                        <input type="radio" name="channellist.isLabel" value="1">NEW</input>
-                        <input type="radio" name="channellist.isLabel" value="2">HOT</input>
                     </td>
                 </tr>
                 <tr>
@@ -52,10 +22,6 @@
                     <td>
                         <input type="radio" name="channellist.isOpen" value="0" checked>关闭</input>&nbsp;&nbsp;&nbsp;&nbsp;
                         <input type="radio" name="channellist.isOpen" value="1">开启</input>
-                    </td>
-                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">固定费用: </td>
-                    <td>
-                        <input type="text" name="channellist.fee"></input>
                     </td>
                 </tr>
                 </tbody>
@@ -76,6 +42,11 @@
                 $("#ChannelID").html(html);
             }
         }).start();
+    })
+    $("#ChannelID").change(function () {
+        var text = $("#ChannelID").find("option:selected").text();
+        // console.log(text.split("-")[1])
+        $("#cid").val(text.split("-")[1])
     })
     // 获取包来源列表
     new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {

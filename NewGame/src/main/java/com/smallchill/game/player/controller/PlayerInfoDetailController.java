@@ -68,11 +68,11 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		 * ipSeeker.getIPLocation(ip).getCountry(); }
 		 */
 		// 获取总赢配置
-		Map channel = Db.findById("Channel", 3);
+		Map channel = Db.findById("Pay_ChannelPool", 3);
 		BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
 		// 用户的总赢
 		BigDecimal totalWin = RechargeExchangeCommon.getUserWin(id);
-		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("goldProportion").toString()),RoundingMode.DOWN).divide(winConfig, RoundingMode.DOWN);
+		BigDecimal fee = totalWin.divide(new BigDecimal(channel.get("exchangeRatio").toString()),RoundingMode.DOWN).divide(winConfig, RoundingMode.DOWN);
 		if (fee.doubleValue()<=0.1){
 			fee = new BigDecimal("0");
 		}

@@ -2,6 +2,7 @@ package com.smallchill.test;
 
 import com.alibaba.druid.sql.visitor.SQLASTOutputVisitorUtils;
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.pay.safePay.utils.SafePayUtils;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
@@ -35,7 +36,7 @@ public class Demo9 {
         map.put("code",21001); //range:21001:50-50000
         ExchangeReview exchangeReview = new ExchangeReview();
         exchangeReview.setAmount(new BigDecimal(555.00));
-        String res = SendHttp.sendRechargeSafe(rechargeRecords, map);
+        String res = SafePayUtils.recharge(rechargeRecords, map);
         System.out.println(res);
     }
 

@@ -78,7 +78,7 @@ public class RechargeRecords extends BaseModel implements Delayed {
         this.channelPid = channelPid;
     }
 
-    private Date afterDate = new Date(createTime.getTime() + 300000);
+    private Date afterDate = new Date(createTime.getTime() + 900000);
 
 
     public String getNickname() {

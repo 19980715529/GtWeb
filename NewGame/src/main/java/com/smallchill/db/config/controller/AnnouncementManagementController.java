@@ -1,6 +1,7 @@
 package com.smallchill.db.config.controller;
 
 import com.smallchill.common.base.BaseController;
+import com.smallchill.core.annotation.Before;
 import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
@@ -9,6 +10,7 @@ import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
+import com.smallchill.db.config.meta.intercept.AnnouncementManagementValidator;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.treasure.model.AnnouncementManagement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +68,7 @@ public class AnnouncementManagementController extends BaseController implements 
      * 添加操作
      */
     @Json
+    @Before(AnnouncementManagementValidator.class)
     @RequestMapping(KEY_SAVE)
     public AjaxResult save(){
         AnnouncementManagement mapping = mapping(PREFIX, AnnouncementManagement.class);
@@ -90,6 +93,7 @@ public class AnnouncementManagementController extends BaseController implements 
      * 修改数据
      */
     @Json
+    @Before(AnnouncementManagementValidator.class)
     @RequestMapping(KEY_UPDATE)
     public AjaxResult update(){
         AnnouncementManagement mapping = mapping(PREFIX, AnnouncementManagement.class);

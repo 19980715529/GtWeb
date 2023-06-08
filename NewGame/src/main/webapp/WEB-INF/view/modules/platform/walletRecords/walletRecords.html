@@ -1,0 +1,252 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var _filter = '{"clientType":"6","startTime":"'+getBeforeDate(0)+'"'+',"endTime":"'+getBeforeDate(0)+'"}';
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('钱包管理','walletRecords');
+        initGrid();
+        initMenuBtn("btns","walletRecords");
+        // query(getBeforeDate(0),getBeforeDate(0),6)
+    });
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["id","时间","大渠道","钱包名称","代收费率", "代付费率","代付附加","代收数额","代收手续费","代收次数","成功次数",
+            "代付数额","代付手续费","代付成功次数","净利润","总手续费"];
+        var _colmodel=[
+            {name:"id",index:"id",hidden:true},
+            {name:"createTime",sortable:false},
+            {name:"channelName",sortable:false},
+            {name:"mcName", sortable: false},
+            {name:"collectRate",sortable: false},
+            {name:"paymentRate", sortable: false},
+            {name:"payFee", sortable:false},
+            {name:"collectAmount", sortable:false},
+            {name:"collectFee", sortable:false},
+            {name:"collectNum",sortable:false},
+            {name:"sucNum", sortable:false},
+            {name:"paymentAmount", sortable:false},
+            {name:"paymentFee", sortable:false},
+            {name:"paymentNum", sortable:false},
+            {name:"netProfit", sortable:false},
+            {name:"totalFee", sortable:false}
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {where: _filter,sort:"createTime",order:"desc"},
+            rowNum:100,
+            height: 'auto',
+            gridComplete:function () {
+                var clientType = $("#clientType").val();
+                var startTime = $("#start_time").val();
+                var endTime = $("#end_time").val();
+                new Ajax("${ctxPath}/walletRecords/query?startTime="+startTime+"&endTime="+endTime+"&clientType="+clientType, function (data) {
+                    if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+                        var type = data.data;
+                        $("#recMoney").text(type.recMoney)
+                        $("#excMoney").text(type.excMoney)
+                        $("#reMoney").text(type.reMoney)
+                        $("#collectAmounts").text(type.collectAmounts)
+                        $("#collectFees").text(type.collectFees)
+                        $("#paymentAmount").text(type.paymentAmount)
+                        $("#paymentFees").text(type.paymentFees)
+                        $("#totalFees").text(type.totalFees)
+                        $("#netProfits").text(type.netProfits)
+                    }
+                }).start();
+            }
+        });
+
+
+    }
+    function query(startTime,endTime,clientType) {
+
+    }
+
+    function rowShow(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isOpen') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">开启</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">关闭</span>';
+            }
+        }
+        return html;
+    }
+    function hotShow(cellvalue,options,rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isLabel') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">NEW</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">否</span>';
+            }else {
+                html += '<span class="label label-info">HOT</span>';
+            }
+        }
+        return html;
+    }
+    function rowType(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='type') {
+            if(rowObject.type === 1) {
+                html += '<span class="label label-info">兑换</span>';
+            } else if(rowObject.type === 0) {
+                html += '<span class="label label-warning">充值</span>';
+            }
+        }
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <span id="GameTypeForm">
+        <label class=""> 时间： </label>
+        <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
+        -
+        <input type="text" id="end_time" value="" class="" />
+        <label>包来源：</label>
+        <select id="clientType"></select>
+    </span>
+    <!-- 简单查询按钮 -->
+    <label class="">
+        <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+    </label>
+    <div class="total-block">
+        总充值：<span class="text-red" id="recMoney"><b>0</b></span>
+        钱包入账：<span class="text-red" id="collectAmounts"><b>0</b></span>
+        代收手续费：<span class="text-red" id="collectFees"><b>0</b></span>
+        总兑换：<span class="text-red" id="excMoney"><b>0</b></span>
+        钱包代付：<span class="text-red" id="paymentAmount"><b>0</b></span>
+        代付手续费：<span class="text-red" id="paymentFees"><b>0</b></span>
+        充提差：<span class="text-red" id="reMoney"><b>0</b></span>
+        钱包利润：<span class="text-red" id="netProfits"><b>0</b></span>
+        总手续费：<span class="text-red" id="totalFees"><b>0</b></span>
+    </div>
+    <div class="col-xs-12 tb-grid">
+        <!-- 按钮组 -->
+<!--        <div class="welljq well-sm" id="btns"></div>-->
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script>
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
+    laydate({
+        elem : '#start_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem : '#end_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+
+    $(function(){
+        $('#start_time').val(getBeforeDate(0));
+        $('#end_time').val(getBeforeDate(0));
+    });
+    // 查询大渠道
+    new Ajax("${ctxPath}/paychannel/findChannel", function (data) {
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['id'] + '">' + type[i]['cname'] + '</option>';
+            }
+            $("#cid").html(html);
+        }
+    }).start();
+    function goSearch() {
+        var clientType = $("#clientType").val();
+        var start_time = $("#start_time").val();
+        var end_time = $("#end_time").val();
+
+        var wheres = {};
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+            layer_alert('请输入时间!', "warn");
+            return;
+        } else if(BladeTool.isNotEmpty(end_time)) {
+            wheres['endTime'] = end_time;
+        }
+        if(BladeTool.isNotEmpty(start_time)) {
+            wheres['startTime'] = start_time;
+            if(BladeTool.isEmpty(end_time)) {
+                wheres['endTime'] = getBeforeDate(1);
+                $("#end_time").val(getBeforeDate(1));
+            }
+        }
+        start_time = $("#start_time").val();
+        end_time = $("#end_time").val();
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isNotEmpty(start_time)) {
+            if(start_time>end_time){
+                layer_alert('开始时间不能大于结束时间!', "warn");
+                return;
+            }
+        }
+        if(BladeTool.isNotEmpty(clientType)) {
+            wheres['clientType'] = clientType;
+        }
+        var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        var pageNum = $jqGrid.getGridParam('page');
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                where : where
+            },
+            page: (isAutoPage) ? pageNum : 1,
+        }).trigger("reloadGrid");
+    }
+</script>
+@include("/common/_listscript.html"){}
+@}

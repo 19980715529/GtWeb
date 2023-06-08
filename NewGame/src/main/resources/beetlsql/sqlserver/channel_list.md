@@ -1,7 +1,6 @@
 all_list
 ===
-    SELECT p.*,(select mcName from Pay_MCPool a where a.id=b.mcId) mcName,(select cname from Pay_Channel a where a.id=b.cid) cname,
-    b.currencyType,b.formalitiesCost,b.type,b.name
+    SELECT p.*,(select mcName from Pay_MCPool a where a.id=b.mcId) mcName,b.type,b.name
     FROM Pay_ChannelList p join Pay_ChannelPool b on p.chPoolId=b.id
     where 1=1
     @if(!isEmpty(clientType)){
@@ -9,6 +8,9 @@ all_list
     @}
     @if(!isEmpty(type)){
         and b.type=#{type}
+    @}
+    @if(!isEmpty(cid)){
+        and b.cid=#{cid}
     @}
 
 find_channel
@@ -24,23 +26,28 @@ find_one
 
 new_list
 ===
-    SELECT a.id,a.chPoolId pid,minLimit min,MaxLimit max,channelTax channelTaxRate,exchangeRatio goldProportion,giveRatio give,winConf,currencyType unit,a.fee,name,
-    (select mcName FROM Pay_MCPool c WHERE c.id=b.cid) mcName,isLabel
-    from Pay_ChannelList a JOIN Pay_ChannelPool b ON a.chPoolId=b.id where b.type=#{type} and clientType=#{clientType} and b.cid=#{cid} and a.isOpen=1 and b.isOpen=1 ORDER BY sort
+    SELECT b.id,minLimit min,MaxLimit max,channelTax channelTaxRate,exchangeRatio goldProportion,giveRatio give,winConf,currencyType unit,b.fee,name,
+    (select mcName FROM Pay_MCPool c WHERE c.id=b.mcId) mcName,isLabel,
+    (select mcId from Pay_MCPool a where a.id=b.mcId) pid
+    from Pay_ChannelList a JOIN Pay_ChannelPool b ON a.chPoolId=b.id 
+    where b.type=#{type} and clientType=#{clientType} and chName=#{cname} and a.isOpen=1 and b.isOpen=1 ORDER BY sort
 
 param_max
 ===
     SELECT ISNULL(MAX(minLimit), 0) min,ISNULL(MAX(maxLimit), 0) max,ISNULL(MAX(channelTax), 0) channelTaxRate,
-    ISNULL(MAX(exchangeRatio), 0) goldProportion,ISNULL(MAX(winConf), 0) winConf,ISNULL(MAX(a.fee), 0) fee
-    FROM Pay_ChannelList a JOIN Pay_ChannelPool b ON a.chPoolId = b.id WHERE a.isOpen=1 and b.isOpen=1
+    ISNULL(MAX(exchangeRatio), 0) goldProportion,ISNULL(MAX(winConf), 0) winConf,ISNULL(MAX(a.fee), 0) as fee
+    FROM Pay_ChannelPool a JOIN Pay_ChannelList b ON b.chPoolId = a.id WHERE a.isOpen=1 and b.isOpen=1
     @if(!isEmpty(cid)){
-        and b.cid=#{cid}
+        and a.cid=#{cid}
     @}
     @if(!isEmpty(type)){
         and type=#{type}
     @}
     @if(!isEmpty(clientType)){
         and clientType=#{clientType}
+    @}
+    @if(!isEmpty(chName)){
+        and chName=#{chName}
     @}
 
 param_one
@@ -56,3 +63,25 @@ param_one
     @if(!isEmpty(clientType)){
         and clientType=#{clientType}
     @}
+
+recharge_one
+===
+    SELECT minLimit min,maxLimit max,giveRatio give,winConf,exchangeRatio goldProportion,channelTax channelTaxRate,code,
+    (select cname from Pay_Channel a where a.id=cid) channelName,
+    (select mcId from Pay_MCPool a where a.id=b.mcId) pid,
+    type,name,fee,money payFee,paymentRate,collectRate
+    FROM Pay_ChannelPool as b WHERE id=#{id}
+
+exchange_one
+===
+    SELECT minLimit min,maxLimit max,giveRatio give,winConf,exchangeRatio goldProportion,channelTax channelTaxRate,code,
+    (select cname from Pay_Channel a where a.id=cid) channelName,
+    (select mcId from Pay_MCPool a where a.id=b.mcId) pid,
+    type,name,fee,money payFee,paymentRate,collectRate
+    FROM Pay_ChannelPool as b WHERE id=#{id}
+
+query_min_list
+===
+    SELECT b.id,b.name 
+    from Pay_ChannelList as a JOIN Pay_ChannelPool as b on a.chPoolId=b.id 
+    WHERE clientType=#{clientType} and chName=#{chName} AND a.isOpen=1 and b.isOpen=1 AND b.type=1

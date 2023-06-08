@@ -34,11 +34,11 @@ public interface ConstUrl {
     /**
      * 兑换回调地址   http://8.222.205.176:1234/NewGame/callback/exchange_rarp_callback
      */
-    String EXCHANGE_RARP_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/exchange_rarp_callback";
+    String EXCHANGE_RARP_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/RarPay/exchange";
     /**
      * 充值回调    http://8.222.205.176:1234/NewGame/callback/recharge_rarp_callback
      */
-    String RECHARGE_RARP_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/recharge_rarp_callback";
+    String RECHARGE_RARP_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/RarPay/recharge";
     //===================================================Paymaya的统一回调地址======================================================
 
 
@@ -54,11 +54,11 @@ public interface ConstUrl {
     /**
      * safe兑换回调
      */
-    String EXCHANGE_SAFE_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/exchange_safe_callback";
+    String EXCHANGE_SAFE_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/SafePay/exchange";
     /**
      * safe充值回调d
      */
-    String RECHARGE_SAFE_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/recharge_safa_callback";
+    String RECHARGE_SAFE_CALLBACK_URL=CALLBACK_IP+"/NewGame/callback/SafePay/recharge";
 
     //================================================MetaPay=====================================================
 
@@ -73,11 +73,11 @@ public interface ConstUrl {
     /**
      * MetaPay 充值回调
      */
-    String RECHARGE_META_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_meta_callback";
+    String RECHARGE_META_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/MetaPay/recharge";
     /**
      * MetaPay兑换回调地址
      */
-    String EXCHANGE_META_PAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_meta_pay_callback";
+    String EXCHANGE_META_PAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/MetaPay/exchange";
 
     //==================================================OMOM===================================================
 
@@ -92,11 +92,11 @@ public interface ConstUrl {
     /**
      * OMOM 充值回调地址
      */
-    String RECHARGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_omom_callback";
+    String RECHARGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/OmoPay/recharge";
     /**
      * OMOM 兑换回调地址
      */
-    String EXCHANGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_omom_callback";
+    String EXCHANGE_OMOM_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/OmoPay/exchange";
     //==================================================AIPay充值请求地址===================================================
 
     /**
@@ -110,11 +110,11 @@ public interface ConstUrl {
     /**
      * AIPay 充值回调地址
      */
-    String RECHARGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_AIPay_callback";
+    String RECHARGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/AIPay/recharge";
     /**
      * AIPay 兑换回调地址
      */
-    String EXCHANGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_AIPay_callback";
+    String EXCHANGE_AIPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/AIPay/exchange";
     //==================================================WePay===================================================
     /**
      * WePay 充值地址
@@ -136,14 +136,14 @@ public interface ConstUrl {
     /**
      * 银河系统充值地址 CloudPay
      */
-    String RECHARGE_CLOUDPAY_URL = "https://cloudc.gazer8.info/api/transfer";
+    String RECHARGE_CLOUDPAY_URL = "https://cloud.galaxy5588.com/api/transfer";
     // 兑换地址
-    String EXCHANGE_CLOUDPAY_URL="https://cloudc.gazer8.info/api/daifu";
+    String EXCHANGE_CLOUDPAY_URL="https://cloud.galaxy5588.com/api/daifu";
 
     // GALAXY 充值回调地址
-    String RECHARGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_galaxy_callback";
+    String RECHARGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/Galaxy/recharge";
     // GALAXY 兑换回调地址
-    String EXCHANGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_galaxy_callback";
+    String EXCHANGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/Galaxy/exchange";
     //==================================================LetsPay===================================================
     /**
      * LetsPay
@@ -154,13 +154,12 @@ public interface ConstUrl {
     String EXCHANGE_LETSPAY_URL="http://api.letspayfast.com/apitrans";
 
     // LetsPay 充值回调地址
-    String RECHARGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_letspay_callback";
+    String RECHARGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/PayPlus/recharge";
     // LetsPay 兑换回调地址
-    String EXCHANGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_letspay_callback";
+    String EXCHANGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/PayPlus/exchange";
     //==================================================MHDPay===================================================
     /**
      * MHDpay
-
      */
     // 充值
     String RECHARGE_MHDPAY_URL = "https://mhdc.gazer8.info/api/transfer";
@@ -175,9 +174,9 @@ public interface ConstUrl {
     // 兑换地址
     String EXCHANGE_LUCKYPAY_URL = "https://api.lumypay.com/api/payout";
     //  Luckypay 充值回调地址
-    String RECHARGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_LuckyPay_callback";
+    String RECHARGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/LuckyPay/recharge";
     // Luckypay 兑换回调地址
-    String EXCHANGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_LuckyPay_callback";
+    String EXCHANGE_LUCKYPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/LuckyPay/exchange";
     /**
      * BPay支付回调地址地址
      */

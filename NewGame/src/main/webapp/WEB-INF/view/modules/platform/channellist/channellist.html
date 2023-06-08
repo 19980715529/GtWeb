@@ -3,7 +3,7 @@
     var ctx="${ctxPath}";
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
-    var _filter = '{"type":"","clientType":"6"}';
+    var _filter = '{"type":"","clientType":"6","cid":""}';
     var isAutoFlushTab=true;
     $(function(){
         backDom('充值渠道管理','channellist');
@@ -12,26 +12,15 @@
     });
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["渠道id","包来源","商户名", "大渠道名称","小渠道","是否关闭","充值是否显示标签","游戏中排的排序","游戏单次充值最小",
-            "渠道单次充值最大","渠道税率","固定费用","金币倍率","总赢倍率","渠道额外赠送","单位","充值/兑换"];
+        var _colnames=["渠道id","包来源","充值/兑换","商户名", "大渠道名称","小渠道","是否关闭"];
         var _colmodel=[
             {name:"id",index:"id",hidden:true},
             {name:"clientType",sortable:false},
+            {name:"type", formatter:rowType},
             {name:"mcName",index:"mcName"},
-            {name:"cname", sortable:false},
+            {name:"chName", sortable: false},
             {name:"name", sortable:false},
-            {name:"isOpen", sortable:false,formatter:rowShow},
-            {name:"isLabel", sortable:false,formatter:hotShow},
-            {name:"sort",sortable:false},
-            {name:"minLimit", sortable:false},
-            {name:"maxLimit", sortable:false},
-            {name:"channelTax", sortable:false},
-            {name:"fee", sortable:false},
-            {name:"exchangeRatio", sortable:false},
-            {name:"winConf", sortable:false},
-            {name:"giveRatio", sortable:false},
-            {name:"currencyType", sortable:false},
-            {name:"type", formatter:rowType}
+            {name:"isOpen", sortable:false,formatter:rowShow}
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -41,7 +30,7 @@
             colModel:_colmodel,
             jsonReader:{id:"id"},
             pager : pager_selector,
-            postData: {where: _filter,sort: "sort", order: "asc"},
+            postData: {where: _filter},
             rowNum:100,
             height: 'auto'
         });
@@ -55,19 +44,6 @@
                 html += '<span class="label label-success">开启</span>';
             } else if (cellvalue === 0) {
                 html += '<span class="label label-danger">关闭</span>';
-            }
-        }
-        return html;
-    }
-    function hotShow(cellvalue,options,rowObject) {
-        var html = '';
-        if(options.colModel.name ==='isLabel') {
-            if(cellvalue === 1) {
-                html += '<span class="label label-success">NEW</span>';
-            } else if (cellvalue === 0) {
-                html += '<span class="label label-danger">否</span>';
-            }else {
-                html += '<span class="label label-info">HOT</span>';
             }
         }
         return html;
@@ -94,8 +70,9 @@
             <option value="1">兑换</option>
         </select>
         <label>包来源：</label>
-    <select id="clientType">
-    </select>
+        <select id="clientType"></select>
+        <label>大渠道来源：</label>
+        <select id="cid"></select>
     </span>
     <!-- 简单查询按钮 -->
     <label class="">
@@ -123,9 +100,21 @@
             $("#clientType").html(html);
         }
     }).start();
+    // 查询大渠道
+    new Ajax("${ctxPath}/paychannel/findChannel", function (data) {
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['id'] + '">' + type[i]['cname'] + '</option>';
+            }
+            $("#cid").html(html);
+        }
+    }).start();
     function goSearch() {
         var type = $("#ptypeid").val();
         var clientType = $("#clientType").val();
+        var cid = $("#cid").val();
         var wheres = {};
 
         if(BladeTool.isNotEmpty(type)) {
@@ -133,6 +122,9 @@
         }
         if(BladeTool.isNotEmpty(clientType)) {
             wheres['clientType'] = clientType;
+        }
+        if(BladeTool.isNotEmpty(cid)) {
+            wheres['cid'] = cid;
         }
         var filter = "";
         if (typeof (_filter) != "undefined") {

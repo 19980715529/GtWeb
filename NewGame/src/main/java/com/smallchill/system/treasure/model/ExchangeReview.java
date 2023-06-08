@@ -20,7 +20,7 @@ public class ExchangeReview extends BaseModel {
     private String bankNumber; // 银行卡号
     private String cardholder; // 持卡人
     private String bank; // 银行
-    private String sourcePlatform; // 来源平台
+    private Integer sourcePlatform; // 包id
     private BigDecimal amount; // 兑换的钱
     private Long gold; // 消耗的金额
     private Long consumptionCode; // 消耗打码量
@@ -125,11 +125,11 @@ public class ExchangeReview extends BaseModel {
         this.bank = bank;
     }
 
-    public String getSourcePlatform() {
+    public Integer getSourcePlatform() {
         return sourcePlatform;
     }
 
-    public void setSourcePlatform(String sourcePlatform) {
+    public void setSourcePlatform(Integer sourcePlatform) {
         this.sourcePlatform = sourcePlatform;
     }
 

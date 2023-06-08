@@ -4,7 +4,7 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'"}';
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
 
     $(function() {
         backDom('平台明细记录','platform_detail_log');
@@ -100,7 +100,7 @@
             shrinkToFit : false,//适用于较少字段,响应式
             colNames : _colnames,
             colModel : _colmodel,
-            postData : {where:_filter},
+            postData : {where:_filter,sort:"createTime",order:"desc"},
             //pager : pager_selector,
             multiselect : false,
             rownumbers : true,
@@ -111,7 +111,7 @@
             gridComplete:function() {
                 new Ajax("${ctxPath}/${code}/summary", function (data) {
                     // RecTotalGold,RecTotalMoney,ExcTotalMoney,RE,RewardCoins,totalTaxScores,RegUserNum,zsy
-                    if(data.code == 0) {
+                    if(data.code === 0) {
                         var temp = data.data;
                         $("#RecTotalGold").text(fmoney(temp.RecTotalGold,0));
                         $("#RecTotalMoney").text(fmoney(temp.RecTotalMoney,0));
@@ -139,7 +139,8 @@
                 <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
                 -
                 <input type="text" id="end_time" value="" class="" />
-
+                <label class=""> 包来源： </label>
+                <select id="clientType"></select>
                 <!-- 简单查询按钮 -->
                 <label class="">
                     <button class="btn btn-sx btn-white" type="button" onclick="search()">查询</button>
@@ -167,6 +168,18 @@
 </div>
 <script src="${ctxPath}/static/laydate/laydate.js"></script>
 <script type="text/javascript">
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="-1">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
     laydate({
         elem : '#start_time',
         format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
@@ -195,6 +208,7 @@
         var wheres = {};
         var start_time = $("#start_time").val();
         var end_time = $("#end_time").val();
+        var clientType = $("#clientType").val();
         if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
             layer_alert('请输入开始时间!', "warn");
             return;
@@ -216,7 +230,9 @@
                 return;
             }
         }
-
+        if (BladeTool.isNotEmpty(clientType)){
+            wheres['clientType']=clientType
+        }
         var filter = "";
         if (typeof (_filter) != "undefined") {
             filter = _filter;

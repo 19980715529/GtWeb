@@ -2560,7 +2560,7 @@ new_recharge
 	SELECT isnull(SUM(Amount),0) TScore,'-4' as ServerId
     	,'充值' as RoomName
     	FROM [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] as p with (nolock)
-    	where p.ChangeType_Id  in (5,207)
+    	where p.ChangeType_Id  in (5,207,215)
     	@if(!isEmpty(UserID)){
     	 and p.User_Id =#{UserID}
     	@}

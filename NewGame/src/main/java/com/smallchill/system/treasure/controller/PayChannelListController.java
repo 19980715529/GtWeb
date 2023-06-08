@@ -29,8 +29,6 @@ import java.util.Map;
 public class PayChannelListController extends BaseController implements ConstShiro {
     @Resource
     private CommonService commonService;
-    @Resource
-    private ExchangeReviewService service;
     private static String BASE_PATH = "/modules/platform/channellist/";
     private static String CODE = "channellist";
     private static String LIST_SOURCE = "channel_list.all_list";

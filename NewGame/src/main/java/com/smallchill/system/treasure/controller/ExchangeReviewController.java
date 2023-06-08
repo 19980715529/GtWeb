@@ -10,35 +10,42 @@ import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
-import com.smallchill.core.plugins.dao.Blade;
-import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.Func;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
-import com.smallchill.core.toolbox.grid.BladePage;
 import com.smallchill.core.toolbox.kit.CharsetKit;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.kit.URLKit;
 import com.smallchill.game.service.CommonService;
-import com.smallchill.pay.model.bpay.BPay;
-import com.smallchill.pay.model.globalPay.GlobalPay;
-import com.smallchill.pay.model.letsPay.LetsPay;
-import com.smallchill.pay.model.letsPay.LetsSuperPay;
-import com.smallchill.pay.model.rarpPay.RarPay;
-import com.smallchill.pay.utils.bPayUtils.BPayUtils;
-import com.smallchill.pay.utils.globalPayUtils.GlobalPayUtils;
-import com.smallchill.pay.utils.rarPayUtils.RarPayUtils;
+import com.smallchill.pay.aipay.model.AIPay;
+import com.smallchill.pay.aipay.utils.AIPayUtils;
+import com.smallchill.pay.bpay.model.BPay;
+import com.smallchill.pay.cloudpay.model.CloudPay;
+import com.smallchill.pay.cloudpay.utils.CloudPayUtils;
+import com.smallchill.pay.globalPay.model.GlobalPay;
+import com.smallchill.pay.luckypay.model.LuckPay;
+import com.smallchill.pay.luckypay.utils.LuckyPayUtils;
+import com.smallchill.pay.mhdPay.utils.MhdPayUtils;
+import com.smallchill.pay.payplus.model.PayPlus;
+import com.smallchill.pay.payplus.model.SuperPayPlus;
+import com.smallchill.pay.metapay.utils.MetaPayUtils;
+import com.smallchill.pay.mhdPay.model.MhdPay;
+import com.smallchill.pay.omopay.utils.OmoPayUtils;
+import com.smallchill.pay.payplus.utils.PayPlusUtils;
+import com.smallchill.pay.rarPay.model.RarPay;
+import com.smallchill.pay.bpay.utils.BPayUtils;
+import com.smallchill.pay.globalPay.utils.GlobalPayUtils;
+import com.smallchill.pay.rarPay.utils.RarPayUtils;
+import com.smallchill.pay.safePay.utils.SafePayUtils;
+import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.service.ExchangeReviewService;
-import com.smallchill.system.treasure.model.GoldChangeRecord;
-import com.smallchill.system.treasure.model.UserWin;
-import com.smallchill.system.treasure.utils.HttpClientUtils;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import com.smallchill.system.treasure.utils.SendHttp;
-import com.smallchill.system.treasure.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -51,16 +58,9 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-
-import static com.smallchill.core.constant.ConstEmail.*;
-import static com.smallchill.core.constant.ConstKey.*;
-import static com.smallchill.core.constant.ConstUrl.*;
 
 /**
 兑换审核接口
@@ -75,13 +75,21 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     @Resource
     private RarPay rarPay;
     @Resource
-    private LetsPay letsPay;
+    private PayPlus payPlus;
     @Resource
-    private LetsSuperPay letsSuperPay;
+    private SuperPayPlus superPayPlus;
     @Resource
     private BPay bPay;
     @Resource
     private GlobalPay globalPay;
+    @Resource
+    private CloudPay cloudPay;
+    @Resource
+    private MhdPay mhdPay;
+    @Resource
+    private AIPay aiPay;
+    @Resource
+    private LuckPay luckPay;
     private static String BASE_PATH = "/system/exchangereview/";
     private static String CODE = "exchangereview";
     private static String LIST_SOURCE = "exchange_review.all_list";
@@ -137,25 +145,24 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         ExchangeReview exchangeReview = service.findById(exchange.getId());
         exchangeReview.setStatus(exchange.getStatus());
         exchangeReview.setFeedback(exchange.getFeedback());
-        exchangeReview.setChannelId(exchange.getChannelId());
         // 判断是否通过审核
         String response ="";
         int progress= exchangeReview.getStatus();
 
         if (progress ==1) {
-            // 获取渠道消息
             // 根据渠道id，和pid进行查询
-            Map<String, Object> cond = new HashMap<>();
-            cond.put("id", exchangeReview.getChannelId());
-            //
-            Map channel = commonService.getInfoByOne("recharge_channel.get_channel", cond);
+//            Map channel = commonService.getInfoByOne("recharge_channel.get_channel", CMap.init().set("id",exchangeReview.getChannelId()));
+            Map channel = commonService.getInfoByOne("channel_list.exchange_one",
+                    CMap.init().set("id",exchange.getChannelId()).set("clientType",exchangeReview.getSourcePlatform()));
             BigDecimal fee = new BigDecimal(channel.get("fee").toString());
-            Integer pid = Integer.valueOf(channel.get("pid").toString());
+            Integer pid = Integer.parseInt(channel.get("pid").toString());
+            exchangeReview.setChannelId(pid);
             // 计算需要发送到第三方的钱 兑换的钱*（1-渠道税率）
             BigDecimal amount = exchangeReview.getAmount();
             BigDecimal taxRate = new BigDecimal(channel.get("channelTaxRate").toString());
             BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
             exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
+            RechargeExchangeCommon.exc(exchangeReview,channel);
             JSONObject respJson;
             int code;
             int status;
@@ -197,7 +204,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 4:
-                    response = SendHttp.sendExchangeSafe(exchangeReview, channel);
+                    response = SafePayUtils.exchange(exchangeReview, channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("服务异常，修改失败");
@@ -216,7 +223,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 20:
-                    response = SendHttp.sendExchangeMetaPay(exchangeReview,channel);
+                    response = MetaPayUtils.exchange(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -240,7 +247,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                 case 23:
                     // omom 请求的金额必须是整数这里进行处理
                     exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
-                    response = SendHttp.sendExchangeOmom(exchangeReview,channel);
+                    response = OmoPayUtils.exchange(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -261,7 +268,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 26:
-                    response = SendHttp.sendExchangeAIPay(exchangeReview,channel);
+                    response = AIPayUtils.exchange(exchangeReview,aiPay,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -281,7 +288,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 29:
-                    response = SendHttp.sendExchangeWePay(exchangeReview,channel);
+                    response = WePayUtils.exchange(exchangeReview,channel);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -301,7 +308,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 32:
-                    response = SendHttp.sendExchangeGalaxy(exchangeReview,CLOUDPAY_APPID,CLOUDPAY_KEY,EXCHANGE_CLOUDPAY_URL,channel);
+                    response = CloudPayUtils.exchange(exchangeReview,cloudPay);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -323,11 +330,11 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     String channelName = channel.get("channelName").toString();
                     Map<String, String> param;
                     if ("super".equals(channelName)){
-                        param = JSON.parseObject(JSON.toJSONString(letsSuperPay), new TypeReference<Map<String, String>>(){});
+                        param = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>(){});
                     }else {
-                        param = JSON.parseObject(JSON.toJSONString(letsPay), new TypeReference<Map<String, String>>(){});
+                        param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
                     }
-                    response = SendHttp.sendExchangeLetsPay(exchangeReview,channel,param);
+                    response = PayPlusUtils.exchange(exchangeReview,channel,param);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -349,7 +356,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 38:
-                    response = SendHttp.sendExchangeGalaxy(exchangeReview,MHDPAY_APPID,MHDPAY_KEY,EXCHANGE_MHDPAY_URL,channel);
+                    response = MhdPayUtils.exchange(exchangeReview,mhdPay);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");
@@ -368,7 +375,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     }
                     break;
                 case 43:
-                    response = SendHttp.sendExchangeLuckyPay(exchangeReview,channel);
+                    response = LuckyPayUtils.sendExchangeLuckyPay(exchangeReview,luckPay);
                     LOGGER.error(response);
                     if ("".equals(response)) {
                         return error("fail");

@@ -1,7 +1,7 @@
 all_list
 ===
     select e.id,e.createTime,e.orderNumber,e.userId,e.nickname,e.phone,e.cardholder,e.bankNumber,e.channelName,
-    e.bank,isnull((select c.name from [RYPlatformManagerDB].[dbo].[Channel] as c where e.channelId=c.id and c.id!=19),'') as channel,
+    e.bank,isnull((select c.mcName from [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c where e.channelId=c.mcId and c.id!=19),'') as channel,
     e.sourcePlatform,e.amount,e.gold,e.consumptionCode,e.status,e.feedback,e.operator,e.msg,e.tipsName
     FROM [RYPlatformManagerDB].[dbo].[Exchange_review] as e where 1=1
     @if(!isEmpty(userId)){

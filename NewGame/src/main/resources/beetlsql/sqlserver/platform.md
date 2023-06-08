@@ -88,10 +88,12 @@ record_list
 ===
     select CONVERT(VARCHAR(10), createTime, 23) writeTime,* FROM [QPGameRecordDB].[dbo].[DailyGameStats]
     where 1=1
+    @if(!isEmpty(clientType)){
+        and clientType=#{clientType}
+    @}
     @if(!isEmpty(StartTime)){
-    and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)
+        and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)
     @}
     @if(!isEmpty(EndTime)){
-    and CONVERT(VARCHAR(100), createTime, 23) <= CONVERT(VARCHAR(100), #{EndTime}, 23)
+        and CONVERT(VARCHAR(100), createTime, 23) <= CONVERT(VARCHAR(100), #{EndTime}, 23)
     @}
-    order by createTime desc

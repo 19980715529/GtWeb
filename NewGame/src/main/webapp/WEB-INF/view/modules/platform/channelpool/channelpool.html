@@ -3,7 +3,7 @@
     var ctx="${ctxPath}";
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
-    var _filter = '';
+    var _filter = '{"type":"","cid":""}';
     var isAutoFlushTab=true;
     $(function(){
         backDom('渠道池','channelpool');
@@ -12,7 +12,8 @@
     });
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["渠道id","商户名","大渠道","小渠道","订单类型","是否开启","货币类型","手续费","固定手续费"];
+        var _colnames=["渠道id","商户名","大渠道","小渠道","订单类型","是否开启","排序","渠道最小限额","渠道最大限额","标签状态",
+            "渠道税率（主动收取）","固定手续费（主动收取）","金币兑换比率","赠送比率","总赢配置","代收手续费（钱包收取）","代付手续费（钱包收取）","固定手续费（钱包收取）","货币类型"];
         var _colmodel=[
             {name:"id",sortable:false},
             {name:"mcName",sortable:false},
@@ -20,9 +21,19 @@
             {name:"name",sortable:false},
             {name:"type",sortable: false,formatter:rowType},
             {name:"isOpen",sortable:false,formatter:rowShow},
-            {name:"currencyType",sortable:false},
-            {name:"formalitiesCost",sortable:false},
+            {name:"sort",sortable:false},
+            {name:"minLimit",sortable:false},
+            {name:"maxLimit",sortable:false},
+            {name:"isLabel",sortable:false,formatter:hotShow},
+            {name:"channelTax",sortable:false},
             {name:"fee",sortable:false},
+            {name:"exchangeRatio",sortable:false},
+            {name:"giveRatio",sortable:false},
+            {name:"winConf",sortable:false},
+            {name:"collectRate",sortable:false},
+            {name:"paymentRate",sortable:false},
+            {name:"money",sortable:false},
+            {name:"currencyType",sortable:false}
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -32,7 +43,7 @@
             colModel:_colmodel,
             jsonReader:{id:"id"},
             pager : pager_selector,
-            postData: {where: _filter},
+            postData: {where: _filter,sort:"sort",order:"asc"},
             rowNum:100,
             height: 'auto'
         });
@@ -77,21 +88,20 @@
 </script>
 <!-- 配置grid -->
 <div class="row">
-<!--    <span id="GameTypeForm">-->
-<!--        <label class=""> 渠道类型： </label>-->
-<!--        <select id="ptypeid">-->
-<!--            <option value="">全部</option>-->
-<!--            <option value="0">充值</option>-->
-<!--            <option value="1">兑换</option>-->
-<!--        </select>-->
-<!--        <label>包来源：</label>-->
-<!--    <select id="clientType">-->
-<!--    </select>-->
-<!--    </span>-->
-<!--    &lt;!&ndash; 简单查询按钮 &ndash;&gt;-->
-<!--    <label class="">-->
-<!--        <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>-->
-<!--    </label>-->
+    <span id="GameTypeForm">
+        <label class=""> 渠道类型： </label>
+        <select id="ptypeid">
+            <option value="">全部</option>
+            <option value="0">充值</option>
+            <option value="1">兑换</option>
+        </select>
+        <label>大渠道来源：</label>
+        <select id="cid"></select>
+    </span>
+    <!-- 简单查询按钮 -->
+    <label class="">
+        <button class="btn btn-sx btn-white btn-search" type="button" onclick="goSearch()">查询</button>
+    </label>
     <div class="col-xs-12 tb-grid">
         <!-- 按钮组 -->
         <div class="welljq well-sm" id="btns"></div>
@@ -102,8 +112,19 @@
     </div>
 </div>
 <script>
-    // 获取所有大渠道
+    // 查询大渠道
     new Ajax("${ctxPath}/paychannel/findChannel", function (data) {
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['id'] + '">' + type[i]['cname'] + '</option>';
+            }
+            $("#cid").html(html);
+        }
+    }).start();
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
@@ -116,14 +137,14 @@
     }).start();
     function goSearch() {
         var type = $("#ptypeid").val();
-        var clientType = $("#clientType").val();
+        var cid = $("#cid").val();
         var wheres = {};
 
         if(BladeTool.isNotEmpty(type)) {
             wheres['type'] = type;
         }
-        if(BladeTool.isNotEmpty(clientType)) {
-            wheres['clientType'] = clientType;
+        if(BladeTool.isNotEmpty(cid)) {
+            wheres['cid'] = cid;
         }
         var filter = "";
         if (typeof (_filter) != "undefined") {
