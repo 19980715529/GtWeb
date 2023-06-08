@@ -23,6 +23,7 @@ import com.smallchill.pay.globalPay.model.GlobalPay;
 import com.smallchill.pay.luckypay.model.LuckPay;
 import com.smallchill.pay.luckypay.utils.LuckyPayUtils;
 import com.smallchill.pay.mhdPay.utils.MhdPayUtils;
+import com.smallchill.pay.omopay.model.OmoPay;
 import com.smallchill.pay.payplus.model.PayPlus;
 import com.smallchill.pay.payplus.model.SuperPayPlus;
 import com.smallchill.pay.metapay.utils.MetaPayUtils;
@@ -124,7 +125,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         Map channel =(Map) info.get("channel");
         // 判断商家
         int pid = Integer.parseInt(channel.get("pid").toString());
-        LOGGER.error("商户id"+pid);
         rechargeRecords.setChannelPid(pid);
         // 钱包统计
         RechargeExchangeCommon.rec(rechargeRecords,channel);
@@ -134,38 +134,40 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return rechargeRar(rechargeRecords, resultMap, channel);
             case 2:
                 return rechargeLuckyPay(rechargeRecords,resultMap,channel);
-            case 4:
-                // safe
-                return rechargeSafe(rechargeRecords, resultMap, channel);
-            case 20:
-                // MetaPay
-                return rechargeMetaPay(rechargeRecords, resultMap,channel);
-            case 23:
-                // Omo
-                return rechargeOmo(rechargeRecords, resultMap,channel);
-            case 26:
-                // AIPay
-                return rechargeAIPay(rechargeRecords, resultMap,channel);
-            case 29:
-                // WePay
-                return rechargeWePay(rechargeRecords, resultMap,channel);
-            case 32:
-                // CloudPay支付
-                return rechargeGalaxy(rechargeRecords,resultMap,channel,1);
-            case 35:
-                // LetsPay支付
-                return rechargeLetsPay(rechargeRecords,resultMap,channel);
-            case 38:
-                // 银河系统MHDPay
-                return rechargeGalaxy(rechargeRecords,resultMap,channel,2);
-            case 49:
-                // BPay
-                return rechargeBPay(rechargeRecords,resultMap,channel);
-            case 52:
-                // GlobalPay
-                return rechargeGlobalPay(rechargeRecords,resultMap,channel);
+            case 3:
+                return rechargeOmo(rechargeRecords,resultMap,channel);
             default:
                 return json(resultMap,"Recharge application failed",1);
+//            case 4:
+//                // safe
+//                return rechargeSafe(rechargeRecords, resultMap, channel);
+//            case 20:
+//                // MetaPay
+//                return rechargeMetaPay(rechargeRecords, resultMap,channel);
+//            case 23:
+//                // Omo
+//                return rechargeOmo(rechargeRecords, resultMap,channel);
+//            case 26:
+//                // AIPay
+//                return rechargeAIPay(rechargeRecords, resultMap,channel);
+//            case 29:
+//                // WePay
+//                return rechargeWePay(rechargeRecords, resultMap,channel);
+//            case 32:
+//                // CloudPay支付
+//                return rechargeGalaxy(rechargeRecords,resultMap,channel,1);
+//            case 35:
+//                // LetsPay支付
+//                return rechargeLetsPay(rechargeRecords,resultMap,channel);
+//            case 38:
+//                // 银河系统MHDPay
+//                return rechargeGalaxy(rechargeRecords,resultMap,channel,2);
+//            case 49:
+//                // BPay
+//                return rechargeBPay(rechargeRecords,resultMap,channel);
+//            case 52:
+//                // GlobalPay
+//                return rechargeGlobalPay(rechargeRecords,resultMap,channel);
         }
     }
 
@@ -701,14 +703,15 @@ public class RechargeDockingController extends BaseController implements ConstSh
             return json(resultMap, "Recharge application failed", 1);
         }
     }
-
+    @Resource
+    private OmoPay omoPay;
     /**
      * Omo支付逻辑
      */
     private AjaxResult rechargeOmo(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
         JSONObject jsonObject;
         String response;
-        response = OmoPayUtils.recharge(rechargeRecords,channel);
+        response = OmoPayUtils.recharge(rechargeRecords,omoPay);
         LOGGER.error(response);
         if (response.equals("")) {
             return json(resultMap, "Recharge application failed", 1);
