@@ -27,13 +27,15 @@ public class GameConfValidator extends BladeValidator {
         // 判断排序是否重复
         // 类型
         int type = Integer.parseInt(request.getParameter("gameconf.type"));
-        // 类型中的排序
-        int typeSort = Integer.parseInt(request.getParameter("gameconf.typeSort"));
+        // 排序
+        int sort = Integer.parseInt(request.getParameter("gameconf.sort"));
         //
         if (parameter==null){
-            validateSortIsRepeat(clientType,type,typeSort);
+            // 添加时
+            validateSortIsRepeat(clientType,type,sort);
         }else {
-            validateSortIsRepeat(clientType,type,typeSort,Integer.parseInt(parameter));
+            // 修改时
+            validateSortIsRepeat(clientType,type,sort,Integer.parseInt(parameter));
         }
 
     }
@@ -60,10 +62,10 @@ public class GameConfValidator extends BladeValidator {
             addError("游戏类型中的排序重复");
         }
     }
-    private void validateSortIsRepeat(int clientType,int Type,int typeSort,Integer id){
+    private void validateSortIsRepeat(int clientType,int Type,int sort,Integer id){
         // 判断类型中的排序是否重复
-        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and typeSort=#{typeSort} and id!=#{id}",
-                CMap.init().set("type", Type).set("typeSort",typeSort).set("clientType",clientType).set("id",id));
+        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and sort=#{sort} and id!=#{id}",
+                CMap.init().set("type", Type).set("sort",sort).set("clientType",clientType).set("id",id));
         if (temp>0){
             addError("游戏类型中的排序重复");
         }

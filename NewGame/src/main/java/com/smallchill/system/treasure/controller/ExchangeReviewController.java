@@ -163,278 +163,44 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
             exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
             RechargeExchangeCommon.exc(exchangeReview,channel);
-            JSONObject respJson;
-            int code;
-            int status;
-            String statusStr;
             // 判断是哪个渠道
             switch (pid) {
                 case 1:
-                    // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
-                    response = RarPayUtils.sendExchangeRar(exchangeReview,channel,rarPay);
-                    // rarp      Gcash account format error   SIGN_ERROR
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("服务异常，修改失败");
-                    }
-                    // 获取平台订单号
-                    respJson = JSONObject.parseObject(response);
-                    code = respJson.getIntValue("code");
-                    // 同步请求状态为0代表请求失败，订单变成失败
-                    if (code == 0) {
-                        exchangeReview.setMsg(respJson.getString("msg"));
-                        // 支付失败
-                        exchangeReview.setStatus(6);
-                    } else {
-                        status = respJson.getJSONObject("data").getIntValue("status");
-                        // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
-                        if (status == 0) {
-                            // 未支付，将订单状态设置为待支付
-                            exchangeReview.setStatus(1);
-                        } else if (status == 10) {
-                            // 支付中，将订单状态设置为待支付
-                            exchangeReview.setStatus(1);
-                        } else if (status == 20) {
-                            // 支付成功，将订单状态设置为已完成
-                            exchangeReview.setStatus(4);
-                        } else if (status == 30) {
-                            // 支付失败，将订单状态设置为支付失败
-                            exchangeReview.setStatus(6);
-                        }
-                    }
+                    if (RarPayExchange(exchangeReview, channel)) return error("服务异常，修改失败");
                     break;
                 case 4:
-                    response = SafePayUtils.exchange(exchangeReview, channel);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("服务异常，修改失败");
-                    }
-                    // 获取平台订单号
-                    respJson = JSONObject.parseObject(response);
-                    statusStr = respJson.getString("status");
-                    if ("success".equals(statusStr)) {
-                        // 申请成功，需要等待三方回调才能知道最终结果
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 获取三方反馈
-                        exchangeReview.setMsg(respJson.getString("status_mes"));
-                        // 申请失败，将订单状态设置为支付失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (SafePayExchange(exchangeReview, channel)) return error("服务异常，修改失败");
                     break;
                 case 20:
-                    response = MetaPayUtils.exchange(exchangeReview,channel);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    // 获取平台订单号
-                    respJson = JSONObject.parseObject(response);
-                    // 获取请求状态
-                    code = respJson.getIntValue("platRespCode");
-                    if (code == 0) {
-                        // 请求成功, 获取平台订单号
-                        String PfOrderNum = respJson.getString("transId");
-                        exchangeReview.setPfOrderNum(PfOrderNum);
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("msg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (MetaPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 23:
-                    // omom 请求的金额必须是整数这里进行处理
-                    exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
-                    response = OmoPayUtils.exchange(exchangeReview,channel);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    // 获取平台订单号
-                    respJson = JSONObject.parseObject(response);
-                    statusStr = respJson.getString("status");
-                    if ("success".equals(statusStr)) {
-                        // 请求成功, 获取平台订单号
-                        String PfOrderNum = respJson.getString("transaction_id");
-                        exchangeReview.setPfOrderNum(PfOrderNum);
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("msg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (OmoPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 26:
-                    response = AIPayUtils.exchange(exchangeReview,aiPay,channel);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    code = respJson.getIntValue("code");
-                    if (code == 0) {
-                        // 请求成功, 获取平台订单号
-                        String PfOrderNum = respJson.getJSONObject("data").getString("payoutId");
-                        exchangeReview.setPfOrderNum(PfOrderNum);
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("error"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (AIPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 29:
-                    response = WePayUtils.exchange(exchangeReview,channel);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    String result = respJson.getString("respCode");
-                    if ("SUCCESS".equals(result)) {
-                        // 请求成功 ,获取平台订单号
-                        String PfOrderNum = respJson.getString("tradeNo");
-                        exchangeReview.setPfOrderNum(PfOrderNum);
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("errorMsg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (WePayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 32:
-                    response = CloudPayUtils.exchange(exchangeReview,cloudPay);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    status = respJson.getIntValue("status");
-                    // 成功
-                    if (status == 1) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("message"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (CloudPayExchange(exchangeReview)) return error("fail");
                     break;
                 case 35:
-                    String channelName = channel.get("channelName").toString();
-                    Map<String, String> param;
-                    if ("super".equals(channelName)){
-                        param = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>(){});
-                    }else {
-                        param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
-                    }
-                    response = PayPlusUtils.exchange(exchangeReview,channel,param);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    String retCode = respJson.getString("retCode");
-                    // 成功
-                    if ("SUCCESS".equals(retCode)) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                        // 获取平台订单号
-                        String platOrder = respJson.getString("platOrder");
-                        exchangeReview.setPfOrderNum(platOrder);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("retMsg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (PayPlusExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 38:
-                    response = MhdPayUtils.exchange(exchangeReview,mhdPay);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    status = respJson.getIntValue("status");
-                    // 成功
-                    if (status == 1) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("message"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (MhdPayExchange(exchangeReview)) return error("fail");
                     break;
-                case 43:
-                    response = LuckyPayUtils.sendExchangeLuckyPay(exchangeReview,luckPay);
-                    LOGGER.error(response);
-                    if ("".equals(response)) {
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    statusStr = respJson.getString("code");
-                    // 成功
-                    if ("00".equals(statusStr)) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                        String sysOrderNo = respJson.getString("sysOrderNo");
-                        exchangeReview.setPfOrderNum(sysOrderNo);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("msg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
-                    break;
+//                case 43:
+//                    if (LuckPayExchange(exchangeReview)) return error("fail");
+//                    break;
                 case 49:
-                    response = BPayUtils.sendExchangeBPay(exchangeReview, channel, bPay);
-                    if ("".equals(response)){
-                        return error("fail");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    statusStr = respJson.getString("code");
-                    // 成功
-                    if ("200".equals(statusStr)) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                        String sysOrderNo = respJson.getJSONObject("data").getString("orderNo");
-                        exchangeReview.setPfOrderNum(sysOrderNo);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("message"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (BPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 52:
                     //GlobalPay
-                    response = GlobalPayUtils.sendExchange(exchangeReview, channel, globalPay);
-                    if ("".equals(response)){
-                        return error("faila");
-                    }
-                    respJson = JSONObject.parseObject(response);
-                    statusStr = respJson.getString("code");
-                    // 成功
-                    if ("10000".equals(statusStr)) {
-                        // 请求成功 ,获取平台订单号
-                        exchangeReview.setStatus(1);
-                        String sysOrderNo = respJson.getString("outTradeNo");
-                        exchangeReview.setPfOrderNum(sysOrderNo);
-                    } else {
-                        // 请求失败, 存储失败原因
-                        exchangeReview.setMsg(respJson.getString("msg"));
-                        // 将状态设置为失败
-                        exchangeReview.setStatus(6);
-                    }
+                    if (GlobalPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 default:
                     break;
@@ -478,6 +244,307 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             return error(UPDATE_FAIL_MSG);
         }
     }
+
+    private boolean GlobalPayExchange(ExchangeReview exchangeReview, Map channel) {
+        String response = GlobalPayUtils.sendExchange(exchangeReview, channel, globalPay);
+        if ("".equals(response)){
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String statusStr = respJson.getString("code");
+        // 成功
+        if ("10000".equals(statusStr)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            String sysOrderNo = respJson.getString("outTradeNo");
+            exchangeReview.setPfOrderNum(sysOrderNo);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean BPayExchange(ExchangeReview exchangeReview, Map channel) {
+
+        String response = BPayUtils.sendExchangeBPay(exchangeReview, channel, bPay);
+        if ("".equals(response)){
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String code = respJson.getString("code");
+        // 成功
+        if ("200".equals(code)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            String sysOrderNo = respJson.getJSONObject("data").getString("orderNo");
+            exchangeReview.setPfOrderNum(sysOrderNo);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean LuckPayExchange(ExchangeReview exchangeReview) {
+
+        String response = LuckyPayUtils.sendExchangeLuckyPay(exchangeReview,luckPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String code = respJson.getString("code");
+        // 成功
+        if ("00".equals(code)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            String sysOrderNo = respJson.getString("sysOrderNo");
+            exchangeReview.setPfOrderNum(sysOrderNo);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean MhdPayExchange(ExchangeReview exchangeReview) {
+
+        String response = MhdPayUtils.exchange(exchangeReview,mhdPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int status = respJson.getIntValue("status");
+        // 成功
+        if (status == 1) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean PayPlusExchange(ExchangeReview exchangeReview, Map channel) {
+        String channelName = channel.get("channelName").toString();
+        Map<String, String> param;
+        if ("super".equals(channelName)){
+            param = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>(){});
+        }else {
+            param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
+        }
+        String response = PayPlusUtils.exchange(exchangeReview, channel,param);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String retCode = respJson.getString("retCode");
+        // 成功
+        if ("SUCCESS".equals(retCode)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            // 获取平台订单号
+            String platOrder = respJson.getString("platOrder");
+            exchangeReview.setPfOrderNum(platOrder);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("retMsg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean CloudPayExchange(ExchangeReview exchangeReview) {
+
+        String response = CloudPayUtils.exchange(exchangeReview,cloudPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int status = respJson.getIntValue("status");
+        // 成功
+        if (status == 1) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean WePayExchange(ExchangeReview exchangeReview, Map channel) {
+
+        String response = WePayUtils.exchange(exchangeReview, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String result = respJson.getString("respCode");
+        if ("SUCCESS".equals(result)) {
+            // 请求成功 ,获取平台订单号
+            String PfOrderNum = respJson.getString("tradeNo");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("errorMsg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean AIPayExchange(ExchangeReview exchangeReview, Map channel) {
+
+        String response = AIPayUtils.exchange(exchangeReview,aiPay, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int code = respJson.getIntValue("code");
+        if (code == 0) {
+            // 请求成功, 获取平台订单号
+            String PfOrderNum = respJson.getJSONObject("data").getString("payoutId");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("error"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean OmoPayExchange(ExchangeReview exchangeReview, Map channel) {
+
+        // omom 请求的金额必须是整数这里进行处理
+        exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
+        String response = OmoPayUtils.exchange(exchangeReview, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        String statusStr = respJson.getString("status");
+        if ("success".equals(statusStr)) {
+            // 请求成功, 获取平台订单号
+            String PfOrderNum = respJson.getString("transaction_id");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean MetaPayExchange(ExchangeReview exchangeReview, Map channel) {
+
+        String response = MetaPayUtils.exchange(exchangeReview, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        // 获取请求状态
+        int code = respJson.getIntValue("platRespCode");
+        if (code == 0) {
+            // 请求成功, 获取平台订单号
+            String PfOrderNum = respJson.getString("transId");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean SafePayExchange(ExchangeReview exchangeReview, Map channel) {
+
+
+        String response = SafePayUtils.exchange(exchangeReview, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        String status = respJson.getString("status");
+        if ("success".equals(status)) {
+            // 申请成功，需要等待三方回调才能知道最终结果
+            exchangeReview.setStatus(1);
+        } else {
+            // 获取三方反馈
+            exchangeReview.setMsg(respJson.getString("status_mes"));
+            // 申请失败，将订单状态设置为支付失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean RarPayExchange(ExchangeReview exchangeReview, Map channel) {
+        // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
+        String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
+        // rarp      Gcash account format error   SIGN_ERROR
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        int code = respJson.getIntValue("code");
+        // 同步请求状态为0代表请求失败，订单变成失败
+        if (code == 0) {
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 支付失败
+            exchangeReview.setStatus(6);
+        } else {
+            int status = respJson.getJSONObject("data").getIntValue("status");
+            // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
+            if (status == 0) {
+                // 未支付，将订单状态设置为待支付
+                exchangeReview.setStatus(1);
+            } else if (status == 10) {
+                // 支付中，将订单状态设置为待支付
+                exchangeReview.setStatus(1);
+            } else if (status == 20) {
+                // 支付成功，将订单状态设置为已完成
+                exchangeReview.setStatus(4);
+            } else if (status == 30) {
+                // 支付失败，将订单状态设置为支付失败
+                exchangeReview.setStatus(6);
+            }
+        }
+        return false;
+    }
+
     // 查询用户金币
     private String getGold(Map<String, Object> userMap) {
         Map feeMap = commonService.getInfoByOne("db_Shop_Prop_UserProp.getGold", userMap);

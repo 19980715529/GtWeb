@@ -120,7 +120,6 @@ public class UsdtRechargeController extends BaseController implements ConstShiro
         }
         // 获取到充值的金钱
         Map channel = Db.selectOne("select * from Channel where id=#{id}", CMap.init().set("id",18));
-        records.setNickname(user.get("NickName").toString());
         // 订单设置为待支付
         records.setOrderStatus(1);
         String orderNum = Utils.getOrderNum(records.getUserId());

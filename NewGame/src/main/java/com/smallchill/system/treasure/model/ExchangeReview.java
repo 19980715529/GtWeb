@@ -30,11 +30,9 @@ public class ExchangeReview extends BaseModel {
     private Integer channelId; // 支付渠道id
     private Date createTime; // 创建时间
     private Date endTime; // 完成时间
-    private String nickname; //玩家昵称
     private BigDecimal money; //发送的第三方的钱
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
-    private String tipsName;
 
 
     public String getMsg() {
@@ -61,13 +59,6 @@ public class ExchangeReview extends BaseModel {
         this.money = money;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
 
     public Integer getId() {
         return id;
@@ -211,12 +202,5 @@ public class ExchangeReview extends BaseModel {
 
     public void setPfOrderNum(String pfOrderNum) {
         this.pfOrderNum = pfOrderNum;
-    }
-
-    public String getTipsName() {
-        return tipsName;
-    }
-    public void setTipsName(String tipsName) {
-        this.tipsName = tipsName;
     }
 }

@@ -31,7 +31,6 @@ public class RechargeRecords extends BaseModel implements Delayed {
     private String pfOrderNum; // 平台订单号
     private String urlPay; // 充值路径
     private Integer isFirstCharge; // 是否首充
-    private String nickname; //玩家昵称
     private Integer channelPid; // 用于统计不同商家的订单情况
     private Integer isThatTay; // 是否是注册当天充值
     private String msg;  // 三方反馈信息
@@ -81,13 +80,6 @@ public class RechargeRecords extends BaseModel implements Delayed {
     private Date afterDate = new Date(createTime.getTime() + 900000);
 
 
-    public String getNickname() {
-        return nickname;
-    }
-
-    public void setNickname(String nickname) {
-        this.nickname = nickname;
-    }
 
     public Integer getIsFirstCharge() {
         return isFirstCharge;

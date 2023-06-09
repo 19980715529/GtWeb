@@ -132,8 +132,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
             case 1:
                 // RARP
                 return rechargeRar(rechargeRecords, resultMap, channel);
-            case 2:
-                return rechargeLuckyPay(rechargeRecords,resultMap,channel);
             case 4:
                 // safe
                 return rechargeSafe(rechargeRecords, resultMap, channel);
@@ -203,11 +201,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
         if ("".equals(phone)){
             return fail("You need to bind your cell phone first");
         }
-        // 获取用户提示
-        exchangeReview.setTipsName(user.get("tipsName").toString());
         // 用户来源平台
         exchangeReview.setSourcePlatform(Integer.parseInt(user.get("ClientType").toString()));
-        exchangeReview.setNickname(String.valueOf(user.get("NickName")));
         Map<String, Object> resultMap = new HashMap<>();
 //        Map channel = commonService.getInfoByOne("recharge_channel.find_one_channel", exchangeReview);
         Map channel = commonService.getInfoByOne("channel_list.param_max",
