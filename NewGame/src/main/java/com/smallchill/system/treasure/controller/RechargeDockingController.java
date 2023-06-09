@@ -133,9 +133,9 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // RARP
                 return rechargeRar(rechargeRecords, resultMap, channel);
             case 2:
-                return rechargeLuckyPay(rechargeRecords,resultMap,channel);
-            case 3:
                 return rechargeOmo(rechargeRecords,resultMap,channel);
+            case 3:
+                return rechargeLuckyPay(rechargeRecords,resultMap,channel);
             default:
                 return json(resultMap,"Recharge application failed",1);
 //            case 4:
@@ -205,11 +205,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
         if ("".equals(phone)){
             return fail("You need to bind your cell phone first");
         }
-        // 获取用户提示
-        exchangeReview.setTipsName(user.get("tipsName").toString());
         // 用户来源平台
         exchangeReview.setSourcePlatform(Integer.parseInt(user.get("ClientType").toString()));
-        exchangeReview.setNickname(String.valueOf(user.get("NickName")));
         Map<String, Object> resultMap = new HashMap<>();
 //        Map channel = commonService.getInfoByOne("recharge_channel.find_one_channel", exchangeReview);
         Map channel = commonService.getInfoByOne("channel_list.param_max",
@@ -499,24 +496,20 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * @return
      */
     private AjaxResult rechargeLuckyPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
-        String code;
-        String PfOrderNum;
-        String response;
-        JSONObject jsonObject;
-        response = LuckyPayUtils.sendRechargeLuckyPay(rechargeRecords,luckPay);
+        String response = LuckyPayUtils.sendRechargeLuckyPay(rechargeRecords,luckPay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }
-        jsonObject = JSON.parseObject(response);
-        code = jsonObject.getString("code");
+        JSONObject jsonObject = JSON.parseObject(response);
+        String code = jsonObject.getString("code");
         if ("00".equals(code)) {
             // 获取支付链接
             String payUrl = jsonObject.getString("backUrl");
             resultMap.put("urlPay", payUrl);
             rechargeRecords.setUrlPay(payUrl);
             // 设置平台订单号
-            PfOrderNum = jsonObject.getString("sysOrderNo");
+            String PfOrderNum = jsonObject.getString("sysOrderNo");
             rechargeRecords.setPfOrderNum(PfOrderNum);
             // 将订单加入到未支付队列中
             GlobalDelayQueue.orderQueue.add(rechargeRecords);
@@ -533,8 +526,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * LetsPay充值逻辑
      */
     private AjaxResult rechargeLetsPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
-        JSONObject jsonObject;
-        String response;
+
         String channelName = channel.get("channelName").toString();
         Map<String, String> param;
         if ("super".equals(channelName)){
@@ -542,12 +534,12 @@ public class RechargeDockingController extends BaseController implements ConstSh
         }else {
             param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
         }
-        response = PayPlusUtils.recharge(rechargeRecords,channel,param);
+        String response = PayPlusUtils.recharge(rechargeRecords,channel,param);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }
-        jsonObject = JSON.parseObject(response);
+        JSONObject jsonObject = JSON.parseObject(response);
         String retCode = jsonObject.getString("retCode");
         // 1：成功，0:失败
         if ("SUCCESS".equals(retCode)) {

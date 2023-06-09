@@ -1,9 +1,9 @@
 all_list
 ===
-    select * FROM [RYPlatformManagerDB].[dbo].[Exchange_review]
+    select a.*,b.NickName nickname FROM [RYPlatformManagerDB].[dbo].[Exchange_review] as a join QPGameUserDB.dbo.AccountsInfo as b on a.userId=b.UserID
     where (status = 4 or status = 3)
     @if(!isEmpty(userId)){
-        and userId=#{userId}
+        and a.userId=#{userId}
     @}
     @if(!isEmpty(orderNum)){
         and orderNumber=#{orderNum}

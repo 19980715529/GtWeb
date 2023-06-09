@@ -254,8 +254,6 @@ public class RechargeExchangeCommon {
             rechargeRecords.setPhone(phone);
         }
         rechargeRecords.setPackageName(Integer.valueOf(user.get("ClientType").toString()));
-        // 用户昵称
-        rechargeRecords.setNickname(String.valueOf(user.get("NickName")));
 //        Map channel = commonService.getInfoByOne("recharge_channel.one_channel", CMap.init().set("id",channelId));
         Map channel = commonService.getInfoByOne("channel_list.recharge_one",
                 CMap.init().set("id",channelId));

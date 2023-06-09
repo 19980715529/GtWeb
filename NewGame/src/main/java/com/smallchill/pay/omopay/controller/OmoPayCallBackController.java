@@ -10,6 +10,7 @@ import com.smallchill.pay.omopay.model.OmoPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +32,7 @@ public class OmoPayCallBackController extends BaseController implements ConstShi
     /**
      * OMOM 充值回调
      */
-    @PostMapping(value = "/recharge",consumes = "application/json")
+    @PostMapping(value = "/recharge",consumes = "application/json",produces = MediaType.TEXT_PLAIN_VALUE)
     public String recharge(@RequestBody Map<String,Object> param){
         // 验证签名
         if (param==null){
@@ -70,7 +71,7 @@ public class OmoPayCallBackController extends BaseController implements ConstShi
     /**
      * OMOM 兑换回调
      */
-    @PostMapping(value = "/exchange",consumes = "application/json")
+    @PostMapping(value = "/exchange",consumes = "application/json",produces = MediaType.TEXT_PLAIN_VALUE)
     public String exchange(@RequestBody Map<String,Object> param){
         if (param==null){
             return "fail";

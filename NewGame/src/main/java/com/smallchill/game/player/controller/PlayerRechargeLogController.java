@@ -2,7 +2,9 @@ package com.smallchill.game.player.controller;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
@@ -140,9 +142,25 @@ public class PlayerRechargeLogController extends BaseController implements Const
 		}
 		// 新增充值人数，新增充值金额
 		jsonObject.put("recType",1);
-		Map a = commonService.getInfoByOne("player_recharge_log1.query_list",jsonObject);
-		map.put("TotalNewRecMoney",a.get("TotalRecMoney"));
-		map.put("TotalNewRecUserNum",a.get("TotalRecUserNum"));
+		// 获取满足条件的所有用户
+		List<Map> userMaps = commonService.getInfoList("player_recharge_log1.query_new_user", jsonObject);
+		ArrayList<Integer> users = new ArrayList<>();
+		if (userMaps.size()>0){
+			for (Map<String,Integer> m:userMaps){
+				users.add(m.get("userId"));
+			}
+			jsonObject.put("users", users);
+			Map a = commonService.getInfoByOne("player_recharge_log1.query_new_list",jsonObject);
+			// 新增充值金额
+			map.put("TotalNewRecMoney",a.get("TotalRecMoney"));
+			// 新增充值人数
+			map.put("TotalNewRecUserNum",a.get("TotalRecUserNum"));
+		}else {
+			// 新增充值金额
+			map.put("TotalNewRecMoney",0);
+			// 新增充值人数
+			map.put("TotalNewRecUserNum",0);
+		}
 		// 兑换总额 recType
 		Map e = commonService.getInfoByOne("player_recharge_log1.query_exc_list",jsonObject);
 		BigDecimal totalExcMoney = new BigDecimal(e.get("TotalNewExcMoney").toString());

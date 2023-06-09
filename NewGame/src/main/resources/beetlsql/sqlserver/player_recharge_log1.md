@@ -1,6 +1,7 @@
 new_recharge_log
 ===
-	select * from [RYPlatformManagerDB].[dbo].[Recharge_records] as r where orderStatus=2
+	select r.*,b.NickName nickname from [RYPlatformManagerDB].[dbo].[Recharge_records] as r 
+    join [QPGameUserDB].dbo.AccountsInfo as b on r.userId=b.UserID where orderStatus=2 
     @if(!isEmpty(UserID)){
 	 and r.userId =#{UserID}
 	@}
@@ -119,11 +120,11 @@ all_recharges
 
 recharge_unstatistics
 ===
-	SELECT [createTime] ,[orderNumber] ,[userId] ,[nickname],[topUpAmount] ,[gold],[orderStatus],[packageName],[channel],[channel_type],[endTime],[msg]
-	FROM [RYPlatformManagerDB].[dbo].[Recharge_records]
+	SELECT [createTime] ,[orderNumber] ,a.userId ,b.NickName nickname,[topUpAmount] ,[gold],[orderStatus],[packageName],[channel],[channel_type],[endTime],[msg]
+	FROM [RYPlatformManagerDB].[dbo].[Recharge_records] as a join QPGameUserDB.dbo.AccountsInfo as b on a.userId=b.UserID
 	where 1=1
 	@if(!isEmpty(UserID)){
-    	 and userId =#{UserID}
+    	 and a.userId =#{UserID}
     @}
     @if(!isEmpty(clientType)){
     	 and packageName =#{clientType}
@@ -200,3 +201,57 @@ query_exc_list
 	@if(!isEmpty(createTime)){
         and DATEDIFF(DAY,createTime,#{endTime})>=0
 	@}
+
+
+
+query_new_user
+===
+    select distinct userId from [RYPlatformManagerDB].[dbo].[Recharge_records] as r where orderStatus=2 AND isThatTay=1
+    @if(!isEmpty(UserID)){
+        and r.userId =#{UserID}
+    @}
+    @if(!isEmpty(ChannelID)){
+        and r.channelPid =#{ChannelID}
+    @}
+    @if(!isEmpty(moneyMin)){
+        and r.topUpAmount >=#{moneyMin}
+    @}
+    @if(!isEmpty(moneyMax)){
+        and r.topUpAmount <=#{moneyMax}
+    @}
+    @if(!isEmpty(clientType)){
+        and r.packageName=#{clientType}
+    @}
+    @if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{createTime})<=0
+    @}
+    @if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{endTime})>=0
+    @}
+
+
+query_new_list
+===
+    select isnull(SUM([topUpAmount]),0) as TotalRecMoney,count(distinct userId) as TotalRecUserNum,count(1) as TotalRecNum
+    from [RYPlatformManagerDB].[dbo].[Recharge_records] as r where orderStatus=2 and userId in (#{join(users)})
+    @if(!isEmpty(UserID)){
+        and r.userId =#{UserID}
+    @}
+    @if(!isEmpty(ChannelID)){
+        and r.channelPid =#{ChannelID}
+    @}
+    @if(!isEmpty(moneyMin)){
+        and r.topUpAmount >=#{moneyMin}
+    @}
+    @if(!isEmpty(moneyMax)){
+        and r.topUpAmount <=#{moneyMax}
+    @}
+    @if(!isEmpty(clientType)){
+        and r.packageName=#{clientType}
+    @}
+    @if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{createTime})<=0
+    @}
+    @if(!isEmpty(createTime)){
+        and DATEDIFF(DAY,createTime,#{endTime})>=0
+    @}

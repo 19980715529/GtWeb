@@ -93,6 +93,7 @@ public class Accountsinfo extends BaseModel {
 	private String LastLoginMachine;
 	private Integer iswarehouse ;
 	private Integer isDrain;
+	private String Email;
 	@JSONField (format="yyyy-MM-dd HH:mm:ss")
 	private Date firstenterhalltime ;
 	@JSONField (format="yyyy-MM-dd HH:mm:ss")
@@ -841,5 +842,13 @@ public class Accountsinfo extends BaseModel {
 	}
 	public void setLimitsend(Integer limitsend) {
 		this.limitsend = limitsend;
+	}
+
+	public String getEmail() {
+		return Email;
+	}
+
+	public void setEmail(String email) {
+		Email = email;
 	}
 }

@@ -13,11 +13,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-
-import static com.smallchill.core.constant.ConstKey.LUCKYPAY_APPID;
-import static com.smallchill.core.constant.ConstKey.PUBLIC_LUCKYPAY_KEY;
 import static com.smallchill.core.constant.ConstUrl.*;
-import static com.smallchill.core.constant.ConstUrl.EXCHANGE_LUCKYPAY_URL;
 
 public class LuckyPayUtils {
     private static final Logger LOGGER = LogManager.getLogger(LuckyPayUtils.class);
