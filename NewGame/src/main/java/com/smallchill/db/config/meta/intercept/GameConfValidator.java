@@ -28,12 +28,12 @@ public class GameConfValidator extends BladeValidator {
         // 类型
         int type = Integer.parseInt(request.getParameter("gameconf.type"));
         // 类型中的排序
-        int typeSort = Integer.parseInt(request.getParameter("gameconf.typeSort"));
+        int sort = Integer.parseInt(request.getParameter("gameconf.sort"));
         //
         if (parameter==null){
-            validateSortIsRepeat(clientType,type,typeSort);
+            validateSortIsRepeat(clientType,type,sort);
         }else {
-            validateSortIsRepeat(clientType,type,typeSort,Integer.parseInt(parameter));
+            validateSortIsRepeat(clientType,type,sort,Integer.parseInt(parameter));
         }
 
     }
@@ -54,16 +54,16 @@ public class GameConfValidator extends BladeValidator {
      */
     private void validateSortIsRepeat(int clientType,int Type,int typeSort){
         // 判断类型中的排序是否重复
-        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and typeSort=#{typeSort}",
-                CMap.init().set("type", Type).set("typeSort",typeSort).set("clientType",clientType));
+        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and sort=#{sort}",
+                CMap.init().set("type", Type).set("sort",typeSort).set("clientType",clientType));
         if (temp>0){
             addError("游戏类型中的排序重复");
         }
     }
-    private void validateSortIsRepeat(int clientType,int Type,int typeSort,Integer id){
+    private void validateSortIsRepeat(int clientType,int Type,int sort,Integer id){
         // 判断类型中的排序是否重复
-        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and typeSort=#{typeSort} and id!=#{id}",
-                CMap.init().set("type", Type).set("typeSort",typeSort).set("clientType",clientType).set("id",id));
+        Integer temp = Db.queryInt("select count(1) from game_conf where clientType=#{clientType} and type=#{type} and sort=#{sort} and id!=#{id}",
+                CMap.init().set("type", Type).set("sort",sort).set("clientType",clientType).set("id",id));
         if (temp>0){
             addError("游戏类型中的排序重复");
         }
