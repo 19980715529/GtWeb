@@ -87,6 +87,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
     @Resource
     private AIPay aiPay;
 
+    @Resource
+    private OmoPay omoPay;
     /**
      * 需要的参数
      * recharge.isFirstCharge:0普通充值，1首充，2随机充值
@@ -695,8 +697,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             return json(resultMap, "Recharge application failed", 1);
         }
     }
-    @Resource
-    private OmoPay omoPay;
+
     /**
      * Omo支付逻辑
      */
