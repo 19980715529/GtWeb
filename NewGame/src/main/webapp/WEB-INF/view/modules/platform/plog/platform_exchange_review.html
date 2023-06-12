@@ -15,7 +15,8 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames=["id","发起时间", "订单号","兑换进度","用户id","备注","商户反馈","昵称","账户","持卡人信息","小渠道","大渠道","来源平台","兑换金额","消耗金币","消耗打码量","反馈","操作管理员","用户电话号"];
+        var _colnames=["id","发起时间", "订单号","兑换进度","用户id","备注","商户反馈","兑换金额","小渠道","大渠道","反馈","来源平台","账号","持卡人信息",
+            "昵称","消耗金币","消耗打码量","用户电话号","操作管理员"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -24,19 +25,28 @@
             {name:"status",  sortable:false,formatter:rowShow},
             {name:"userId", sortable:false,formatter:genLink},
             {name:"tipsName", sortable:false},
+            // 商户反馈
             {name:"msg", sortable:false},
-            {name:"nickname", sortable:false,formatter:genLink},
-            {name:"bankNumber",sortable:false},
-            {name:"cardholder", sortable:false},
-            {name:"channel", sortable:false},
-            {name:"channelName", sortable:false},
-            {name:"sourcePlatform", sortable:false},
+            // 兑换金额
             {name:"amount",  sortable:false},
+            // 小渠道
+            {name:"channel", sortable:false},
+            // 大渠道
+            {name:"channelName", sortable:false},
+            // 反馈
+            {name:"feedback", sortable:false},
+            // 来源平台
+            {name:"sourcePlatform", sortable:false},
+            // 账号
+            {name:"bankNumber",sortable:false},
+            // 持卡人
+            {name:"cardholder", sortable:false},
+            {name:"nickname", sortable:false,formatter:genLink},
             {name:"gold",  sortable:false},
             {name:"consumptionCode", sortable:false},
-            {name:"feedback", sortable:false},
-            {name:"operator", sortable:false},
-            {name:"phone", sortable:false}
+            // 电话号
+            {name:"phone", sortable:false},
+            {name:"operator", sortable:false}
         ];
 
 

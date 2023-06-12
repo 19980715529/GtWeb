@@ -13,22 +13,23 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames=["发起时间", "订单号","兑换进度","用户id","昵称","用户账号","持卡人信息","来源平台","兑换金额","消耗金币","消耗打码量","结束时间","操作管理员","用户电话号"];
+        var _colnames=["发起时间", "订单号","兑换进度","用户id","兑换金额","持卡人信息","昵称","来源平台","用户账号","消耗金币","消耗打码量","结束时间","用户电话号","操作管理员"];
         var _colmodel=[
             {name:"createTime",sortable:false},
             {name:"orderNumber", sortable:false},
             {name:"status",  sortable:false,formatter:rowShow},
             {name:"userId", sortable:false,formatter:genLink},
-            {name:"nickname", sortable:false,formatter:genLink},
-            {name:"bankNumber",sortable:false},
-            {name:"cardholder", sortable:false},
-            {name:"sourcePlatform", sortable:false},
             {name:"amount",  sortable:false},
+            {name:"cardholder", sortable:false},
+            {name:"nickname", sortable:false,formatter:genLink},
+            {name:"sourcePlatform", sortable:false},
+            {name:"bankNumber",sortable:false},
+            // 消耗金币
             {name:"gold",  sortable:false},
             {name:"consumptionCode", sortable:false},
             {name:"endTime",  sortable:false},
-            {name:"operator", sortable:false},
-            {name:"phone", sortable:false}
+            {name:"phone", sortable:false},
+            {name:"operator", sortable:false}
         ];
 
         var objToal = {

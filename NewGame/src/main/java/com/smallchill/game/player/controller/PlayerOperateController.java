@@ -887,7 +887,7 @@ public class PlayerOperateController extends BaseController implements ConstShir
 		// 判断用户是否绑定手机
 		if ("".equals(user.get("bindPhone").toString())){
 			// 执行存储过程
-			Integer integer = utils.SendBindPhoneEmail(mapping.getUserid(), mapping.getBindphone());
+			Integer integer = utils.SendBindPhoneEmail(mapping.getUserid(), mapping.getBindphone(),mapping.getEmail());
 			LOGGER.error("执行存储过程:"+integer);
 			if (integer==0){
 				return success("修改成功");

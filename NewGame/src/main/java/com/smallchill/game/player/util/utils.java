@@ -16,14 +16,16 @@ public class utils {
      * @szPhoneNum varchar(33), -- 手机号码
      * @szPassword varchar(33), -- 新密码
      * @szCode varchar(10) -- 邀请码
+     * @szEmail varchar(32),--邮件
+     * @szRealName varchar(100)
      * @return
      */
-    public static Integer SendBindPhoneEmail(Integer userId,String phone){
+    public static Integer SendBindPhoneEmail(Integer userId,String phone,String email){
         SQLManager dao = Blade.dao("gameuserdb");
         Integer re = dao.executeOnConnection(new OnConnection<Integer>() {
             @Override
             public Integer call(Connection connection) throws SQLException {
-                CallableStatement statement = connection.prepareCall("{?=call [QPGameUserDB].[dbo].[AA_Pro_UserInfo_BindPhone](?,?,?,?)}");
+                CallableStatement statement = connection.prepareCall("{?=call [QPGameUserDB].[dbo].[AA_Pro_UserInfo_BindPhone](?,?,?,?,?,?)}");
                 // 注册输出参数
                 statement.registerOutParameter(1, Types.INTEGER);
                 // 设置参数
@@ -31,6 +33,8 @@ public class utils {
                 statement.setString("szPhoneNum", phone);
                 statement.setString("szPassword", "e10adc3949ba59abbe56e057f20f883e");
                 statement.setString("szCode", "");
+                statement.setString("szEmail", email);
+                statement.setString("szRealName", "");
                 statement.execute();
                 return statement.getInt(1);
             }

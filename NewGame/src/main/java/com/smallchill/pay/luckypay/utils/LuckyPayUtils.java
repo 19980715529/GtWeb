@@ -25,7 +25,7 @@ public class LuckyPayUtils {
         String response;
         Map<String, Object> params = new HashMap();
         // 商户号
-        params.put("merNo", luckPay.method);
+        params.put("merNo", luckPay.merNo);
         // 订单号
         params.put("orderNo", rechargeRecords.getOrderNumber());
         // 通道

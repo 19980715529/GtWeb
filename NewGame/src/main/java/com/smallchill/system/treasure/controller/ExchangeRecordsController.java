@@ -42,7 +42,7 @@ public class ExchangeRecordsController extends BaseController implements ConstSh
     /*
     进入兑换记录界面
      */
-    @DoControllerLog(name="加入兑换界面")
+    @DoControllerLog(name="进入兑换界面")
     @RequestMapping("/")
     @Permission(ADMINISTRATOR)
     public String records(ModelMap mm){
