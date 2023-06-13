@@ -192,9 +192,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                 case 38:
                     if (MhdPayExchange(exchangeReview)) return error("fail");
                     break;
-//                case 43:
-//                    if (LuckPayExchange(exchangeReview)) return error("fail");
-//                    break;
                 case 49:
                     if (BPayExchange(exchangeReview, channel)) return error("fail");
                     break;

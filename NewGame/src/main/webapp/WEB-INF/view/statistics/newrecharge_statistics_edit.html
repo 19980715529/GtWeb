@@ -1,0 +1,22 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/newrecharge/update" method="post" class="form-horizontal" role="form">
+            <input type="hidden" name="newrecharge.id" value="${newrecharge.id}" readonly/>
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">投入成本: </td>
+                    <td><input type="text" name="newrecharge.deliveryCost" value="${newrecharge.deliveryCost}"/></td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

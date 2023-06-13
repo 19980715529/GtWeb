@@ -1,0 +1,201 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx = "${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var grid_data = [ ];
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+
+    $(function() {
+        backDom('新增充值统计','newrecharge');
+        initGrid();
+        initMenuBtn("btns","newrecharge");
+    });
+
+
+    function initGrid() {
+        var grid_url = ctx + "/newrecharge/list";//查询列表接口
+        var _colnames=["id","时间", "新增用户","注册人数","充值人数","新增充值人数","新增充值次数","新增充值总额","新增兑换人数","新增兑换总额","新增充提差","新增人均充值","付费成本","投放成本"];
+        var _colmodel=[
+            {name:"id",sortable:true,hidden:true},
+            {name:"createTime",sortable:true},
+            {name:"newUserNum", sortable:false},
+            // 注册
+            {name:"registerNum",  sortable:false},
+            // 充值人数
+            {name:"recUserNum", sortable:false},
+            // 新增充值人数
+            {name:"newRecUser", sortable:false},
+            // 新增充值次数
+            {name:"newRecNum", sortable:false},
+            // 新增充值金额
+            {name:"newRecAmount",  sortable:false},
+            // 新增兑换人数
+            {name:"newExcUser", sortable:false},
+            // 新增兑换金额
+            {name:"newExcAmount", sortable:false},
+            // 充提差
+            {name:"newRE", sortable:false},
+            // 人均充值
+            {name:"averageRecharge", sortable:false},
+            // 费用成本
+            {name:"cost",sortable:false},
+            // 投放成本
+            {name:"deliveryCost",sortable:false}
+            // {name:"clientType",sortable:false},
+        ];
+
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            autowidth: true,
+            shrinkToFit : false,//适用于较少字段,响应式
+            colNames : _colnames,
+            colModel : _colmodel,
+            postData : {where:_filter,sort: "createTime", order: "desc"},
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            multiselect : true, // 是否显示勾选框
+            rownumbers : true, // 是否出现排序
+            rowNum:100,
+            height: 'auto'
+        });
+    }
+
+</script>
+
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="" method="post" class="" role="form">
+            <!-- 配置查询 -->
+            <div class="">
+                <!-- 简单查询第一组 -->
+                <label class=""> 时间： </label>
+                <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
+                -
+                <input type="text" id="end_time" value="" class="" />
+                <label class=""> 包来源： </label>
+                <select id="clientType"></select>
+                <!-- 简单查询按钮 -->
+                <label class="">
+                    <button class="btn btn-sx btn-white" type="button" onclick="search()">查询</button>
+                    <button class="btn btn-sx btn-white" type="button" onclick="resetForm()">重置</button>
+                </label>
+            </div>
+        </form>
+        <!-- 按钮组 -->
+        <div class="welljq well-sm" id="btns"></div>
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script src="${ctxPath}/static/laydate/laydate.js"></script>
+<script type="text/javascript">
+    laydate({
+        elem : '#start_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        // max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+    laydate({
+        elem : '#end_time',
+        format : 'YYYY-MM-DD', // 分隔符可以任意定义，该例子表示只显示年月日
+        //festival: true, //显示节日
+        // max: laydate.now(-1),
+        choose : function(datas) { //选择日期完毕的回调
+            /*   alert('得到：'+datas); */
+        }
+    });
+
+    $(function(){
+        $('#start_time').val(getCurrentMonthFirst().format('yyyy-MM-dd'));
+        $('#end_time').val(getBeforeDate(0));
+    });
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="-1">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+    }).start();
+
+    function search() {
+        var wheres = {};
+        var start_time = $("#start_time").val();
+        var end_time = $("#end_time").val();
+        var clientType = $("#clientType").val()
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isEmpty(start_time)) {
+            layer_alert('请输入开始时间!', "warn");
+            return;
+        } else if(BladeTool.isNotEmpty(end_time)) {
+            wheres['EndTime'] = end_time;
+        }
+        if(BladeTool.isNotEmpty(start_time)) {
+            wheres['StartTime'] = start_time;
+            if(BladeTool.isEmpty(end_time)) {
+                wheres['EndTime'] = getBeforeDate(1);
+                $("#end_time").val(getBeforeDate(1));
+            }
+        }
+        start_time = $("#start_time").val();
+        end_time = $("#end_time").val();
+        if(BladeTool.isNotEmpty(end_time) && BladeTool.isNotEmpty(start_time)) {
+            if(start_time>end_time){
+                layer_alert('开始时间不能大于结束时间!', "warn");
+                return;
+            }
+        }
+        if(BladeTool.isNotEmpty(clientType)) {
+            wheres['clientType'] = clientType;
+        }
+
+        var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        var pageNum = $jqGrid.getGridParam('page');
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                where : where
+            },
+            page: (isAutoPage) ? pageNum : 1
+        }).trigger("reloadGrid");
+    }
+    function resetForm() {
+        $("input").val("");
+        $('#start_time').val(getCurrentMonthFirst().format('yyyy-MM-dd'));
+        $('#end_time').val(getBeforeDate(0));
+    }
+</script>
+
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}
