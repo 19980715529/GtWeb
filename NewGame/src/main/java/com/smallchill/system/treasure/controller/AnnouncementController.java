@@ -3,6 +3,7 @@ package com.smallchill.system.treasure.controller;
 import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.plugins.dao.Redis;
 import com.smallchill.core.toolbox.CMap;
@@ -11,6 +12,7 @@ import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.redis.IJedis;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.treasure.model.ChannelVo;
+import com.smallchill.system.treasure.model.RechargeGear;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.web.bind.annotation.*;
 
@@ -183,4 +185,12 @@ public class AnnouncementController extends BaseController implements ConstShiro
         }
         return json(channelVos);
     }
+
+    // 获取充值挡位
+    @GetMapping("/recharge/gear")
+    public AjaxResult getGear(){
+        List<Map> payChannel = Db.selectList("select * from Pay_RechargeGear order by sort");
+        return json(payChannel);
+    }
+
 }

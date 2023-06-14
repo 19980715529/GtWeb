@@ -14,15 +14,6 @@
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>
 	</servlet>
-<!--	<servlet>-->
-<!--		<servlet-name>event-collector</servlet-name>-->
-<!--		<servlet-class>com.smallchill.common.task.GlobalDelayQueue</servlet-class>-->
-<!--		<load-on-startup>60</load-on-startup>-->
-<!--	</servlet>-->
-<!--	<servlet-mapping>-->
-<!--		<servlet-name>event-collector</servlet-name>-->
-<!--		<url-pattern>/event-collect</url-pattern>-->
-<!--	</servlet-mapping>-->
 	<servlet-mapping>
 		<servlet-name>springmvc</servlet-name>
 		<url-pattern>/</url-pattern>
