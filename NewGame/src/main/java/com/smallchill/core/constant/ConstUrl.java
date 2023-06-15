@@ -136,10 +136,6 @@ public interface ConstUrl {
     /**
      * 银河系统充值地址 CloudPay
      */
-    String RECHARGE_CLOUDPAY_URL = "https://cloud.galaxy5588.com/api/transfer";
-    // 兑换地址
-    String EXCHANGE_CLOUDPAY_URL="https://cloud.galaxy5588.com/api/daifu";
-
     // GALAXY 充值回调地址
     String RECHARGE_GALAXY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/Galaxy/recharge";
     // GALAXY 兑换回调地址
@@ -148,11 +144,6 @@ public interface ConstUrl {
     /**
      * LetsPay
      */
-    // 充值
-    String RECHARGE_LETSPAY_URL = "http://api.letspayfast.com/apipay";
-    // 兑换地址
-    String EXCHANGE_LETSPAY_URL="http://api.letspayfast.com/apitrans";
-
     // LetsPay 充值回调地址
     String RECHARGE_LETSPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/PayPlus/recharge";
     // LetsPay 兑换回调地址
@@ -161,16 +152,10 @@ public interface ConstUrl {
     /**
      * MHDpay
      */
-    // 充值
-    String RECHARGE_MHDPAY_URL = "https://mhdc.gazer8.info/api/transfer";
-    // 兑换
-    String EXCHANGE_MHDPAY_URL = "https://mhdc.gazer8.info/api/daifu";
     //==================================================LuckyPay===================================================
     /**
      * Luckypay
      */
-    // 充值地址
-    String RECHARGE_LUCKYPAY_URL = "https://api.lumypay.com/api/payin";
     // 兑换地址
     String EXCHANGE_LUCKYPAY_URL = "https://api.lumypay.com/api/payout";
     //  Luckypay 充值回调地址
@@ -180,14 +165,21 @@ public interface ConstUrl {
     /**
      * BPay支付回调地址地址
      */
-    String RECHARGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/BPay/callback/recharge";
+    String RECHARGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/BPay/recharge";
     // BPay 回调地址
-    String EXCHANGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/BPay/callback/exchange";
+    String EXCHANGE_BPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/BPay/exchange";
     /**
      * GlobalPay回调地址
      */
     String RECHARGE_GLOBALPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/GlobalPay/recharge";
     // GlobalPay 回调地址
     String EXCHANGE_GLOBALPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/GlobalPay/exchange";
+
+    /**
+     * BetcatPay回调地址
+     */
+    String RECHARGE_BETCATPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/BetcatPay/recharge";
+    // GlobalPay 回调地址
+    String EXCHANGE_BETCATPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/BetcatPay/exchange";
 }
 

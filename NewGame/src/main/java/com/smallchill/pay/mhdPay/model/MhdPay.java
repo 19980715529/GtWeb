@@ -1,6 +1,5 @@
 package com.smallchill.pay.mhdPay.model;
 
-import com.smallchill.pay.utils.model.GalaxyPay;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;

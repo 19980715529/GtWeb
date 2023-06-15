@@ -27,7 +27,7 @@ find_one
 new_list
 ===
     SELECT b.id,minLimit min,MaxLimit max,channelTax channelTaxRate,exchangeRatio goldProportion,giveRatio give,winConf,currencyType unit,b.fee,name,
-    (select mcName FROM Pay_MCPool c WHERE c.id=b.mcId) mcName,isLabel,
+    (select mcName FROM Pay_MCPool c WHERE c.id=b.mcId) mcName,isLabel,payurl,
     (select mcId from Pay_MCPool a where a.id=b.mcId) pid
     from Pay_ChannelList a JOIN Pay_ChannelPool b ON a.chPoolId=b.id 
     where b.type=#{type} and clientType=#{clientType} and chName=#{cname} and a.isOpen=1 and b.isOpen=1 ORDER BY sort

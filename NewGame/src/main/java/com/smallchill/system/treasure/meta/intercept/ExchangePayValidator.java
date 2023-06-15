@@ -10,7 +10,5 @@ public class ExchangePayValidator extends BladeValidator {
         validateRequired("exchange.exchangeAmount","Wrong order info");
         validateRequired("exchange.bankNumber","Wrong order info");
         validateRequired("exchange.channelName","Wrong order info");
-        validateRequired("exchange.cardholder","Wrong order info");
-        validateRequired("exchange.phone","Wrong order info");
     }
 }

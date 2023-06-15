@@ -23,7 +23,7 @@ import java.util.Map;
 import static com.smallchill.system.treasure.utils.CallBackUtils.*;
 
 @RestController
-@RequestMapping("/BPay/callback")
+@RequestMapping("/callback/BPay")
 public class BPayCallbackController extends BaseController implements ConstShiro {
     @Resource
     private BPay bPay;

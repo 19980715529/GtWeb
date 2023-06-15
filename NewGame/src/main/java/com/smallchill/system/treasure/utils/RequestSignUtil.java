@@ -14,6 +14,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
 //import org.assertj.core.util.Strings;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
@@ -55,7 +56,6 @@ public class RequestSignUtil {
             stringBuilder.append(objectMap.get(key));  // 拼接参数
         }
         String keyStr = stringBuilder.toString();  // 得到待加密的字符串
-        System.out.println("带加密的字符串："+keyStr);
         String signedStr = "";
         try {
             signedStr = privateEncrypt(keyStr, getPrivateKey(customerPrivateKey));  // 私钥加密

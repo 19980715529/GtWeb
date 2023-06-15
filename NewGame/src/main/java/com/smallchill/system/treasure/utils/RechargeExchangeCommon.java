@@ -193,9 +193,9 @@ public class RechargeExchangeCommon {
      * 获取随机用户名
      */
     public static String RandomUsername(){
-        List<String> list = Arrays.asList("Cecile,Darell,Jayden","Filimena,Borna,Alina","Suellen,Posey,Johnny","Sarra,Rolph,Arvin","Hiram,Brahm,Joyce",
-                "Eurydice,Tabor,Dream","Alessandra,Bol,Feo","Daan,Titus,Aquinnah","Chanelle,Tiege,Acadia","Morag,Alford,Vaeda","Hari,Uhl,Vanessa",
-                "Bituin,Nicanor,Wynne","Delaney,Acadia,Charmaine");
+        List<String> list = Arrays.asList("Primeveire","Jalynn","Philippine","Amour","Hari","Daan","Mary","Marygrace","Charmaine","Yue",
+                "Vicenzo","Lorinda","Lyydia","Einan","Josefina","Abiodun","Filimena","Gull","Viv","Rolfe","Wieland","Jorine","Sirena",
+                "Mose","Khariton","Manaia");
         Random random = new Random();
         int size = list.size();
         int randomIndex = random.nextInt(size);
@@ -239,7 +239,7 @@ public class RechargeExchangeCommon {
     }
 
     /**
-     * 充值工具类
+     * 充值工具
      */
 
     public static Map<String,Object> recharge(RechargeRecords rechargeRecords, JSONObject resultMap, Map user, CommonService commonService,Integer channelId){
@@ -327,6 +327,10 @@ public class RechargeExchangeCommon {
         rechargeRecords.setOrderNumber(orderNo);
         // 设置时间
         rechargeRecords.setCreateTime(new Date());
+        int pid = Integer.parseInt(channel.get("pid").toString());
+        rechargeRecords.setChannelPid(pid);
+        // 钱包统计
+        RechargeExchangeCommon.rec(rechargeRecords,channel);
         // 设置响应结果
         resultMap.put("Userid",rechargeRecords.getUserId());
         resultMap.put("gameCoin",rechargeRecords.getGold()); //  充值的游戏币

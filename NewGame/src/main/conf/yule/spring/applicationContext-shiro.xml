@@ -115,7 +115,7 @@
 				/login = anon
 				/rechargeDock/** = anon
 				/callback/** = anon
-				/BPay/callback/** = anon
+				/pay/** = anon
 				/api/** = anon
 				/captcha = anon
 				/smscha = anon

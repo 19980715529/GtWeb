@@ -93,9 +93,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * recharge.topUpAmount：充值的金额
      * recharge.pid: 父渠道id
      * recharge.id: 渠道id
-     * recharge.email：用户邮箱
-     * recharge.userName：用户名
-     * recharge.phone：电话号
      * 响应参数格式
      * Userid userid
      * gold 充值数量
@@ -115,7 +112,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
-        LOGGER.error("小渠道id:" + channelId);
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
         if (code==1){
@@ -124,7 +120,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         Map channel =(Map) info.get("channel");
         // 判断商家
         int pid = Integer.parseInt(channel.get("pid").toString());
-        LOGGER.error("商户id"+pid);
         rechargeRecords.setChannelPid(pid);
         // 钱包统计
         RechargeExchangeCommon.rec(rechargeRecords,channel);
@@ -174,8 +169,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * 兑换金额：exchange.exchangeAmount
      * 银行卡号：exchange.bankNumber
      * 渠道类型: exchange.channelName
-     * 用户名：exchange.cardholder
-     * 电话号：exchange.phone
      * @return
      */
     @Json
@@ -185,8 +178,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         String userId = HttpKit.getRequest().getParameter("exchange.userId");
         BigDecimal examouont = new BigDecimal(HttpKit.getRequest().getParameter("exchange.exchangeAmount"));
         ExchangeReview exchangeReview = mapping("exchange", ExchangeReview.class);
-        String name = exchangeReview.getCardholder().trim();
-        exchangeReview.setCardholder(name);
         exchangeReview.setAmount(examouont);
         // 根据用户id查询用户数据
         HashMap<String, Object> user_map = new HashMap<>();
@@ -204,7 +195,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         // 用户来源平台
         exchangeReview.setSourcePlatform(Integer.parseInt(user.get("ClientType").toString()));
         Map<String, Object> resultMap = new HashMap<>();
-//        Map channel = commonService.getInfoByOne("recharge_channel.find_one_channel", exchangeReview);
         Map channel = commonService.getInfoByOne("channel_list.param_max",
                 CMap.init().set("type",1).set("clientType",exchangeReview.getSourcePlatform()).set("chName",exchangeReview.getChannelName()));
         //  判断用户的兑换金额是否满足条件;
@@ -291,7 +281,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
             String amount = RechargeExchangeCommon.getGold(Integer.valueOf(UserId));
             if ("".equals(amount)){
-                return json(null,"用户不存在",1);
+                return json(null,"Userid does not exist",1);
             }
             List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear gear,isRecharge,isExchange from Pay_Channel order by sort");
             for (Map map:payChannel) {
@@ -310,9 +300,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 获取最大参数
                 CMap param =CMap.init().set("clientType", cid).set("type", type).set("cid", map.get("id"));
                 Map max_param = commonService.getInfoByOne("channel_list.param_max", param);
-//                if (max_param==null){
-//                    continue;
-//                }
                 // 获取其中一条
                 Map ch = commonService.getInfoByOne("channel_list.param_one", param);
                 if (ch==null){
@@ -535,7 +522,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
         }else {
             param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
         }
-        response = PayPlusUtils.recharge(rechargeRecords,channel,param);
+
+        response = PayPlusUtils.recharge(rechargeRecords,payPlus);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
