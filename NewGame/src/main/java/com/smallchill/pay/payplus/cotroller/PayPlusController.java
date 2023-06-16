@@ -56,7 +56,7 @@ public class PayPlusController extends BaseController implements ConstShiro {
         String response = PayPlusUtils.recharge(rechargeRecords,payPlus);
         LOGGER.error(response);
         if ("".equals(response)) {
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
         JSONObject jsonObject;
         try {
@@ -83,12 +83,12 @@ public class PayPlusController extends BaseController implements ConstShiro {
                 Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
                         CMap.init().set("userId",rechargeRecords.getUserId()));
             }
-            return json(resultMap, "Recharge application success");
+            return json(resultMap, "105006");
         } else {
-            rechargeRecords.setMsg(jsonObject.getString("message"));
+            rechargeRecords.setMsg(jsonObject.getString("retMsg"));
             rechargeRecords.setOrderStatus(3);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
     }
 }

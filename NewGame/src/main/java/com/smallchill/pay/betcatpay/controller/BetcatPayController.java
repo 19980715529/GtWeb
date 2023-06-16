@@ -55,7 +55,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         String response = BetcatPayUtils.recharge(rechargeRecords,betcatPay);
         LOGGER.error(response);
         if ("".equals(response)) {
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
         JSONObject jsonObject;
         try {
@@ -69,7 +69,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
             rechargeRecords.setMsg(jsonObject.getString("msg"));
             rechargeRecords.setOrderStatus(3);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }else {
             JSONObject params = jsonObject.getJSONObject("data").getJSONObject("params");
             // 获取充值地址
@@ -86,7 +86,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
                 Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
                         CMap.init().set("userId",rechargeRecords.getUserId()));
             }
-            return json(resultMap, "Recharge application success");
+            return json(resultMap, "105006");
         }
     }
 }

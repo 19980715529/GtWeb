@@ -148,7 +148,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         exchangeReview.setStatus(exchange.getStatus());
         exchangeReview.setFeedback(exchange.getFeedback());
         // 判断是否通过审核
-        String response ="";
         int progress= exchangeReview.getStatus();
 
         if (progress ==1) {
@@ -168,10 +167,10 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             // 判断是哪个渠道
             switch (pid) {
                 case 35:
-                    if (PayPlusExchange(exchangeReview, channel)) return error("服务异常，修改失败");
+                    if (PayPlusExchange(exchangeReview, channel)) return error("充值服务器异常");
                     break;
                 case 2:
-                    if (BetcatPayExchange(exchangeReview)) return error("服务异常，修改失败");
+                    if (BetcatPayExchange(exchangeReview)) return error("充值服务器异常");
                     break;
                 default:
                     break;

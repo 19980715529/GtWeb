@@ -185,12 +185,12 @@ public class RechargeDockingController extends BaseController implements ConstSh
         Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
         if (user==null){
             // 用户不存在
-            return fail("Userid does not exist");
+            return fail("105001");
         }
         // 获取用户绑定的电话
         String phone = exchangeReview.getPhone();
         if ("".equals(phone)){
-            return fail("You need to bind your cell phone first");
+            return fail("105002");
         }
         // 用户来源平台
         exchangeReview.setSourcePlatform(Integer.parseInt(user.get("ClientType").toString()));
@@ -209,7 +209,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             exchangeReview.setChannelId(19);
         }
         if (amount.intValue()<min.intValue() || amount.intValue()>max.intValue()){
-            return json(null,"兑换的金额不满足渠道条件",2);
+            return json(null,"105003",2);
         }
         // 计算兑换金币
         BigDecimal changeGolds=amount.multiply(new BigDecimal(goldPr)).setScale(0,RoundingMode.DOWN);
@@ -225,7 +225,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             code = RechargeExchangeCommon.ExchangeAmount(exchangeReview.getUserId(), changeGolds.longValue(), i);
         }catch (Exception e){
             LOGGER.error(e.getMessage());
-            return fail("");
+            return fail("105011");
         }
         switch (code){
             case 0:
@@ -245,15 +245,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 SendHttp.sendGame1003(exchangeReview.getUserId());
                 return json(resultMap);
             case 1:
-                return fail("Userid does not exist");
+                return fail("105001");
             case 2:
-                return fail("Unbound phone");
+                return fail("105002");
             case 3:
-                return fail("Insufficient exchange quota");
             case 4:
-                return fail("Lack of player gold");
+                return fail("105003");
             default:
-                return fail("");
+                return fail("105011");
         }
     }
 
@@ -272,7 +271,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
         Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserId",UserId));
         if (user==null){
             // 用户不存在
-            return fail("Userid does not exist");
+            return fail("105001");
         }
         ArrayList<ChannelVo> channelVos = new ArrayList<>();
         // 获取大渠道 Pay_Channel
@@ -281,7 +280,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
             String amount = RechargeExchangeCommon.getGold(Integer.valueOf(UserId));
             if ("".equals(amount)){
-                return json(null,"Userid does not exist",1);
+                return json(null,"105001",1);
             }
             List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear gear,isRecharge,isExchange from Pay_Channel order by sort");
             for (Map map:payChannel) {
@@ -676,7 +675,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
                         CMap.init().set("userId",rechargeRecords.getUserId()));
             }
-            return json(resultMap, "Recharge application success");
+            return json(resultMap, "105006");
         } else {
             rechargeRecords.setMsg(jsonObject.getString("msg"));
             rechargeRecords.setOrderStatus(3);

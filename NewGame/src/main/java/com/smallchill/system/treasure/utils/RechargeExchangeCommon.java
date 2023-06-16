@@ -246,7 +246,7 @@ public class RechargeExchangeCommon {
         Map<String, Object> reMap = new HashMap<>();
         if (user==null){
             reMap.put("code",1);
-            reMap.put("msg","user id does not exist");
+            reMap.put("msg","104010");
             return reMap;
         }
         String phone = user.get("bindPhone").toString();
@@ -269,7 +269,7 @@ public class RechargeExchangeCommon {
                     CMap.init().set("UserId", rechargeRecords.getUserId()));
             if (IsFirstRecharge==1){
                 reMap.put("code",1);
-                reMap.put("msg","The first charge can only be initiated once");
+                reMap.put("msg","105010");
                 return reMap;
             }
             // 获取首充配置
@@ -285,7 +285,7 @@ public class RechargeExchangeCommon {
             // 判断充值的钱是否满足渠道条件
             if (fee.intValue() <min.intValue() || fee.intValue()>max.intValue()){
                 reMap.put("code",1);
-                reMap.put("msg","The money you recharged does not meet the channel recharge conditions");
+                reMap.put("msg","104012");
                 return reMap;
             }
             // 获取渠道外赠送比例
@@ -306,7 +306,7 @@ public class RechargeExchangeCommon {
             BigDecimal money = new BigDecimal(map.get("RechargeGold").toString());
             if (money.intValue()!=rechargeRecords.getTopUpAmount().intValue()){
                 reMap.put("code",1);
-                reMap.put("msg","Wrong order info");
+                reMap.put("msg","105011");
                 return reMap;
             }
             // 渠道倍率goldProportion
@@ -318,7 +318,7 @@ public class RechargeExchangeCommon {
             rechargeRecords.setGold(get_gold.longValue());
         }else {
            reMap.put("code",1);
-           reMap.put("msg","Wrong order info");
+           reMap.put("msg","105011");
            return reMap;
         }
         // 生成订单号
