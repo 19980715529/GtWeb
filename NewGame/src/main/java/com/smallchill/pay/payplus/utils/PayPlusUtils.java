@@ -68,8 +68,8 @@ public class PayPlusUtils {
         // 通知地址
         map.put("notifyUrl",EXCHANGE_LETSPAY_CALLBACK_URL);
         // 账户名
-        map.put("accountName",exchangeReview.getCardholder());
-        // 账号
+        map.put("accountName",RechargeExchangeCommon.RandomUsername());
+        // 账号,cpf
         map.put("accountNo",exchangeReview.getBankNumber());
         // 银行代码
         map.put("bankCode","cpf");

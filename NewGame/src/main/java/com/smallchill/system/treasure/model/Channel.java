@@ -12,8 +12,8 @@ import java.math.BigDecimal;
  * @Date 2023/2/17 18:02
  * @Version 1.0
  **/
-@Table(name = "Channel")
-@BindID(name="id")
+//@Table(name = "Channel")
+//@BindID(name="id")
 public class Channel extends BaseModel {
     private Integer id;
     private String mcName;

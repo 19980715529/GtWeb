@@ -31,8 +31,8 @@ import java.util.Map;
 /**
  * 充值渠道接口
  */
-@Controller
-@RequestMapping("/rechargechannel")
+//@Controller
+//@RequestMapping("/rechargechannel")
 public class RechargeChannelController extends BaseController implements ConstShiro {
     @Autowired
     private CommonService commonService;

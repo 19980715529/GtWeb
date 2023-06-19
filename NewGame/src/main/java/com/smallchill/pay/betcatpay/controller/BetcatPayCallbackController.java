@@ -12,10 +12,7 @@ import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -31,9 +28,9 @@ public class BetcatPayCallbackController extends BaseController implements Const
     private BetcatPay betcatPay;
 
     @PostMapping(value = "/recharge",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String rechargeLuckyPayCallback(@RequestParam Map<String,Object> param) {
+    public String rechargeLuckyPayCallback(@RequestBody Map<String,Object> param) {
         // 验证签名
-        if (param == null) {
+        if (param == null || param.isEmpty()) {
             return "fail";
         }
         LOGGER.error(param);
@@ -66,8 +63,8 @@ public class BetcatPayCallbackController extends BaseController implements Const
     }
 
     @PostMapping(value = "/exchange",consumes = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public String exchangeLuckyPayCallback(@RequestParam Map<String,Object> param){
-        if (param==null){
+    public String exchangeLuckyPayCallback(@RequestBody Map<String,Object> param){
+        if (param==null || param.isEmpty()){
             return "fail";
         }
         LOGGER.error(param);

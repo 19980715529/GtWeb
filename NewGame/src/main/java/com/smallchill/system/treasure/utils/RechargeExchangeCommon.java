@@ -254,7 +254,6 @@ public class RechargeExchangeCommon {
             rechargeRecords.setPhone(phone);
         }
         rechargeRecords.setPackageName(Integer.valueOf(user.get("ClientType").toString()));
-//        Map channel = commonService.getInfoByOne("recharge_channel.one_channel", CMap.init().set("id",channelId));
         Map channel = commonService.getInfoByOne("channel_list.recharge_one",
                 CMap.init().set("id",channelId));
         // 将渠道数据存储到订单里面

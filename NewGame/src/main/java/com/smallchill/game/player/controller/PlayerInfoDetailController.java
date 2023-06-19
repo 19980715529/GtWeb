@@ -3,6 +3,7 @@ package com.smallchill.game.player.controller;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
@@ -68,7 +69,8 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		 * ipSeeker.getIPLocation(ip).getCountry(); }
 		 */
 		// 获取总赢配置
-		Map channel = Db.findById("Pay_ChannelPool", 3);
+		List<Map> pay_channelPool = Db.selectList("select * from Pay_ChannelPool where type=1");
+		Map channel = pay_channelPool.get(0);
 		BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
 		// 用户的总赢
 		BigDecimal totalWin = RechargeExchangeCommon.getUserWin(id);

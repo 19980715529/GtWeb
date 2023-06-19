@@ -52,7 +52,6 @@ public class PayPlusController extends BaseController implements ConstShiro {
         if (code==1){
             return fail(info.get("msg").toString());
         }
-        PayPlusUtils.recharge(rechargeRecords,payPlus);
         String response = PayPlusUtils.recharge(rechargeRecords,payPlus);
         LOGGER.error(response);
         if ("".equals(response)) {

@@ -187,17 +187,6 @@
         }
     }).start();
 
-    // 获取充值渠道
-    new Ajax(ctx + "/${code}/rechargechannel/list", function (data) {
-        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
-            var type = data.data.rows;
-            var html = '<option value="">全部</option>';
-            for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['id'] + '">' + type[i]['mcName'] + '</option>';
-            }
-            $("#ChannelID").html(html);
-        }
-    }).start();
     function search() {
         var wheres = {};
         var start_time = $("#start_time").val();

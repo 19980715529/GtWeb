@@ -110,8 +110,8 @@ public class PlayerRechargeLogController extends BaseController implements Const
 		result.put("recharge", recharge);
 		return json(result);
 	}
-	@Json
-	@RequestMapping("/rechargechannel/list")
+//	@Json
+//	@RequestMapping("/rechargechannel/list")
 	public AjaxResult getChannel(){
 		Object channel = paginateBySelf("recharge_channel.find_all_parent");
 		return json(channel);
