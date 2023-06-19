@@ -25,6 +25,6 @@ all_list
 one_list
 ===
     select e.id,e.createTime,e.orderNumber,e.userId,e.phone,e.cardholder,e.bankNumber,e.channelName,
-    e.bank,isnull((select c.name from [RYPlatformManagerDB].[dbo].[Channel] as c where e.channelId=c.id),'') as channel,
+    e.bank,isnull((select c.mcName from [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c where e.channelId=c.mcId),'') as channel,
     e.sourcePlatform,e.amount,e.gold,e.consumptionCode,e.status,e.feedback,e.operator,e.msg
     FROM [RYPlatformManagerDB].[dbo].[Exchange_review] as e where e.id = #{id} 
