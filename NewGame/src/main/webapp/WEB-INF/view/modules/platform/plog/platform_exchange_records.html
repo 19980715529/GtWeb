@@ -13,11 +13,13 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames=["发起时间", "订单号","兑换进度","用户id","兑换金额","持卡人信息","昵称","来源平台","用户账号","消耗金币","消耗打码量","结束时间","用户电话号","操作管理员"];
+        var _colnames=["发起时间", "订单号","兑换进度","审核方式","用户id","兑换金额","持卡人信息","昵称","来源平台","用户账号","消耗金币","消耗打码量","结束时间","用户电话号","操作管理员"];
         var _colmodel=[
             {name:"createTime",sortable:false},
             {name:"orderNumber", sortable:false},
             {name:"status",  sortable:false,formatter:rowShow},
+            // 审核方式
+            {name:"auditMethod",  sortable:false,formatter:rowShow},
             {name:"userId", sortable:false,formatter:genLink},
             {name:"amount",  sortable:false},
             {name:"cardholder", sortable:false},
@@ -73,6 +75,13 @@
         if(options.colModel.name ==='status') {
             if(rowObject.status === 3 || rowObject.status == 4){
                 html += '<span class="label label-success">已完成</span>';
+            }
+        }
+        if (options.colModel.name === 'auditMethod'){
+            if (rowObject.auditMethod === 0){
+                html += '<span class="label label-info">人工审核</span>';
+            }else if (rowObject.auditMethod === 1){
+                html += '<span class="label label-primary">自动审核</span>';
             }
         }
         return html;

@@ -44,6 +44,7 @@ import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.service.ExchangeReviewService;
+import com.smallchill.system.treasure.utils.ExchangeUtils;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import com.smallchill.system.treasure.utils.SendHttp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,9 +147,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         exchangeReview.setStatus(exchange.getStatus());
         exchangeReview.setFeedback(exchange.getFeedback());
         // 判断是否通过审核
-        String response ="";
         int progress= exchangeReview.getStatus();
-
         if (progress ==1) {
             // 根据渠道id，和pid进行查询
 //            Map channel = commonService.getInfoByOne("recharge_channel.get_channel", CMap.init().set("id",exchangeReview.getChannelId()));
@@ -163,41 +162,50 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
             exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
             RechargeExchangeCommon.exc(exchangeReview,channel);
+            // 设置人工审核
+            exchangeReview.setAuditMethod(0);
             // 判断是哪个渠道
             switch (pid) {
                 case 1:
-                    if (RarPayExchange(exchangeReview, channel)) return error("服务异常，修改失败");
+                    if (ExchangeUtils.RarPayExchange(exchangeReview, channel,rarPay)) return error("服务异常，修改失败");
                     break;
                 case 4:
-                    if (SafePayExchange(exchangeReview, channel)) return error("服务异常，修改失败");
+                    if (ExchangeUtils.SafePayExchange(exchangeReview, channel)) return error("服务异常，修改失败");
                     break;
                 case 20:
-                    if (MetaPayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.MetaPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 23:
-                    if (OmoPayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.OmoPayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 26:
-                    if (AIPayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.AIPayExchange(exchangeReview, channel,aiPay)) return error("fail");
                     break;
                 case 29:
-                    if (WePayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.WePayExchange(exchangeReview, channel)) return error("fail");
                     break;
                 case 32:
-                    if (CloudPayExchange(exchangeReview)) return error("fail");
+                    if (ExchangeUtils.CloudPayExchange(exchangeReview,cloudPay)) return error("fail");
                     break;
                 case 35:
-                    if (PayPlusExchange(exchangeReview, channel)) return error("fail");
+                    String channelName = channel.get("channelName").toString();
+                    Map<String, String> param;
+                    if ("super".equals(channelName)){
+                        param = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>(){});
+                    }else {
+                        param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
+                    }
+                    if (ExchangeUtils.PayPlusExchange(exchangeReview, channel,param)) return error("fail");
                     break;
                 case 38:
-                    if (MhdPayExchange(exchangeReview)) return error("fail");
+                    if (ExchangeUtils.MhdPayExchange(exchangeReview,mhdPay)) return error("fail");
                     break;
                 case 49:
-                    if (BPayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.BPayExchange(exchangeReview, channel,bPay)) return error("fail");
                     break;
                 case 52:
                     //GlobalPay
-                    if (GlobalPayExchange(exchangeReview, channel)) return error("fail");
+                    if (ExchangeUtils.GlobalPayExchange(exchangeReview, channel,globalPay)) return error("fail");
                     break;
                 default:
                     break;
@@ -484,8 +492,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     }
 
     private boolean SafePayExchange(ExchangeReview exchangeReview, Map channel) {
-
-
         String response = SafePayUtils.exchange(exchangeReview, channel);
         LOGGER.error(response);
         if ("".equals(response)) {
@@ -509,7 +515,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     private boolean RarPayExchange(ExchangeReview exchangeReview, Map channel) {
         // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
         String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
-        // rarp      Gcash account format error   SIGN_ERROR
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;

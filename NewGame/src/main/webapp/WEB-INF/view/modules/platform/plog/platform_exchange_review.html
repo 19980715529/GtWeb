@@ -15,7 +15,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/${code}/list";//查询列表接口
-        var _colnames=["id","发起时间", "订单号","兑换进度","用户id","备注","商户反馈","兑换金额","小渠道","大渠道","反馈","来源平台","账号","持卡人信息",
+        var _colnames=["id","发起时间", "订单号","兑换进度","审核方式","用户id","备注","商户反馈","兑换金额","小渠道","大渠道","反馈","来源平台","账号","持卡人信息",
             "昵称","消耗金币","消耗打码量","用户电话号","操作管理员"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
@@ -23,6 +23,9 @@
             {name:"orderNumber", sortable:false},
             // 兑换进度
             {name:"status",  sortable:false,formatter:rowShow},
+            // 审核方式
+            {name:"auditMethod",  sortable:false,formatter:rowShow},
+
             {name:"userId", sortable:false,formatter:genLink},
             {name:"tipsName", sortable:false},
             // 商户反馈
@@ -96,6 +99,13 @@
                 html += '<span class="label label-danger">' + dict_progress[cellvalue] + '</span>';
             }else if (rowObject.status === 8){
                 html += '<span style="background-color: #2e8965">'+ dict_progress[cellvalue] + '</span>';
+            }
+        }
+        if (options.colModel.name === 'auditMethod'){
+            if (rowObject.auditMethod === 0){
+                html += '<span class="label label-info">人工审核</span>';
+            }else if (rowObject.auditMethod === 1){
+                html += '<span class="label label-primary">自动审核</span>';
             }
         }
         return html;

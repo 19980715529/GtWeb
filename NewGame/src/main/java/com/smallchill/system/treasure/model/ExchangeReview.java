@@ -34,6 +34,15 @@ public class ExchangeReview extends BaseModel {
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
 
+    private Integer auditMethod; // 三方反馈信息
+
+    public Integer getAuditMethod() {
+        return auditMethod;
+    }
+
+    public void setAuditMethod(Integer auditMethod) {
+        this.auditMethod = auditMethod;
+    }
 
     public String getMsg() {
         return msg;
