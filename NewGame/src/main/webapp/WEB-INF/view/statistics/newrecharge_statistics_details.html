@@ -4,45 +4,34 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","pid":"${id}"}';
 
     $(function() {
-        backDom('新增充值统计','newrecharge');
+        backDom('新增充值统计详情','newrecharge');
         initGrid();
-        initMenuBtn("btns","newrecharge");
+        // initMenuBtn("btns","newrecharge");
     });
 
 
     function initGrid() {
-        var grid_url = ctx + "/newrecharge/list";//查询列表接口
-        var _colnames=["id","时间", "新增用户","注册人数","充值人数","新增充值人数","新增充值次数","新增充值总额","新增兑换人数","新增兑换总额","新增充提差","新增人均充值","付费成本","投放成本","操作"];
+        var grid_url = ctx + "/newrecharge/details/list";//查询列表接口
+        var _colnames=["id","时间", "充值人数","充值次数","充值总额","兑换人数","兑换总额","充提差","新增人均充值"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
-            {name:"newUserNum", sortable:false},
-            //
-            {name:"registerNum",  sortable:false},
-            // 充值人数
             {name:"recUserNum", sortable:false},
-            // 新增充值人数
-            {name:"newRecUser", sortable:false},
-            // 新增充值次数
-            {name:"newRecNum", sortable:false},
-            // 新增充值金额
-            {name:"newRecAmount",  sortable:false},
-            // 新增兑换人数
-            {name:"newExcUser", sortable:false},
-            // 新增兑换金额
-            {name:"newExcAmount", sortable:false},
+            // 充值次数
+            {name:"recNum",  sortable:false},
+            // 充值总额
+            {name:"recAmount", sortable:false},
+            // 兑换人数
+            {name:"excUserNum", sortable:false},
+            // 兑换总额
+            {name:"excAmount", sortable:false},
             // 充提差
-            {name:"newRE", sortable:false},
-            // 人均充值
-            {name:"averageRecharge", sortable:false},
-            // 费用成本
-            {name:"cost",sortable:false},
-            // 投放成本
-            {name:"deliveryCost",sortable:false},
-            {name:"id",sortable:false,formatter:genLink},
+            {name:"RE",  sortable:false},
+            //
+            {name:"avgRec", sortable:false}
         ];
 
 
@@ -55,15 +44,11 @@
             postData : {where:_filter,sort: "createTime", order: "desc"},
             jsonReader:{id:"id"},
             pager : pager_selector,
-            multiselect : true, // 是否显示勾选框
+            multiselect : false, // 是否显示勾选框
             rownumbers : true, // 是否出现排序
             rowNum:100,
             height: 'auto'
         });
-    }
-    function genLink(cellvalue, options, rowObject) {
-        var html = '<a name="'+ctx + '/newrecharge/details/' + rowObject.id+'" title="充值详情" class="text-33C3F7 iframeurl" href="'+ctx + '/newrecharge/details/' + rowObject.id+'">充值详情</a>';
-        return html;
     }
 
 </script>
@@ -79,8 +64,8 @@
                 <input type="text" id="start_time" placeholder="请输入时间段查询数据"/>
                 -
                 <input type="text" id="end_time" value="" class="" />
-                <label class=""> 包来源： </label>
-                <select id="clientType"></select>
+<!--                <label class=""> 包来源： </label>-->
+<!--                <select id="clientType"></select>-->
                 <!-- 简单查询按钮 -->
                 <label class="">
                     <button class="btn btn-sx btn-white" type="button" onclick="search()">查询</button>
@@ -88,9 +73,47 @@
                 </label>
             </div>
         </form>
+        <label class=""> 合计数据： </label>
+        <div class="col-xs-12 tb-grid">
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">时间</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增用户</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">注册人数</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充值人数</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增充值人数</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增充值次数</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增充值总额</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增兑换人数</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增兑换额度</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增充提差</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">新增人均充值</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">付费成本</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">投放成本</td>
+            </tr>
+            <tr>
+                <td>${newrecharge.createTime}</td>
+                <td>${newrecharge.newUserNum}</td>
+                <td>${newrecharge.registerNum}</td>
+                <td>${newrecharge.recUserNum}</td>
+                <td>${newrecharge.newRecUser}</td>
+                <td>${newrecharge.newRecNum}</td>
+                <td>${newrecharge.newRecAmount}</td>
+                <td>${newrecharge.newExcUser}</td>
+                <td>${newrecharge.newExcAmount}</td>
+                <td>${newrecharge.newRE}</td>
+                <td>${newrecharge.averageRecharge}</td>
+                <td>${newrecharge.cost}</td>
+                <td>${newrecharge.deliveryCost}</td>
+            </tr>
+            </tbody>
+        </table>
+        </div>
         <!-- 按钮组 -->
-        <div class="welljq well-sm" id="btns"></div>
+<!--        <div class="welljq well-sm" id="btns"></div>-->
         <!-- grid -->
+<!--        <label class=""> 详情数据： </label>-->
         <table id="grid-table"></table>
         <!-- 分页 -->
         <div id="grid-pager"></div>
@@ -122,17 +145,17 @@
         $('#end_time').val(getBeforeDate(0));
     });
     // 获取平台列表
-    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
-        console.log(data);
-        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
-            var type = data.data;
-            var html = '<option value="-1">请选择</option>';
-            for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
-            }
-            $("#clientType").html(html);
-        }
-    }).start();
+    // new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    //     console.log(data);
+    //     if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+    //         var type = data.data;
+    //         var html = '<option value="-1">请选择</option>';
+    //         for (var i = 0; i < type.length; i++) {
+    //             html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+    //         }
+    //         $("#clientType").html(html);
+    //     }
+    // }).start();
 
     function search() {
         var wheres = {};

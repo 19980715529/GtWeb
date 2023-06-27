@@ -2,6 +2,7 @@ package com.smallchill.system.treasure.model;
 
 import com.smallchill.core.annotation.BindID;
 import com.smallchill.core.base.model.BaseModel;
+import lombok.Data;
 import org.beetl.sql.core.annotatoin.SeqID;
 import org.beetl.sql.core.annotatoin.Table;
 import org.joda.time.DateTime;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(name = "Exchange_review")
+@Data
 @BindID(name = "id")
 public class ExchangeReview extends BaseModel {
     private Integer id;
@@ -33,174 +35,5 @@ public class ExchangeReview extends BaseModel {
     private BigDecimal money; //发送的第三方的钱
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
-
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public String getChannelName() {
-        return channelName;
-    }
-
-    public void setChannelName(String channelName) {
-        this.channelName = channelName;
-    }
-
-    public BigDecimal getMoney() {
-        return money;
-    }
-
-    public void setMoney(BigDecimal money) {
-        this.money = money;
-    }
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getOrderNumber() {
-        return orderNumber;
-    }
-
-    public void setOrderNumber(String orderNumber) {
-        this.orderNumber = orderNumber;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getBankNumber() {
-        return bankNumber;
-    }
-
-    public void setBankNumber(String bankNumber) {
-        this.bankNumber = bankNumber;
-    }
-
-    public String getCardholder() {
-        return cardholder;
-    }
-
-    public void setCardholder(String cardholder) {
-        this.cardholder = cardholder;
-    }
-
-    public String getBank() {
-        return bank;
-    }
-
-    public void setBank(String bank) {
-        this.bank = bank;
-    }
-
-    public Integer getSourcePlatform() {
-        return sourcePlatform;
-    }
-
-    public void setSourcePlatform(Integer sourcePlatform) {
-        this.sourcePlatform = sourcePlatform;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
-    public Long getGold() {
-        return gold;
-    }
-
-    public void setGold(Long Gold) {
-        this.gold = Gold;
-    }
-
-    public Long getConsumptionCode() {
-        return consumptionCode;
-    }
-
-    public void setConsumptionCode(Long consumptionCode) {
-        this.consumptionCode = consumptionCode;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getFeedback() {
-        return feedback;
-    }
-
-    public void setFeedback(String feedback) {
-        this.feedback = feedback;
-    }
-
-    public String getOperator() {
-        return operator;
-    }
-
-    public void setOperator(String operator) {
-        this.operator = operator;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Date getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getChannelId() {
-        return channelId;
-    }
-
-    public void setChannelId(Integer channelId) {
-        this.channelId = channelId;
-    }
-
-    public String getPfOrderNum() {
-        return pfOrderNum;
-    }
-
-    public void setPfOrderNum(String pfOrderNum) {
-        this.pfOrderNum = pfOrderNum;
-    }
+    private Integer auditMethod; // 三方反馈信息
 }

@@ -95,20 +95,6 @@ public class AnnouncementController extends BaseController implements ConstShiro
         }
 
     }
-    @GetMapping("/redis/set")
-    public AjaxResult setRedisKey(@RequestParam String key,@RequestParam String value){
-        IJedis cache = Redis.init("cache");
-        cache.set(key, value);
-        return success("添加成功");
-    }
-    @GetMapping("/redis/get")
-    public AjaxResult getRedisKey(@RequestParam String key){
-        IJedis cache = Redis.init("cache");
-        String value = cache.get(key);
-        Map<String, String> map = new HashMap<>();
-        map.put(key,value);
-        return json(map);
-    }
 
     /**
      * 充值兑换渠道获取
@@ -191,6 +177,26 @@ public class AnnouncementController extends BaseController implements ConstShiro
     public AjaxResult getGear(){
         List<Map> payChannel = Db.selectList("select * from Pay_RechargeGear order by sort");
         return json(payChannel);
+    }
+
+    // 获取转盘配置
+    @GetMapping("/turntable")
+    public AjaxResult turntable(){
+        List<Map> config = Db.selectList("select turntable_index,award,type from [QPServerInfoDB].[dbo].[Turntable_TurntableConfig]");
+        List<Map> BaseConfig = Db.selectList("select * from [QPServerInfoDB].[dbo].[Turntable_TurntableBaseConfig]");
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("config",config);
+        map.put("BaseConfig",BaseConfig);
+        return json(map);
+    }
+
+    /**
+     * 签到奖励配置
+     */
+    @GetMapping("/checkConfig")
+    public AjaxResult check(){
+        List<Map> maps = Db.selectList("select Day,Award from [QPServerInfoDB].[dbo].[CheckIn_CheckInAward] where AwardType=1");
+        return json(maps);
     }
 
 }

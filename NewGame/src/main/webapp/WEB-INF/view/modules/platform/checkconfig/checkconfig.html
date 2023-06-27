@@ -1,0 +1,126 @@
+@layout("/common/_container.html"){
+<script type="text/javascript">
+    var ctx="${ctxPath}";
+    var grid_selector = "#grid-table";
+    var pager_selector = "#grid-pager";
+    var _filter = '';
+    var isAutoFlushTab=true;
+    $(function(){
+        backDom('签到配置列表','checkconfig');
+        initGrid();
+        initMenuBtn("btns","checkconfig");
+    });
+    function initGrid(){
+        var grid_url = ctx+"/${code}/list";//查询列表接口
+        var _colnames=["id","天数","奖励数额","奖励类型"];
+        var _colmodel=[
+            {name:"id",sortable:false},
+            {name:"Day",sortable:false},
+            {name:"Award",sortable:false},
+            {name:"AwardType",sortable:false,formatter:rowType},
+        ];
+
+        jQuery(grid_selector).jqGrid({
+            url:grid_url,
+            shrinkToFit : true,//适用于较少字段,响应式
+            colNames:_colnames,
+            colModel:_colmodel,
+            jsonReader:{id:"id"},
+            pager : pager_selector,
+            postData: {where: _filter,sort:"Day",order:"asc"},
+            rowNum:100,
+            height: 'auto'
+        });
+
+
+    }
+    function rowShow(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isRecharge' || options.colModel.name ==='isExchange') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">开启</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">关闭</span>';
+            }
+        }
+        return html;
+    }
+    function hotShow(cellvalue,options,rowObject) {
+        var html = '';
+        if(options.colModel.name ==='isLabel') {
+            if(cellvalue === 1) {
+                html += '<span class="label label-success">NEW</span>';
+            } else if (cellvalue === 0) {
+                html += '<span class="label label-danger">否</span>';
+            }else {
+                html += '<span class="label label-info">HOT</span>';
+            }
+        }
+        return html;
+    }
+    function rowType(cellvalue, options, rowObject) {
+        var html = '';
+        if(options.colModel.name ==='AwardType') {
+            if(rowObject.AwardType === 1) {
+                html += '<span class="label label-info">金币</span>';
+            } else if(rowObject.AwardType === 0) {
+                html += '<span class="label label-warning">其他</span>';
+            }
+        }
+        return html;
+    }
+</script>
+<!-- 配置grid -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <!-- 按钮组 -->
+        <div class="welljq well-sm" id="btns"></div>
+        <!-- grid -->
+        <table id="grid-table"></table>
+        <!-- 分页 -->
+        <div id="grid-pager"></div>
+    </div>
+</div>
+<script>
+    function goSearch() {
+        var type = $("#ptypeid").val();
+        var clientType = $("#clientType").val();
+        var wheres = {};
+
+        if(BladeTool.isNotEmpty(type)) {
+            wheres['type'] = type;
+        }
+        if(BladeTool.isNotEmpty(clientType)) {
+            wheres['clientType'] = clientType;
+        }
+        var filter = "";
+        if (typeof (_filter) != "undefined") {
+            filter = _filter;
+        }
+        var where = "";
+        $.each(wheres, function(key, value) {
+            if (BladeTool.isNotEmpty(key) && BladeTool.isNotEmpty(value)) {
+                where += "\"" + key + "\":\"" + value + "\"" + ",";
+            }
+        });
+
+        if (BladeTool.isNotEmpty(where)) {
+            where = '{' + where;
+            where = where.substring(0, where.length - 1);
+            where += '}';
+        }
+
+        where = BladeTool.isEmpty(where) ? "" : encodeURI(where);
+        isAutoPage = (BladeTool.isEmpty(where) ? true : false);
+        var pageNum = $jqGrid.getGridParam('page');
+        $jqGrid.jqGrid("setGridParam", {
+            datatype : "json",
+            postData : {
+                where : where
+            },
+            page: (isAutoPage) ? pageNum : 1,
+        }).trigger("reloadGrid");
+    }
+</script>
+@include("/common/_listscript.html"){}
+@}

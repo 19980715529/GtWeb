@@ -49,7 +49,7 @@ public class BetcatPayCallbackController extends BaseController implements Const
         }
         // 订单状态（0生成订单，1支付中，2支付未通知，3支付已通知，-1交易失败，-2交易过期，-3交易退还，-4交易异常）
         int status = params.getIntValue("orderStatus");
-        if (status==3) {
+        if (status==2 || status==3) {
             if (rechargeRecords.getOrderStatus() == 2) {
                 return "ok";
             }
@@ -83,7 +83,7 @@ public class BetcatPayCallbackController extends BaseController implements Const
         }
         // 订单状态（0生成订单，1支付中，2支付未通知，3支付已通知，-1交易失败，-2交易过期，-3交易退还，-4交易异常）
         int status = params.getIntValue("orderStatus");
-        if (status==3){
+        if (status==2 || status==3){
             if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
                 return "ok";
             }

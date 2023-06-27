@@ -8,6 +8,8 @@ import com.smallchill.core.toolbox.kit.ThreadKit;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.model.WalletRecords;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.beetl.sql.core.OnConnection;
 import org.beetl.sql.core.SQLManager;
 
@@ -17,13 +19,16 @@ import java.math.RoundingMode;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CallBackUtils {
+    private static final Logger LOGGER = LogManager.getLogger(CallBackUtils.class);
     // 执行存储过程
     public static void storedProcedure(Map<String,Object> map){
         SQLManager dao = Blade.dao("gameroomitemdb");
@@ -147,10 +152,46 @@ public class CallBackUtils {
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),
                         rechargeRecords.getChannel(),rechargeRecords.getChannelPid(),dateFormat.format(rechargeRecords.getCreateTime()),0);
+                // 执行计算打码量存储过程
+//                查询
+                Integer baseGold = null;
+                if (rechargeRecords.getIsFirstCharge()==0){
+                    baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
+                }else {
+                    baseGold = Db.queryInt("select gold from First_charge_config where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
+                }
+                Integer normalAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=11",null);
+                Integer specialAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=12",null);
+                Long code = (long) baseGold *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGold()-baseGold);
+                addUserCode(rechargeRecords.getUserId(),code);
             };
             ThreadKit.excAsync(runnable,false);
         }
 
+    }
+
+    /**
+     * 充值完成后需要执行的打码量量存储过程，
+     * @UserID int,            --玩家ID
+     * @CodingQuantity bigit	--打码量
+     */
+    public static void addUserCode(Integer userId,Long code){
+        Db.executeCall(new OnConnection<Integer>() {
+            @Override
+            public Integer call(Connection connection) throws SQLException {
+                try {
+                    CallableStatement statement = connection.prepareCall("{? = call [QPGameUserDB].[dbo].[Coding_AddCoding](?,?)}");
+                    statement.registerOutParameter(1, Types.INTEGER);
+                    statement.setInt(2,userId);
+                    statement.setLong(3,code);
+                    statement.execute();
+                    return statement.getInt(1);
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                    return -1;
+                }
+            }
+        });
     }
 
     /**

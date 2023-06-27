@@ -177,25 +177,27 @@ public class PlatformLogController extends BaseController implements ConstShiro 
 					// 充值返利产出金币总量
 					ret.put("czcoderebategold",rs.getString("czcoderebategold"));
 
-					// 在线金币奖励
-					ret.put("onlinegoldbonus",rs.getString("onlinegoldbonus"));
-					// 使用在线
-					ret.put("onlinecount",new BigDecimal(rs.getString("onlinecount")).longValue());
-					// 每日签到金币
-					ret.put("dailygoldbonus",rs.getString("dailygoldbonus"));
+					// 白银金币奖励
+					ret.put("silverGoldRewards",rs.getString("silverGoldRewards"));
+					// 白银金币奖励次数
+					ret.put("silvercount",new BigDecimal(rs.getString("silvercount")).longValue());
+					// 黄金转盘金币奖励次数
+					ret.put("goldenGoldRewards",rs.getString("goldenGoldRewards"));
 					// 使用每日签到获得转盘次数使用
-					ret.put("dailycount",new BigDecimal(rs.getString("dailycount")).longValue());
-					// 打码返利
-					ret.put("codegoldbonus",rs.getString("codegoldbonus"));
-					// 打码返利获得转盘使用次数
-					ret.put("codecount",new BigDecimal(rs.getString("codecount")).longValue());
+					ret.put("goldcount",new BigDecimal(rs.getString("goldcount")).longValue());
+
+					// 砖石
+					ret.put("diamondGoldRewards",rs.getString("diamondGoldRewards"));
+
+//					 打码返利获得转盘使用次数
+					ret.put("diamondcount",new BigDecimal(rs.getString("diamondcount")).longValue());
 
 					// 在线奖领取励转盘次数,
-					ret.put("onlinerewards",new BigDecimal(rs.getString("onlinerewards")).longValue());
+//					ret.put("onlinerewards",new BigDecimal(rs.getString("onlinerewards")).longValue());
 					// 每日签到领取转盘次数,
-					ret.put("dailyattendances",new BigDecimal(rs.getString("dailyattendances")).longValue());
+//					ret.put("dailyattendances",new BigDecimal(rs.getString("dailyattendances")).longValue());
 					// 打码返利领取转盘次数
-					ret.put("coderebates",new BigDecimal(rs.getString("coderebates")).longValue());
+//					ret.put("coderebates",new BigDecimal(rs.getString("coderebates")).longValue());
 
 					// 绑定手机号奖励总金币
 					ret.put("bindmobilerewards",rs.getString("bindmobilerewards"));

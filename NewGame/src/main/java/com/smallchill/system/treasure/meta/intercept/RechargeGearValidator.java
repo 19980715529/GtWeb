@@ -8,8 +8,8 @@ import com.smallchill.core.toolbox.CMap;
 public class RechargeGearValidator extends BladeValidator {
     @Override
     protected void doValidate(Invocation inv) {
-        validateLong("rechargegear.amount",0,99999,"请输入正确的格式,范围在0-99999");
-        validateLong("rechargegear.gold",0,99999,"请输入金币正确的格式,范围在0-99999");
+        validateLong("rechargegear.amount",0,999999999,"请输入正确的格式,范围在0-999999999");
+        validateLong("rechargegear.gold",0,999999999,"请输入金币正确的格式,范围在0-999999999");
         validateRequired("rechargegear.getExtra","请输入获得比率");
         validateSort("rechargegear.sort","rechargegear.id");
     }

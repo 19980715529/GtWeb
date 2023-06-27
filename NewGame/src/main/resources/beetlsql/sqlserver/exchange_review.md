@@ -1,11 +1,14 @@
 all_list
 ===
-    select e.id,e.createTime,e.orderNumber,e.userId,e.phone,e.cardholder,e.bankNumber,e.channelName,
+    select e.id,e.createTime,e.orderNumber,e.userId,e.phone,e.cardholder,e.bankNumber,e.channelName,e.auditMethod,
     e.bank,isnull((select c.mcName from [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c where e.channelId=c.mcId and c.id!=19),'') as channel,
     e.sourcePlatform,e.amount,e.gold,e.consumptionCode,e.status,e.feedback,e.operator,e.msg,b.tipsName,b.NickName nickname
     FROM [RYPlatformManagerDB].[dbo].[Exchange_review] as e join QPGameUserDB.dbo.AccountsInfo as b on e.userId=b.UserID where 1=1
     @if(!isEmpty(userId)){
          and userId = #{userId}
+      @}
+    @if(!isEmpty(auto)){
+         and auditMethod = #{auto}
       @}
     @if(!isEmpty(orderNum)){
          and orderNumber = #{orderNum}

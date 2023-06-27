@@ -46,6 +46,7 @@ import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.service.ExchangeReviewService;
+import com.smallchill.system.treasure.utils.ExchangeUtils;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import com.smallchill.system.treasure.utils.SendHttp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +93,8 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     private AIPay aiPay;
     @Resource
     private LuckPay luckPay;
+    @Resource
+    private BetcatPay betcatPay;
     private static String BASE_PATH = "/system/exchangereview/";
     private static String CODE = "exchangereview";
     private static String LIST_SOURCE = "exchange_review.all_list";
@@ -147,9 +150,9 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         ExchangeReview exchangeReview = service.findById(exchange.getId());
         exchangeReview.setStatus(exchange.getStatus());
         exchangeReview.setFeedback(exchange.getFeedback());
-        // 判断是否通过审核
+        // 判断当前审核状态
         int progress= exchangeReview.getStatus();
-
+        exchangeReview.setAuditMethod(0);
         if (progress ==1) {
             // 根据渠道id，和pid进行查询
 //            Map channel = commonService.getInfoByOne("recharge_channel.get_channel", CMap.init().set("id",exchangeReview.getChannelId()));
@@ -164,44 +167,17 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
             exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
             RechargeExchangeCommon.exc(exchangeReview,channel);
+            // 设置人工审核
             // 判断是哪个渠道
             switch (pid) {
                 case 35:
-                    if (PayPlusExchange(exchangeReview, channel)) return error("充值服务器异常");
+                    if (ExchangeUtils.PayPlusExchange(exchangeReview,payPlus)) return error("充值服务器异常");
                     break;
                 case 2:
-                    if (BetcatPayExchange(exchangeReview)) return error("充值服务器异常");
+                    if (ExchangeUtils.BetcatPayExchange(exchangeReview,betcatPay)) return error("充值服务器异常");
                     break;
                 default:
                     break;
-//                case 20:
-//                    if (MetaPayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 23:
-//                    if (OmoPayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 26:
-//                    if (AIPayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 29:
-//                    if (WePayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 32:
-//                    if (CloudPayExchange(exchangeReview)) return error("fail");
-//                    break;
-//                case 35:
-//                    if (PayPlusExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 38:
-//                    if (MhdPayExchange(exchangeReview)) return error("fail");
-//                    break;
-//                case 49:
-//                    if (BPayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
-//                case 52:
-//                    //GlobalPay
-//                    if (GlobalPayExchange(exchangeReview, channel)) return error("fail");
-//                    break;
                 }
         }else if(progress==4){
             // 兑换完成
@@ -333,62 +309,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         }
         return false;
     }
-
-    private boolean PayPlusExchange(ExchangeReview exchangeReview, Map channel) {
-        String response = PayPlusUtils.exchange(exchangeReview,payPlus);
-        LOGGER.error(response);
-        if ("".equals(response)) {
-            return true;
-        }
-        JSONObject respJson = JSONObject.parseObject(response);
-        String retCode = respJson.getString("retCode");
-        // 成功
-        if ("SUCCESS".equals(retCode)) {
-            // 请求成功 ,获取平台订单号
-            exchangeReview.setStatus(1);
-            // 获取平台订单号
-            String platOrder = respJson.getString("platOrder");
-            exchangeReview.setPfOrderNum(platOrder);
-        } else {
-            // 请求失败, 存储失败原因
-            exchangeReview.setMsg(respJson.getString("retMsg"));
-            // 将状态设置为失败
-            exchangeReview.setStatus(6);
-        }
-        return false;
-    }
-    @Resource
-    private BetcatPay betcatPay;
-    private boolean BetcatPayExchange(ExchangeReview exchangeReview) {
-        String response = BetcatPayUtils.exchange(exchangeReview,betcatPay);
-        LOGGER.error(response);
-        if ("".equals(response)) {
-            return true;
-        }
-        JSONObject respJson = JSONObject.parseObject(response);
-        int code = respJson.getIntValue("code");
-        // 成功
-        if (code==0) {
-            // 0生成订单，1支付中，2支付未通知，3支付已通知，-1交易失败，-2交易过期，-3交易退还，-4交易异常
-            int status = respJson.getJSONObject("data").getIntValue("orderStatus");
-            if (status<0){
-                respJson.getJSONObject("data").getIntValue("message");
-                return true;
-            }
-            // 请求成功 ,获取平台订单号
-            exchangeReview.setStatus(1);
-            // 获取平台订单号
-            String platOrder = respJson.getString("orderNo");
-            exchangeReview.setPfOrderNum(platOrder);
-        } else {
-            // 请求失败, 存储失败原因
-            exchangeReview.setMsg(respJson.getString("msg"));
-            // 将状态设置为失败
-            exchangeReview.setStatus(6);
-        }
-        return false;
-    }
-
 
 
     private boolean CloudPayExchange(ExchangeReview exchangeReview) {

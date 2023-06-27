@@ -9,13 +9,16 @@ import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.annotation.Before;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.game.newmodel.Accountsinfo;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.pay.aipay.model.AIPay;
 import com.smallchill.pay.aipay.utils.AIPayUtils;
+import com.smallchill.pay.betcatpay.model.BetcatPay;
 import com.smallchill.pay.bpay.model.BPay;
 import com.smallchill.pay.cloudpay.model.CloudPay;
 import com.smallchill.pay.cloudpay.utils.CloudPayUtils;
@@ -39,6 +42,7 @@ import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.meta.intercept.ExchangePayValidator;
 import com.smallchill.system.treasure.model.*;
+import com.smallchill.system.treasure.utils.ExchangeUtils;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import com.smallchill.system.treasure.utils.SendHttp;
 import com.smallchill.system.treasure.utils.Utils;
@@ -86,81 +90,9 @@ public class RechargeDockingController extends BaseController implements ConstSh
     @Resource
     private AIPay aiPay;
 
-    /**
-     * 需要的参数
-     * recharge.isFirstCharge:0普通充值，1首充，2随机充值
-     * recharge.userId:用户id
-     * recharge.topUpAmount：充值的金额
-     * recharge.pid: 父渠道id
-     * recharge.id: 渠道id
-     * 响应参数格式
-     * Userid userid
-     * gold 充值数量
-     * gameCoin  游戏币
-     * Type	0:充值 1:提现
-     * @return
-     */
-    @Json
-    @PostMapping("/phpToUp")
-    @Transactional
-    public AjaxResult phpRecharge(){
-        RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
-        // 根据用户id查询用户数据
-        HashMap<String, Object> user_map = new HashMap<>();
-        user_map.put("UserID",rechargeRecords.getUserId());
-        Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
-        JSONObject resultMap = new JSONObject();
-        // 获取充值渠道id
-        int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
-        Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
-        int code = Integer.parseInt(info.get("code").toString());
-        if (code==1){
-            return fail(info.get("msg").toString());
-        }
-        Map channel =(Map) info.get("channel");
-        // 判断商家
-        int pid = Integer.parseInt(channel.get("pid").toString());
-        rechargeRecords.setChannelPid(pid);
-        // 钱包统计
-        RechargeExchangeCommon.rec(rechargeRecords,channel);
-        switch (pid) {
-            case 1:
-                // RARP
-                return rechargeRar(rechargeRecords, resultMap, channel);
-            case 4:
-                // safe
-                return rechargeSafe(rechargeRecords, resultMap, channel);
-            case 20:
-                // MetaPay
-                return rechargeMetaPay(rechargeRecords, resultMap,channel);
-            case 23:
-                // Omo
-                return rechargeOmo(rechargeRecords, resultMap,channel);
-            case 26:
-                // AIPay
-                return rechargeAIPay(rechargeRecords, resultMap,channel);
-            case 29:
-                // WePay
-                return rechargeWePay(rechargeRecords, resultMap,channel);
-            case 32:
-                // CloudPay支付
-                return rechargeGalaxy(rechargeRecords,resultMap,channel,1);
-            case 35:
-                // LetsPay支付
-                return rechargeLetsPay(rechargeRecords,resultMap,channel);
-            case 38:
-                // 银河系统MHDPay
-                return rechargeGalaxy(rechargeRecords,resultMap,channel,2);
-            case 49:
-                // BPay
-                return rechargeBPay(rechargeRecords,resultMap,channel);
-            case 52:
-                // GlobalPay
-                return rechargeGlobalPay(rechargeRecords,resultMap,channel);
-            default:
-                return json(resultMap,"Recharge application failed",1);
-        }
-    }
+    @Resource
+    private BetcatPay betcatPay;
+
 
 
     /**兑换接口
@@ -203,26 +135,21 @@ public class RechargeDockingController extends BaseController implements ConstSh
         BigDecimal max = new  BigDecimal(String.valueOf(channel.get("max")));
         // 金币倍率
         String goldPr = channel.get("goldProportion").toString();
-        resultMap.put("unit","PHP");
+        resultMap.put("unit","BRL");
         if ("USDT".equals(exchangeReview.getChannelName())){
             resultMap.put("unit","USDT");
             exchangeReview.setChannelId(19);
         }
         if (amount.intValue()<min.intValue() || amount.intValue()>max.intValue()){
-            return json(null,"105003",2);
+            return fail("105003");
         }
         // 计算兑换金币
         BigDecimal changeGolds=amount.multiply(new BigDecimal(goldPr)).setScale(0,RoundingMode.DOWN);
-        // 获取总赢配置
-        BigDecimal winConfig = new BigDecimal(channel.get("winConf").toString());
-        // 计算消耗的总赢兑换金额*金币比例*金币倍率*总赢倍率；
-        BigDecimal win = amount.multiply(new BigDecimal(goldPr)).multiply(winConfig).setScale(0,RoundingMode.DOWN);
-        exchangeReview.setConsumptionCode(win.longValue());
         exchangeReview.setGold(changeGolds.longValue());
         int code;
         try {
-            int i = winConfig.multiply(new BigDecimal("10000")).intValue();
-            code = RechargeExchangeCommon.ExchangeAmount(exchangeReview.getUserId(), changeGolds.longValue(), i);
+            code = RechargeExchangeCommon.ExchangeAmount(exchangeReview.getUserId(), changeGolds.longValue());
+            LOGGER.error(code);
         }catch (Exception e){
             LOGGER.error(e.getMessage());
             return fail("105011");
@@ -237,25 +164,157 @@ public class RechargeDockingController extends BaseController implements ConstSh
                     exchangeReview.setCreateTime(new Date());
                     exchangeReview.setStatus(2);
                     // 生成兑换订单
-                    exchangeReviewService.saveRtId(exchangeReview);
+                    int id = exchangeReviewService.saveRtId(exchangeReview);
+                    exchangeReview.setId(id);
+                    // 判断订单是否满足自动审核条件
+                    LOGGER.error(exchangeReview.getAmount());
+                    Boolean temp = AuditConditioningJudgment(exchangeReview);
+                    if (temp){
+                        autoReview(exchangeReview);
+                    }
                 }catch (Exception e){
-                    return json(null,e.getMessage(),1);
+                    LOGGER.error(e.getMessage());
+                    return fail("105011");
                 }
                 // 发送请求提示前端刷新金币
                 SendHttp.sendGame1003(exchangeReview.getUserId());
                 return json(resultMap);
             case 1:
+                // 用户不存在
                 return fail("105001");
             case 2:
+                //  未绑定手机
                 return fail("105002");
             case 3:
+                // 未发起首充
+                return fail("105012");
             case 4:
+                // 玩家金币不足
                 return fail("105003");
+            case 5:
+                // 打码量不满足条件
+                return fail("105013");
             default:
                 return fail("105011");
         }
     }
+    /**
+     * 判断兑换条件
+     */
+    private Boolean AuditConditioningJudgment(ExchangeReview exchangeReview){
+        // 判断是否开启自动审核
+        Map map = Db.selectOne("select * from [RYPlatformManagerDB].[dbo].AutoReviewConfig", null);
+        JSONObject auto = JSONObject.parseObject(JSON.toJSONString(map));
+        if (auto.getIntValue("auto")==1){
+            // 判断大渠道是否关闭
+            Map channel = Db.selectOne("select id from Pay_Channel where isExchange=1 order by sort", null);
+            if (channel==null || channel.isEmpty()){
+                System.out.println("出口"+1);
+                return false;
+            }
+            // 判断小渠道是否关闭
+            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid}", CMap.init().set("cid",channel.get("id")));
+            if (minChannel==null || minChannel.isEmpty()){
+                System.out.println("出口"+2);
+                return false;
+            }
+            // 判断用户是否是内部员工
+            Accountsinfo accountsinfo = Blade.create(Accountsinfo.class).findById(exchangeReview.getUserId());
+            if (accountsinfo.getIsInnerMember()==1){
+                System.out.println("出口"+3);
+                return false;
+            }
+            // 判断用户是否有备注
+            if (accountsinfo.getTipsname()!=null && accountsinfo.getTipsname().length()>0){
+                System.out.println("出口"+4);
+                return false;
+            }
+            // 当日所有的充提差是否小于0
+            Map info = Db.selectOne("select * from [QPGameUserDB].[dbo].[PlayerSocreInfo] where Userid=#{userId}",
+                    CMap.init().set("userId", exchangeReview.getUserId()));
+            // 判断用户总充值金额
+            BigDecimal TotalRecharge = new BigDecimal(info.get("TotalRecharge").toString());
+            if (auto.getIntValue("param1")==1){
+                if (TotalRecharge.intValue()<=0){
+                    System.out.println("出口"+5);
+                    return false;
+                }
+            }
+            // 用户今日充值金额
+            String TodayRecharge = info.get("TodayRecharge").toString();
+            if (auto.getIntValue("param2")==1){
+                // 判断用户当日是否有充值
+                int i = Integer.parseInt(TodayRecharge);
+                if (i<=0){
+                    System.out.println("出口"+6);
+                    return false;
+                }
+            }
+            // 用户总兑换金额
+            BigDecimal TotalWithDraw = new BigDecimal(info.get("TotalWithDraw").toString()).add(exchangeReview.getAmount());
+            // 用户充提差
+            BigDecimal dif = TotalRecharge.subtract(TotalWithDraw);
+            if (dif.intValue()<auto.getIntValue("param3")){
+                // 判断用户充提差是否满足条件
+                System.out.println("出口"+7+dif);
+                return false;
+            }
+            // 判断用户充提倍速是否满足条件，充值金额/兑换金额
+            BigDecimal divide = TotalRecharge.divide(TotalWithDraw, 2, RoundingMode.DOWN);
+            if (divide.floatValue()<auto.getFloatValue("param4")){
+                System.out.println("出口"+8);
+                return false;
+            }
+            // 判断单次兑换金额是否满足条件
+            if (exchangeReview.getAmount().intValue()>auto.getIntValue("param5")){
+                System.out.println("出口"+9);
+                return false;
+            }
+            // 今日兑换是否超过条件
+            BigDecimal todayWithDraw = new BigDecimal(info.get("TodayWithDraw").toString());
+            if (todayWithDraw.intValue() < auto.getIntValue("param6")){
+                exchangeReview.setChannelId(Integer.parseInt(minChannel.get("id").toString()));
+                System.out.println("出口"+10);
+                return true;
+            }else {
+                System.out.println("出口"+11);
+                return false;
+            }
+        }
+        return false;
+    }
 
+
+    /**
+     * 自动审核
+     */
+    private void autoReview(ExchangeReview exchangeReview) {
+        Map channel = commonService.getInfoByOne("channel_list.exchange_one",
+                CMap.init().set("id", exchangeReview.getChannelId()).set("clientType", exchangeReview.getSourcePlatform()));
+        BigDecimal fee = new BigDecimal(channel.get("fee").toString());
+        Integer pid = Integer.parseInt(channel.get("pid").toString());
+        exchangeReview.setChannelId(pid);
+        // 计算需要发送到第三方的钱 兑换的钱*（1-渠道税率）
+        BigDecimal amount = exchangeReview.getAmount();
+        BigDecimal taxRate = new BigDecimal(channel.get("channelTaxRate").toString());
+        BigDecimal money = amount.multiply(new BigDecimal("1").subtract(taxRate));
+        exchangeReview.setMoney(money.subtract(fee).setScale(2, RoundingMode.FLOOR));
+        RechargeExchangeCommon.exc(exchangeReview, channel);
+        // 设置自动审核
+        exchangeReview.setAuditMethod(1);
+        // 判断是哪个渠道
+        switch (pid) {
+            case 35:
+                ExchangeUtils.PayPlusExchange(exchangeReview,payPlus);
+                break;
+            case 2:
+                ExchangeUtils.BetcatPayExchange(exchangeReview,betcatPay);
+                break;
+            default:
+                break;
+        }
+        exchangeReviewService.update(exchangeReview);
+    }
 
     /**
      * 充值兑换渠道获取
@@ -277,11 +336,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
         // 获取大渠道 Pay_Channel
         if (type==1){
             // 查询用户用户总赢
-            BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
+//            BigDecimal totalWin = RechargeExchangeCommon.getUserWin(Integer.valueOf(UserId));
             String amount = RechargeExchangeCommon.getGold(Integer.valueOf(UserId));
             if ("".equals(amount)){
                 return json(null,"105001",1);
             }
+            // 查询需求打码量
+            long needCode = Long.parseLong(Db.queryStr("select NeedCodingQuantity from [QPGameUserDB].[dbo].[PlayerSocreInfo] where Userid=#{Userid}",
+                    CMap.init().set("Userid", UserId)));
             List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear gear,isRecharge,isExchange from Pay_Channel order by sort");
             for (Map map:payChannel) {
                 ChannelVo channelVo = JSON.parseObject(JSON.toJSONString(map), ChannelVo.class);
@@ -309,16 +371,16 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 max_param.put("unit",ch.get("unit"));
                 max_param.put("mcName",ch.get("mcName"));
                 // 获取金币
-                BigDecimal gpt = new BigDecimal(max_param.get("goldProportion").toString());
+//                BigDecimal gpt = new BigDecimal(max_param.get("goldProportion").toString());
                 // 根据用户总赢计算可以兑换的钱  用户总赢/10000/1.5
-                BigDecimal fee1 = totalWin.divide(gpt, RoundingMode.DOWN).divide(new BigDecimal(max_param.get("winConf").toString()), RoundingMode.DOWN);
+//                BigDecimal fee1 = totalWin.divide(gpt, RoundingMode.DOWN).divide(new BigDecimal(max_param.get("winConf").toString()), RoundingMode.DOWN);
                 // 根据用户金币计算能够兑换的钱  用户金币/金币倍率
-                BigDecimal am = new BigDecimal(amount).divide(gpt,RoundingMode.DOWN);
-                int fee = Math.min(fee1.intValue(), am.intValue());
-                if (fee<0.01){
-                    fee = 0;
+//                BigDecimal am = new BigDecimal(amount).divide(gpt,RoundingMode.DOWN);
+//                int fee = Math.min(fee1.intValue(), am.intValue());
+                if (needCode<0){
+                    needCode = 0;
                 }
-                max_param.put("money",fee);
+                max_param.put("money",needCode);
                 channelVo.getTypes().add(max_param);
             }
         }else {
@@ -390,10 +452,9 @@ public class RechargeDockingController extends BaseController implements ConstSh
      */
     @Json
     @GetMapping("/firstrecharge")
-    @RateLimit(limit = 1,period = 1)
     public AjaxResult first(){
-        Map first = commonService.getInfoByOne("recharge_channel.first_list", null);
-        return json(first);
+        List<Map> infoList = commonService.getInfoList("recharge_channel.first_list", null);
+        return json(infoList);
     }
 
     private AjaxResult rechargeGlobalPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {

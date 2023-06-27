@@ -35,20 +35,27 @@ public class BetcatPayController extends BaseController implements ConstShiro {
 
     @Resource
     private BetcatPay betcatPay;
-
+    /**
+     * 需要的参数
+     * recharge.isFirstCharge:0普通充值，1首充，2随机充值
+     * recharge.userId:用户id
+     * recharge.pid: 父渠道id
+     * recharge.id: 渠道id
+     * 新加：充值挡位id recharge.gear
+     * @return
+     */
     @PostMapping("/recharge")
     @Transactional
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords = mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
-        HashMap<String, Object> user_map = new HashMap<>();
-        user_map.put("UserID",rechargeRecords.getUserId());
-        Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
+        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",rechargeRecords.getUserId()));
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
+        LOGGER.error(code);
         if (code==1){
             return fail(info.get("msg").toString());
         }
@@ -66,7 +73,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         }
         int code1 = jsonObject.getIntValue("code");
         if (code1!=0){
-            rechargeRecords.setMsg(jsonObject.getString("msg"));
+            rechargeRecords.setMsg(jsonObject.getString("error"));
             rechargeRecords.setOrderStatus(3);
             rechargeRecordsService.saveRtId(rechargeRecords);
             return json(resultMap, "105005", 1);

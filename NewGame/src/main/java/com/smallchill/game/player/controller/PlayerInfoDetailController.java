@@ -112,14 +112,17 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		// 获取用户充值返利奖励金币
 		Integer rebateGold = Db.queryInt("select isnull(sum(Data),0) from [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] where UserId=#{UserID} and DataType=1", paras);
 		mm.put("rebateGold",rebateGold);
-		// 在线金币领取
-		Map onlineData = Db.selectOne("select isnull(sum(Daya),0) gold,count(id) num from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] where Userid=#{UserID} and UseType=1 and ClaimType=1", paras);
+		// 白银转盘金币领取
+		Map onlineData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
+				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=1 and Fake=0", paras);
 		mm.put("onlineData",onlineData);
-		// 在线金币领取
-		Map dailyData = Db.selectOne("select isnull(sum(Daya),0) gold,count(id) num from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] where Userid=#{UserID} and UseType=2 and ClaimType=1", paras);
+		// 黄金转盘金币领取
+		Map dailyData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
+				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=0 and Fake=0", paras);
 		mm.put("dailyData",dailyData);
-		// 打码
-		Map codeData = Db.selectOne("select isnull(sum(Daya),0) gold,count(id) num from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] where Userid=#{UserID} and UseType=3 and ClaimType=1", paras);
+		// 钻石
+		Map codeData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
+				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=3 and Fake=1", paras);
 		mm.put("codeData",codeData);
 		// 分析代理金币
 		Map shareMap = Db.selectOne("select isnull(sum(Amount),0) gold from [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] where User_Id=#{UserID} and ChangeType_Id in (212,213)", paras);

@@ -1,5 +1,6 @@
 package com.smallchill.system.treasure.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
@@ -114,21 +115,19 @@ public class RechargeExchangeCommon {
     }
     /**
      * @UserID int,
-     * @ExchangeGold bigint,			--兑换金币
-     * @TotalWinRate float				--总赢倍率
+     * @ExchangeGold bigint --兑换金币
      */
-    public static Integer ExchangeAmount(Integer userId,Long ExchangeGold,Integer TotalWinRate){
+    public static Integer ExchangeAmount(Integer userId,Long ExchangeGold){
         SQLManager dao = Blade.dao();
         return dao.executeOnConnection(new OnConnection<Integer>() {
             @Override
             public Integer call(Connection connection) throws SQLException {
-                CallableStatement statement = connection.prepareCall("{? = call [RYPlatformManagerDB].[dbo].[ExchangeAmount](?,?,?)}");
+                CallableStatement statement = connection.prepareCall("{? = call [RYPlatformManagerDB].[dbo].[ExchangeAmount](?,?)}");
                 // 注册输出参数
                 statement.registerOutParameter(1, Types.INTEGER);
                 // 设置参数
                 statement.setInt(2, userId);
                 statement.setLong(3, ExchangeGold);
-                statement.setInt(4, TotalWinRate);
                 statement.execute();
                 return statement.getInt(1);
             }
@@ -238,10 +237,10 @@ public class RechargeExchangeCommon {
         });
     }
 
+
     /**
      * 充值工具
      */
-
     public static Map<String,Object> recharge(RechargeRecords rechargeRecords, JSONObject resultMap, Map user, CommonService commonService,Integer channelId){
         Map<String, Object> reMap = new HashMap<>();
         if (user==null){
@@ -253,6 +252,7 @@ public class RechargeExchangeCommon {
         if (phone!=null){
             rechargeRecords.setPhone(phone);
         }
+        // 获取包id
         rechargeRecords.setPackageName(Integer.valueOf(user.get("ClientType").toString()));
         Map channel = commonService.getInfoByOne("channel_list.recharge_one",
                 CMap.init().set("id",channelId));
@@ -260,8 +260,8 @@ public class RechargeExchangeCommon {
         rechargeRecords.setChannel_type(String.valueOf(channel.get("name")));
         // 大渠道
         rechargeRecords.setChannel(String.valueOf(channel.get("channelName")));
-        BigDecimal fee= rechargeRecords.getTopUpAmount();
-        // 判断是否首充
+        BigDecimal amount = new BigDecimal(0);
+        // 判断是否首充,大于0为首充
         if(rechargeRecords.getIsFirstCharge()==1){
             // 判断是否已经首充过  QPGameUserDB   AccountsInfo
             Integer IsFirstRecharge = Db.queryInt("select IsFirstRecharge from [QPGameUserDB].[dbo].[AccountsInfo] where UserID = #{UserId}",
@@ -272,49 +272,58 @@ public class RechargeExchangeCommon {
                 return reMap;
             }
             // 获取首充配置
-            Map first = commonService.getInfoByOne("recharge_channel.first_list", null);
+            Map first = commonService.getInfoByOne("recharge_channel.first_one", CMap.init().set("id",rechargeRecords.getGear()));
             BigDecimal gold = new BigDecimal(String.valueOf(first.get("gold")));
             BigDecimal gold_give = new BigDecimal(String.valueOf(first.get("give_gold")));
+            // 计算获得金币
             rechargeRecords.setGold(gold.add(gold_give).longValue());
+            rechargeRecords.setTopUpAmount(new BigDecimal(first.get("amount").toString()));
             // 修改
         }else if (rechargeRecords.getIsFirstCharge()==0){
-            // 普通充值
-            BigDecimal max = new BigDecimal(String.valueOf(channel.get("max")));
-            BigDecimal min = new BigDecimal(String.valueOf(channel.get("min")));
-            // 判断充值的钱是否满足渠道条件
-            if (fee.intValue() <min.intValue() || fee.intValue()>max.intValue()){
-                reMap.put("code",1);
-                reMap.put("msg","104012");
-                return reMap;
-            }
-            // 获取渠道外赠送比例
-            BigDecimal give = new BigDecimal(String.valueOf(channel.get("give")));
-            // 渠道倍率goldProportion
-            BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
-            //  充值的钱*金币倍率*赠送比例
-            BigDecimal give_gold = fee.multiply(gpr).multiply(give);
-            //  充值的钱*10000*金币倍率+渠道外赠送
-            BigDecimal get_Gold = fee.multiply(gpr).add(give_gold).setScale(0,RoundingMode.HALF_UP);
+            // 普通充值，查询充值挡位计算获得的金币
+//            BigDecimal max = new BigDecimal(String.valueOf(channel.get("max")));
+//            BigDecimal min = new BigDecimal(String.valueOf(channel.get("min")));
+//            // 判断充值的钱是否满足渠道条件
+//            if (fee.intValue() <min.intValue() || fee.intValue()>max.intValue()){
+//                reMap.put("code",1);
+//                reMap.put("msg","104012");
+//                return reMap;
+//            }
+            // 充值充值挡位 recharge_gear
+            Map gear = commonService.getInfoByOne("recharge_gear.find_gear_by_id", CMap.init().set("id", rechargeRecords.getGear()));
+            JSONObject gears = JSONObject.parseObject(JSON.toJSONString(gear));
+            // 设置充值金额
+            amount = gears.getBigDecimal("amount");
+            rechargeRecords.setTopUpAmount(amount);
+            // 获取充值获得金币
+            BigDecimal gold = new BigDecimal(gears.getString("gold"));
+            // 赠送比率
+            BigDecimal extra = new BigDecimal(gears.getString("getExtra"));
+            //  获取赠送的金币 基础金币*赠送比例
+            BigDecimal give_gold = gold.multiply(extra);
+            //  最终获得金币：基础金币+渠道外赠送
+            BigDecimal get_Gold = gold.add(give_gold).setScale(0,RoundingMode.HALF_UP);
             // 将充值金币存储到订单里面
             rechargeRecords.setGold(get_Gold.longValue());
-        }else if (rechargeRecords.getIsFirstCharge()==2){
-            // 随机充值，查询随机充值配置
-            Map map = Db.selectOne("select * from [QPGameUserDB].[dbo].[PlayerActiveInfo_RandomRecharge] where UserId=#{userId}",
-                    CMap.init().set("userId",rechargeRecords.getUserId()));
-            // 计算随机充值金额是否正确
-            BigDecimal money = new BigDecimal(map.get("RechargeGold").toString());
-            if (money.intValue()!=rechargeRecords.getTopUpAmount().intValue()){
-                reMap.put("code",1);
-                reMap.put("msg","105011");
-                return reMap;
-            }
-            // 渠道倍率goldProportion
-            BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
-            // 奖励百分比
-            BigDecimal percentId = new BigDecimal(map.get("PercentId").toString()).divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
-            // 计算获得金币
-            BigDecimal get_gold = money.multiply(gpr).multiply(percentId).setScale(0, RoundingMode.DOWN);
-            rechargeRecords.setGold(get_gold.longValue());
+//            else if (rechargeRecords.getIsFirstCharge()==2){
+//                // 随机充值，查询随机充值配置
+//                Map map = Db.selectOne("select * from [QPGameUserDB].[dbo].[PlayerActiveInfo_RandomRecharge] where UserId=#{userId}",
+//                        CMap.init().set("userId",rechargeRecords.getUserId()));
+//                // 计算随机充值金额是否正确
+//                BigDecimal money = new BigDecimal(map.get("RechargeGold").toString());
+//                if (money.intValue()!=rechargeRecords.getTopUpAmount().intValue()){
+//                    reMap.put("code",1);
+//                    reMap.put("msg","105011");
+//                    return reMap;
+//                }
+//                // 渠道倍率goldProportion
+//                BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
+//                // 奖励百分比
+//                BigDecimal percentId = new BigDecimal(map.get("PercentId").toString()).divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
+//                // 计算获得金币
+//                BigDecimal get_gold = money.multiply(gpr).multiply(percentId).setScale(0, RoundingMode.DOWN);
+//                rechargeRecords.setGold(get_gold.longValue());
+//            }
         }else {
            reMap.put("code",1);
            reMap.put("msg","105011");
@@ -333,7 +342,7 @@ public class RechargeExchangeCommon {
         // 设置响应结果
         resultMap.put("Userid",rechargeRecords.getUserId());
         resultMap.put("gameCoin",rechargeRecords.getGold()); //  充值的游戏币
-        resultMap.put("gold",fee.setScale(2,RoundingMode.HALF_UP)); //  充值的钱
+        resultMap.put("gold",amount.setScale(2,RoundingMode.HALF_UP)); //  充值的钱
         resultMap.put("type",0);// 充值类型
         rechargeRecords.setIsThatTay(0);
         reMap.put("code",0);
@@ -442,7 +451,7 @@ public class RechargeExchangeCommon {
         SQLManager dao = Blade.dao();
         return dao.executeOnConnection(new OnConnection<Map<String,Object>>() {
             @Override
-            public Map<String, Object> call(Connection connection) throws SQLException {
+            public Map<String, Object> call(Connection connection) {
                 HashMap<String, Object> map = new HashMap<>();
                 try {
                     CallableStatement callableStatement = connection.prepareCall("{call [RYPlatformManagerDB].[dbo].[RealTimeWalletStatistics](?,?,?)}");
@@ -478,5 +487,7 @@ public class RechargeExchangeCommon {
             }
         });
     }
+
+
 
 }

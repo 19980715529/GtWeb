@@ -34,26 +34,32 @@ public class PayPlusController extends BaseController implements ConstShiro {
 
     @Resource
     private PayPlus payPlus;
-    //
+
+    /**
+     * 需要的参数
+     * recharge.isFirstCharge:0普通充值，1首充，2随机充值
+     * recharge.userId:用户id
+     * recharge.topUpAmount：充值的金额：这个不要了
+     * recharge.pid: 父渠道id
+     * recharge.id: 渠道id
+     * 新加：充值挡位id recharge.gear
+     * @return
+     */
     @PostMapping("/recharge")
     @Transactional
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
-        HashMap<String, Object> user_map = new HashMap<>();
-        user_map.put("UserID",rechargeRecords.getUserId());
-        Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
+        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",rechargeRecords.getUserId()));
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
-        LOGGER.error("小渠道id:" + channelId);
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
         if (code==1){
             return fail(info.get("msg").toString());
         }
         String response = PayPlusUtils.recharge(rechargeRecords,payPlus);
-        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "105005", 1);
         }
@@ -62,7 +68,7 @@ public class PayPlusController extends BaseController implements ConstShiro {
             jsonObject = JSON.parseObject(response);
         }catch (Exception e){
             LOGGER.error(e.getMessage());
-            return fail(e.getMessage());
+            return fail("105005");
         }
         String retCode = jsonObject.getString("retCode");
         // 1：成功，0:失败

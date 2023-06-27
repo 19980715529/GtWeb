@@ -80,7 +80,6 @@ public class PlayerCoinLogController extends BaseController implements ConstShir
 		if (changeType_id==null){
 			changeType_id = "";
 		}
-		LOGGER.error(changeType_id);
 		String ServerId = JSON.toJSONString(paras.get("ServerID")).replaceAll("\"", "");
         if (ServerId != null && !ServerId.equals("") && !ServerId.equals("null")) {
             Gameroomitem room = Blade.create(Gameroomitem.class).findFirstBy(" where ServerID=" + ServerId, null);

@@ -377,7 +377,7 @@ new_detail
 	(SELECT  COUNT(id)  FROM [RYPlatformManagerDB].[dbo].[Exchange_review] with (nolock) WHERE userId = a.UserID and status in (1,2,8)) as ExchangeAuditNum,
 	(SELECT  TotalScore FROM [QPGameUserDB].[dbo].[PlayerSocreInfo] with (nolock) WHERE Userid = a.UserID) as TotalWaste,
     (SELECT  TotalWin FROM [QPGameUserDB].[dbo].[PlayerSocreInfo] with (nolock) WHERE Userid = a.UserID) as TotalWin,
-	(SELECT  isnull(SUM(Daya),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] with (nolock) WHERE Userid = a.UserID and ClaimType =1) as RotaryReward,
+	(SELECT  isnull(SUM(Award),0) FROM [QPGameRecordDB].[dbo].[Turntable_History] with (nolock) WHERE UserID = a.UserID and Fake=0) as RotaryReward,
 	(SELECT  isnull(sum(Data),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] with (nolock) WHERE UserId = a.UserID and DataType =1) as CodeReward,
 	(case when (DATEDIFF(DAY,b.changeScoreTime,GETDATE())>0) then 0 else b.todayScore end) as DayWaste
 	, b.js_BussniessCount, b.out_BussniessCount,
@@ -428,9 +428,7 @@ new_list1
 	b.out_BussniessCount as SendScore,
 	(b.js_BussniessCount-b.out_BussniessCount) as RS,
     ((select isnull(sum(Data),0) from [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] c with (nolock) where c.UserId=a.userID and DataType=1)+
-    (select isnull(sum(Daya),0) gold from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] c with (nolock) where c.Userid=a.userID and UseType=1 and ClaimType=1)+
-    (select isnull(sum(Daya),0) gold from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] c with (nolock) where c.Userid=a.userID and UseType=2 and ClaimType=1)+
-    (select isnull(sum(Daya),0) gold from [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] c with (nolock) where c.Userid=a.userID and UseType=3 and ClaimType=1)) as rewardGold,
+    (select isnull(sum(Award),0) gold from [QPGameRecordDB].[dbo].[Turntable_History] c with (nolock) where c.UserID=a.userID and Fake=0)) as rewardGold,
 	isnull((select (case when ServerID=0 then '大厅' else (select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] where ServerID=l.ServerID) end) FROM [QPTreasureDB].[dbo].[GameScoreLocker] l with (nolock) where l.UserID=a.UserID),'离线') as OnlineServerName,
 	(case when a.FirstServerId=0 then '无' else (select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] where ServerID=a.FirstServerId) end) as FirstEnterKindName
 	,(case when (Businessman=0 or Businessman is null) then (case when vipLevel=0 then '普通用户' else '特权用户:VIP'+cast(vipLevel as varchar) end) else '至尊VIP' end) as TypeName

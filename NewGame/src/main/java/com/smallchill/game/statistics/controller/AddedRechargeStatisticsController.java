@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -38,10 +39,27 @@ public class AddedRechargeStatisticsController extends BaseController implements
         return BASE_PATH + "newrecharge_statistics.html";
     }
 
+    @DoControllerLog(name="进入用户充值统计页面")
+    @RequestMapping("/details/{id}")
+    public String details(@PathVariable Integer id, ModelMap mm) {
+        mm.put("code", CODE);
+        mm.put("id", id);
+        // 查询所有
+        Map newrecharge = commonService.getInfoByOne("newrecharge.find_one", CMap.init().set("id", id));
+        mm.put("newrecharge", newrecharge);
+        return BASE_PATH + "newrecharge_statistics_details.html";
+    }
+
     @Json
     @RequestMapping(KEY_LIST)
     public Object list() {
         return paginateBySelf("newrecharge.all_list");
+    }
+
+    @Json
+    @RequestMapping("/details/list")
+    public Object detailsList() {
+        return paginateBySelf("newrecharge.details_list");
     }
 
     @RequestMapping(KEY_EDIT+"/{id}")

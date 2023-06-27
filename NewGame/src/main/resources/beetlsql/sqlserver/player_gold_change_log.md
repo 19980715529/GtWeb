@@ -2634,16 +2634,16 @@ bank_deposit
 	  @}
 rotary_give_gold
 ===
-    select isnull(SUM(Daya),0) TScore,'-7' as ServerId,'转盘金币奖励' as RoomName FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_TurntableClaimHistory] as p with (nolock) 
-    where ClaimType=1
+    select isnull(SUM(Award),0) TScore,'-7' as ServerId,'转盘金币奖励' as RoomName FROM [QPGameRecordDB].[dbo].[Turntable_History] as p with (nolock) 
+    where Fake=1
     @if(!isEmpty(UserID)){
-        and p.Userid =#{UserID}
+        and p.UserID =#{UserID}
     @}
     @if(!isEmpty(BeginTime)){
-		 and CONVERT(VARCHAR(100), p.times, 20) >= CONVERT(VARCHAR(100), #{BeginTime}, 20)
+		 and CONVERT(VARCHAR(100), p.Time, 20) >= CONVERT(VARCHAR(100), #{BeginTime}, 20)
 	  @}
 	  @if(!isEmpty(EndTime)){
-		 and CONVERT(VARCHAR(100), p.times, 20) <= CONVERT(VARCHAR(100), #{EndTime}, 20)
+		 and CONVERT(VARCHAR(100), p.Time, 20) <= CONVERT(VARCHAR(100), #{EndTime}, 20)
 	  @}
         	  
 shuiguo777

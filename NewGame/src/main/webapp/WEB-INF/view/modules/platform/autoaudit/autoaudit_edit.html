@@ -1,0 +1,63 @@
+@layout("/common/_container.html"){
+<!-- PAGE CONTENT BEGINS -->
+<div class="row">
+    <div class="col-xs-12 tb-grid">
+        <form data-url="${ctxPath}/autoaudit/update" method="post" class="form-horizontal" role="form">
+            <input type="hidden" name="autoaudit.id" value="${autoaudit.id}" readonly/>
+            <table class="table table-bordered">
+                <tbody>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否开启自动审核: </td>
+                    <td>
+                        <input type="radio" name="autoaudit.auto" value="0" ${autoaudit.auto==0?"checked":""}>关闭</input>&nbsp;&nbsp;
+                        <input type="radio" name="autoaudit.auto" value="1" ${autoaudit.auto==1?"checked":""}>开启</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">用户需要充值: </td>
+                    <td>
+                        <input type="radio" name="autoaudit.param1" value="0" ${autoaudit.param1==0?"checked":""}>关闭</input>&nbsp;&nbsp;
+                        <input type="radio" name="autoaudit.param1" value="1" ${autoaudit.param1==1?"checked":""}>开启</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">用户当日需要充值: </td>
+                    <td>
+                        <input type="radio" name="autoaudit.param2" value="0" ${autoaudit.param2==0?"checked":""}>关闭</input>&nbsp;&nbsp;
+                        <input type="radio" name="autoaudit.param2" value="1" ${autoaudit.param2==1?"checked":""}>开启</input>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">充提差: </td>
+                    <td>
+                        <input type="text" name="autoaudit.param3" value="${autoaudit.param3}"/>&nbsp;<span style="color: red">完成后大于则自动审核</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">用户充提倍速: </td>
+                    <td>
+                        <input type="text" name="autoaudit.param4" value="${autoaudit.param4}"/>&nbsp;<span style="color: red">完成后大于则自动审核</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">单笔订单金额上线: </td>
+                    <td>
+                        <input type="text" name="autoaudit.param5" value="${autoaudit.param5}"/>&nbsp;<span style="color: red">完成后小于则自动审核</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">今日总金额自动限额: </td>
+                    <td>
+                        <input type="text" name="autoaudit.param6" value="${autoaudit.param6}"/>&nbsp;<span style="color: red">完成后小于则自动审核</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script>
+</script>
+<!-- 按钮 -->
+@ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}
+@}

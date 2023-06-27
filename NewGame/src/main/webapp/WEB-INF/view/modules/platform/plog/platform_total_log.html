@@ -22,8 +22,10 @@
 					<td>${total.totalscore!0}</td>
 					<td style="vertical-align: middle !important;text-align:right;">转盘活动产出金币总量 </td>
 					<td>${total.turntablegold!0}</td>
-					<td style="vertical-align: middle !important;text-align:right;">领取转盘总次数</td>
-					<td>${total.onlinerewards!0+total.dailyattendances!0+total.coderebates!0+total.onlinecount!0+total.dailycount!0+total.codecount!0}</td>
+<!--					<td style="vertical-align: middle !important;text-align:right;">领取转盘总次数</td>-->
+<!--					<td>${total.onlinerewards!0+total.dailyattendances!0+total.coderebates!0+total.silvercount!0+total.dailycount!0+total.diamondcount!0}</td>-->
+					<td style="vertical-align: middle !important;text-align:right;">钻石领取转盘次数 </td>
+					<td>${total.coderebates!0+total.diamondcount!0}</td>
 					<td style="vertical-align: middle !important;text-align:right;">总登录人数</td>
 					<td>${total.czUserLogin!0}</td>
 				</tr>
@@ -33,9 +35,11 @@
 
 					<td style="vertical-align: middle !important;text-align:right;">充值返利金币总量</td>
 					<td>${total.czcoderebategold!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">打码返利转盘使用次数</td>
+					<td>${total.diamondcount!0}</td>
 
-					<td style="vertical-align: middle !important;text-align:right;">在线奖领取励转盘次数</td>
-					<td>${total.onlinerewards!0+total.onlinecount!0}</td>
+<!--					<td style="vertical-align: middle !important;text-align:right;">在线奖领取励转盘次数</td>-->
+<!--					<td>${total.onlinerewards!0+total.silvercount!0}</td>-->
 
 					<td style="vertical-align: middle !important;text-align:right;">今日登录人数</td>
 					<td>${total.DLoginUserCount!0}</td>
@@ -47,46 +51,44 @@
 					<td style="vertical-align: middle !important;text-align:right;">绑定手机金币总量</td>
 					<td>${total.bindmobilerewards!0}</td>
 
-					<td style="vertical-align: middle !important;text-align:right;">每日签到领取转盘次数</td>
-					<td>${total.dailyattendances!0+total.dailycount!0}</td>
-
+<!--					<td style="vertical-align: middle !important;text-align:right;">领取转盘次数</td>-->
+<!--					<td>${total.dailyattendances!0+total.silvercount!0}</td>-->
+					<td style="vertical-align: middle !important;text-align:right;">使用转盘总次数</td>
+					<td>${total.silvercount!0+total.goldcount!0+total.diamondcount!0}</td>
 					<td colspan="2" rowspan="6"></td>
 				</tr>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;">当日充值获得金币 </td>
 					<td>${total.czscore!0}</td>
 
-					<td style="vertical-align: middle !important;text-align:right;">在线奖励金币 </td>
-					<td>${total.onlinegoldbonus!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">白银转盘奖励金币 </td>
+					<td>${total.silverGoldRewards!0}</td>
 
-					<td style="vertical-align: middle !important;text-align:right;">打码返利领取转盘次数 </td>
-					<td>${total.coderebates!0+total.codecount!0}</td>
+
 				</tr>
 				<tr>
 					<td colspan="2" rowspan="1"></td>
-					<td style="vertical-align: middle !important;text-align:right;">每日签到金币</td>
-					<td>${total.dailygoldbonus!0}</td>
-					<td style="vertical-align: middle !important;text-align:right;">使用转盘总次数</td>
-					<td>${total.onlinecount!0+total.dailycount!0+total.codecount!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">黄金转盘奖励金币</td>
+					<td>${total.goldenGoldRewards!0}</td>
+
 				</tr>
 				<tr>
 					<td colspan="2" rowspan="1"></td>
-					<td style="vertical-align: middle !important;text-align:right;">打码返利金币</td>
-					<td>${total.codegoldbonus!0}</td>
-					<td style="vertical-align: middle !important;text-align:right;">在线奖励转盘使用次数</td>
-					<td>${total.onlinecount!0}</td>
-				</tr>
-				<tr>
-					<td colspan="2" rowspan="1"></td>
-					<td colspan="2" rowspan="1"></td>
-					<td style="vertical-align: middle !important;text-align:right;">每日签到转盘使用次数</td>
-					<td>${total.dailycount!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">钻石转盘金币奖励</td>
+					<td>${total.diamondGoldRewards!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">白银奖励转盘使用次数</td>
+					<td>${total.silvercount!0}</td>
 				</tr>
 				<tr>
 					<td colspan="2" rowspan="1"></td>
 					<td colspan="2" rowspan="1"></td>
-					<td style="vertical-align: middle !important;text-align:right;">打码返利转盘使用次数</td>
-					<td>${total.codecount!0}</td>
+					<td style="vertical-align: middle !important;text-align:right;">黄金转盘使用次数</td>
+					<td>${total.goldcount!0}</td>
+				</tr>
+				<tr>
+					<td colspan="2" rowspan="1"></td>
+					<td colspan="2" rowspan="1"></td>
+
 				</tr>
 				<tr>
 					<td colspan="2" class="t-caption bg-0f5ac4 text-center text-white">用户注册</td>
