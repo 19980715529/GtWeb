@@ -11,17 +11,13 @@ public class BindPhoneValidator extends BladeValidator {
     protected void doValidate(Invocation inv) {
         validateRequired("player.bindPhone", "请输入手机号");
         String phone = request.getParameter("player.bindPhone");
-        validateStringEquLenValue(phone,10,"电话号的长度为10位");
+        validateStringEquLenValue(phone,11,"电话号的长度为11位");
 
     }
 
     protected void validateStringEquLenValue(String value, int len, String errorMessage) {
         if (StrKit.isBlank(value)) {
             addError(errorMessage);
-            return;
-        }
-        if (!value.startsWith("9")){
-            addError("电话号必须以9开头");
             return;
         }
         int length = StrKit.length(value);
@@ -33,7 +29,6 @@ public class BindPhoneValidator extends BladeValidator {
                 CMap.init().set("phone",value));
         if (con!=0){
             addError("该手机号已经被绑定");
-            return;
         }
     }
 }
