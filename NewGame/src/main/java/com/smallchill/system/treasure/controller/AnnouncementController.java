@@ -2,6 +2,7 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.plugins.dao.Redis;
@@ -100,6 +101,7 @@ public class AnnouncementController extends BaseController implements ConstShiro
         return success("添加成功");
     }
     @GetMapping("/redis/get")
+    @RateLimit()
     public AjaxResult getRedisKey(@RequestParam String key){
         IJedis cache = Redis.init("cache");
         String value = cache.get(key);

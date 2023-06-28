@@ -46,7 +46,6 @@ public class GlobalPayController extends BaseController implements ConstShiro {
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
-        LOGGER.error("小渠道id:"+channelId);
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
         if (code==1){

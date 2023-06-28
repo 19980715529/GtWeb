@@ -40,6 +40,8 @@ import com.smallchill.pay.rarPay.model.RarPay;
 import com.smallchill.pay.bpay.utils.BPayUtils;
 import com.smallchill.pay.globalPay.utils.GlobalPayUtils;
 import com.smallchill.pay.rarPay.utils.RarPayUtils;
+import com.smallchill.pay.rpay.model.RPay;
+import com.smallchill.pay.rpay.utils.RPayUtils;
 import com.smallchill.pay.safePay.utils.SafePayUtils;
 import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
@@ -76,19 +78,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     @Resource
     private RarPay rarPay;
     @Resource
-    private PayPlus payPlus;
-    @Resource
-    private SuperPayPlus superPayPlus;
-    @Resource
-    private BPay bPay;
-    @Resource
-    private GlobalPay globalPay;
-    @Resource
-    private CloudPay cloudPay;
-    @Resource
-    private MhdPay mhdPay;
-    @Resource
-    private AIPay aiPay;
+    private RPay rPay;
     @Resource
     private LuckPay luckPay;
     @Resource
@@ -97,6 +87,10 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     private static String CODE = "exchangereview";
     private static String LIST_SOURCE = "exchange_review.all_list";
     private static String PREFIX = "exchange_review";
+
+    public ExchangeReviewController() {
+    }
+
     @DoControllerLog(name="进入兑换审核界面")
     @RequestMapping("/")
     public String index(ModelMap mm) {
@@ -174,6 +168,8 @@ public class ExchangeReviewController extends BaseController implements ConstShi
                     break;
                 case 3:
                     if (LuckPayExchange(exchangeReview)) return error("fail");
+                case 4:
+                    if (RPayExchange(exchangeReview))return error("fail");
                     break;
                 default:
                     break;
@@ -409,17 +405,35 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         }
     }
 
-    private boolean LuckPayExchange(ExchangeReview exchangeReview) {
-        JSONObject respJson;
-        String response;
-        String statusStr;
-        response = LuckyPayUtils.sendExchangeLuckyPay(exchangeReview,luckPay);
+    private boolean RPayExchange(ExchangeReview exchangeReview){
+        String response = RPayUtils.exchange(exchangeReview,rPay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
         }
-        respJson = JSONObject.parseObject(response);
-        statusStr = respJson.getString("code");
+        JSONObject respJson = JSONObject.parseObject(response);
+        int status = respJson.getIntValue("status");
+        // 成功
+        if (status == 1) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
+    private boolean LuckPayExchange(ExchangeReview exchangeReview) {
+        String response = LuckyPayUtils.sendExchangeLuckyPay(exchangeReview,luckPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String statusStr = respJson.getString("code");
         // 成功
         if ("00".equals(statusStr)) {
             // 请求成功 ,获取平台订单号
@@ -436,19 +450,16 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     }
 
     private boolean OmoPayExchange(ExchangeReview exchangeReview) {
-        String response;
-        JSONObject respJson;
-        String statusStr;
         // omom 请求的金额必须是整数这里进行处理
         exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
-        response = OmoPayUtils.exchange(exchangeReview,omoPay);
+        String response = OmoPayUtils.exchange(exchangeReview,omoPay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
         }
         // 获取平台订单号
-        respJson = JSONObject.parseObject(response);
-        statusStr = respJson.getString("status");
+        JSONObject respJson = JSONObject.parseObject(response);
+        String statusStr = respJson.getString("status");
         if ("success".equals(statusStr)) {
             // 请求成功, 获取平台订单号
             String PfOrderNum = respJson.getString("transaction_id");
@@ -464,27 +475,23 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     }
 
     private boolean RarPayExchange(ExchangeReview exchangeReview, Map channel) {
-        String response;
-        JSONObject respJson;
-        int status;
-        int code;
         // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
-        response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
+        String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
         // rarp      Gcash account format error   SIGN_ERROR
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
         }
         // 获取平台订单号
-        respJson = JSONObject.parseObject(response);
-        code = respJson.getIntValue("code");
+        JSONObject respJson = JSONObject.parseObject(response);
+        int code = respJson.getIntValue("code");
         // 同步请求状态为0代表请求失败，订单变成失败
         if (code == 0) {
             exchangeReview.setMsg(respJson.getString("msg"));
             // 支付失败
             exchangeReview.setStatus(6);
         } else {
-            status = respJson.getJSONObject("data").getIntValue("status");
+            int status = respJson.getJSONObject("data").getIntValue("status");
             // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
             if (status == 0) {
                 // 未支付，将订单状态设置为待支付

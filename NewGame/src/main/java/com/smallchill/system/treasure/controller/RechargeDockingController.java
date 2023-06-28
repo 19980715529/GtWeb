@@ -34,6 +34,8 @@ import com.smallchill.pay.rarPay.model.RarPay;
 import com.smallchill.pay.bpay.utils.BPayUtils;
 import com.smallchill.pay.globalPay.utils.GlobalPayUtils;
 import com.smallchill.pay.rarPay.utils.RarPayUtils;
+import com.smallchill.pay.rpay.model.RPay;
+import com.smallchill.pay.rpay.utils.RPayUtils;
 import com.smallchill.pay.safePay.utils.SafePayUtils;
 import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.service.ExchangeReviewService;
@@ -77,12 +79,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
     private BPay bPay;
     @Resource
     private GlobalPay globalPay;
-
-    @Resource
-    private CloudPay cloudPay;
-
-    @Resource
-    private MhdPay mhdPay;
 
     @Resource
     private AIPay aiPay;
@@ -138,6 +134,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return rechargeOmo(rechargeRecords,resultMap,channel);
             case 3:
                 return rechargeLuckyPay(rechargeRecords,resultMap,channel);
+            case 4:
+                return rechargeGalaxy(rechargeRecords,resultMap,channel);
             default:
                 return json(resultMap,"Recharge application failed",1);
 //            case 4:
@@ -316,9 +314,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 获取最大参数
                 CMap param =CMap.init().set("clientType", cid).set("type", type).set("cid", map.get("id"));
                 Map max_param = commonService.getInfoByOne("channel_list.param_max", param);
-//                if (max_param==null){
-//                    continue;
-//                }
                 // 获取其中一条
                 Map ch = commonService.getInfoByOne("channel_list.param_one", param);
                 if (ch==null){
@@ -568,17 +563,15 @@ public class RechargeDockingController extends BaseController implements ConstSh
             return json(resultMap, "Recharge application failed", 1);
         }
     }
+    @Resource
+    private RPay rPay;
     /**
      * 银河系统支付逻辑
      */
-    private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap, Map<String,Object> channel,Integer i) {
+    private AjaxResult rechargeGalaxy(RechargeRecords rechargeRecords, JSONObject resultMap, Map<String,Object> channel) {
         JSONObject jsonObject;
         String response;
-        if (i==1){
-            response = CloudPayUtils.recharge(rechargeRecords,cloudPay,channel);
-        }else {
-            response = MhdPayUtils.recharge(rechargeRecords,mhdPay,channel);
-        }
+        response = RPayUtils.recharge(rechargeRecords,rPay,channel);
         LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
