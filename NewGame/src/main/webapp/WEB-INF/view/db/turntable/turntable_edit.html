@@ -6,25 +6,25 @@
       <table class="table table-bordered">
         <tbody>
         <tr>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">配置数列: </td>
-          <td ><input type="text" name="turntable.id" value="${turntable.Id}" readonly /></td>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">来源类型: </td>
-          <td><input type="radio" name="turntable.sourceType" value="1" ${turntable.SourceType==1?"checked":""}>在线奖励</input>
-            <input type="radio" name="turntable.sourceType" value="2" ${turntable.SourceType==2?"checked":""}>每日登录</input>
-            <input type="radio" name="turntable.sourceType" value="3" ${turntable.SourceType==3?"checked":""}>打码返利</input>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">转盘索引: </td>
+          <td ><input type="hidden" name="turntable.id" value="${turntable.id}" />
+          <input type="text" name="turntable.turntable_index"  value="${turntable.turntable_index}" readonly /></td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">转盘类型: </td>
+          <td>${turntable.type}
+            <span class="label-default">0:白银,1:黄金,2:钻石</span>
           </td>
         </tr>
         <tr>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">奖励类型: </td>
-          <td><input type="text" name="turntable.rewardType" value="${turntable.RewardType}"/></td>
-          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">中奖权重: </td>
-          <td><input type="text" name="turntable.mediumWeight" value="${turntable.MediumWeight}"/></td>
-
-        </tr>
-
-        <tr>
           <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">奖励数额: </td>
-          <td><input type="text"  name="turntable.amountOfReward" value="${turntable.AmountOfReward}" /></td>
+          <td>
+            <input type="text" name="turntable.award" value="${turntable.award}" readonly/>
+          </td>
+        </tr>
+        <tr>
+          <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">中奖权重: </td>
+          <td><input type="text" name="turntable.pro" value="${turntable.pro}"/></td>
         </tr>
         </tbody>
       </table>

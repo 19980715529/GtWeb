@@ -7,6 +7,7 @@ import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
 import com.smallchill.db.config.model.TurnTable;
@@ -85,9 +86,7 @@ public class TurnTableController extends BaseController implements ConstShiro {
     @RequestMapping(KEY_EDIT+"/{id}")
     @Permission({ADMINISTRATOR,ADMIN})
     public String update(@PathVariable Integer id, ModelMap mm){
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("id",id);
-        Map active = commonService.getInfoByOne("turntable.one_turntable", map);
+        Map active = commonService.getInfoByOne("turntable.one_turntable", CMap.init().set("id",id));
         mm.put("turntable",active);
         mm.put("code",CODE);
         return BASE_PATH + "turntable_edit.html";
@@ -100,8 +99,7 @@ public class TurnTableController extends BaseController implements ConstShiro {
     @Permission({ADMINISTRATOR,ADMIN})
     public AjaxResult update(ModelMap mm){
         TurnTable turnTable = mapping(PREFIX, TurnTable.class);
-        int update = Db.update("update [QPServerInfoDB].[dbo].[TurntableRewardTypeConfig] set " +
-                "SourceType=#{sourceType},RewardType=#{rewardType},MediumWeight=#{mediumWeight},AmountOfReward=#{amountOfReward} where Id =#{id}", turnTable);
+        int update = Db.update("update [QPServerInfoDB].[dbo].[Turntable_TurntableConfig] set pro=#{pro} where id =#{id}", turnTable);
         mm.put("code",CODE);
         if (update<0){
             return fail(UPDATE_FAIL_MSG);

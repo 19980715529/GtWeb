@@ -16,13 +16,13 @@
 
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["配置数列","来源类型", "奖励类型","中奖权重","奖励数额"];
+        var _colnames=["id","转盘索引","奖励数额","中奖权重","转盘类型"];
         var _colmodel=[
-            {name:"Id",sortable: false},
-            {name:"SourceType",sortable: false,formatter:rowShow},
-            {name:"RewardType", sortable:false},
-            {name:"MediumWeight", sortable:false},
-            {name:"AmountOfReward", sortable:false}
+            {name:"id",sortable: false},
+            {name:"turntable_index",sortable: false},
+            {name:"award", sortable:false},
+            {name:"pro", sortable:false},
+            {name:"type", sortable:false,formatter:rowShow}
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -39,13 +39,13 @@
     }
     function rowShow(cellvalue, options, rowObject) {
         var html = '';
-        if(options.colModel.name ==='SourceType') {
-            if(cellvalue === 1) {
-                html += '<span>在线奖励</span>';
-            } else if (cellvalue === 2) {
-                html += '<span>每日登录</span>';
-            }else if (cellvalue === 3){
-                html += '<span>打码返利</span>';
+        if(options.colModel.name ==='type') {
+            if(cellvalue === 0) {
+                html += '<span>白银</span>';
+            } else if (cellvalue === 1) {
+                html += '<span>黄金</span>';
+            }else if (cellvalue === 2){
+                html += '<span>钻石</span>';
             }
         }
         return html;
