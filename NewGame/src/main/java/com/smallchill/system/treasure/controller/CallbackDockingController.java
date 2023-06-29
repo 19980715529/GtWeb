@@ -40,7 +40,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
     private ExchangeReviewService exchangeReviewService;
 
 
-//    @PostMapping(value = "/test",consumes = "application/json")
+    @PostMapping(value = "/test",consumes = "application/json")
     public String rechargeTest(@RequestBody Map<String,Object> param){
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 判断订单号是否存在
@@ -65,7 +65,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
         return "SUCCESS";
     }
 
-//    @PostMapping(value = "/exchange/test",consumes = "application/json")
+    @PostMapping(value = "/exchange/test",consumes = "application/json")
     public String exchangeMetaPayCallback(@RequestBody Map<String,Object> param){
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         String orderNum = params.getString("orderNum");

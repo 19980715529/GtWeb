@@ -430,7 +430,6 @@ public class RechargeExchangeCommon {
      * @param type
      */
     public static void walletStatistics(String orderNum,Integer clientType,String channelName,Integer mcId,String createTime,Integer type){
-        LOGGER.error("orderNum="+orderNum+",clientType="+clientType+",channelName="+channelName+",mcId="+mcId+",createTime="+createTime+",type="+type);
         SQLManager dao = Blade.dao();
         dao.executeOnConnection(new OnConnection<Integer>() {
             @Override

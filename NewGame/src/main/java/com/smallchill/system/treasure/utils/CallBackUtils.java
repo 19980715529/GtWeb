@@ -153,20 +153,14 @@ public class CallBackUtils {
                 RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),
                         rechargeRecords.getChannel(),rechargeRecords.getChannelPid(),dateFormat.format(rechargeRecords.getCreateTime()),0);
                 // 执行计算打码量存储过程
-                Integer baseGold = null;
                 if (rechargeRecords.getIsFirstCharge()==0){
-                    baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
-                }else {
-                    baseGold = Db.queryInt("select gold from First_charge_config where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
-                }
-                // 添加用户打码量
-                if (rechargeRecords.getIsFirstCharge()!=1){
+                    Integer baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
+                    // 添加用户打码量
                     Integer normalAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=11",null);
                     Integer specialAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=12",null);
                     Long code = (long) baseGold *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGold()-baseGold);
                     addUserCode(rechargeRecords.getUserId(),code);
                 }
-
             };
             ThreadKit.excAsync(runnable,false);
         }
