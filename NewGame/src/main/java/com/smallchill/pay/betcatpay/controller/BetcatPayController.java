@@ -67,8 +67,9 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         JSONObject jsonObject;
         try {
             jsonObject = JSON.parseObject(response);
+            LOGGER.error(jsonObject.toJSONString());
         }catch (Exception e){
-//            LOGGER.error(e.getMessage());
+            LOGGER.error(e.getMessage());
             return fail(e.getMessage());
         }
         int code1 = jsonObject.getIntValue("code");

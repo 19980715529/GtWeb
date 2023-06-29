@@ -364,9 +364,11 @@ public class RechargeExchangeCommon {
             walletRecords.setCollectNum(collectNum+1);
             blade.update(walletRecords);
             // 统计总包
-            Integer collectNum1 = walletRecord_total.getCollectNum();
-            walletRecord_total.setCollectNum(collectNum1+collectNum+1);
-            blade.update(walletRecord_total);
+            if (walletRecord_total!=null){
+                Integer collectNum1 = walletRecord_total.getCollectNum();
+                walletRecord_total.setCollectNum(collectNum1+collectNum+1);
+                blade.update(walletRecord_total);
+            }
         }else {
             // 不存在就添加
             WalletRecords wallet = new WalletRecords();

@@ -66,6 +66,7 @@ public class PayPlusController extends BaseController implements ConstShiro {
         JSONObject jsonObject;
         try {
             jsonObject = JSON.parseObject(response);
+            LOGGER.error(jsonObject.toJSONString());
         }catch (Exception e){
             LOGGER.error(e.getMessage());
             return fail("105005");

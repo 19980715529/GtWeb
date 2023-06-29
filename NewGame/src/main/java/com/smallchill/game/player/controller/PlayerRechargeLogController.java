@@ -152,7 +152,6 @@ public class PlayerRechargeLogController extends BaseController implements Const
 			for (Map<String,Integer> m:userMaps){
 				users.add(m.get("userId"));
 			}
-			LOGGER.error(users);
 			jsonObject.put("users", users);
 			Map a = commonService.getInfoByOne("player_recharge_log1.query_new_list",jsonObject);
 			// 新增充值金额
