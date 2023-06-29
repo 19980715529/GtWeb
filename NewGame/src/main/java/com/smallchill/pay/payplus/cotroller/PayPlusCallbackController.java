@@ -35,7 +35,7 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         if (param==null){
             return "fail";
         }
-        LOGGER.error(param);
+//        LOGGER.error(param);
         String mchId = param.get("mchId").toString();
         if (mchId==null){
             return "fail";
@@ -44,7 +44,7 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         if (!temp){
             return "fail";
         }
-        LOGGER.error("认证成功");
+//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("orderNo");
@@ -73,7 +73,7 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         if (param==null){
             return "fail";
         }
-        LOGGER.error(param);
+//        LOGGER.error(param);
         // 去除msg,不参与签名
         String msg = param.remove("msg").toString();
         String mchId = param.get("mchId").toString();
@@ -90,7 +90,7 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         if (!temp){
             return "fail";
         }
-        LOGGER.error("认证成功");
+//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("mchTransNo");

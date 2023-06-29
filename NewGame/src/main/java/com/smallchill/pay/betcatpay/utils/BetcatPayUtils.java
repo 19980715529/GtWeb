@@ -36,7 +36,7 @@ public class BetcatPayUtils {
         String sign = SignUtils.create(betcatPay.payKey,map);
         // 生成签名全部大写
         map.put("sign", sign);
-        LOGGER.error(JSON.toJSONString(map));
+//        LOGGER.error(JSON.toJSONString(map));
         response = HttpClientUtils.sendPostJson(betcatPay.payUrl, JSON.toJSONString(map));
         return response;
     }
@@ -62,7 +62,7 @@ public class BetcatPayUtils {
         // 生成签名全部大写
         String sign = SignUtils.create(betcatPay.payOutKey,map);
         map.put("sign",sign);
-        LOGGER.error(JSON.toJSONString(map));
+//        LOGGER.error(JSON.toJSONString(map));
         response = HttpClientUtils.sendPostJson(betcatPay.payOutUrl, JSON.toJSONString(map));
         return response;
     }

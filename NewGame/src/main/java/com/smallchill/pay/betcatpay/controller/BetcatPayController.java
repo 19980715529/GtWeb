@@ -55,12 +55,12 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
-        LOGGER.error(code);
+//        LOGGER.error(code);
         if (code==1){
             return fail(info.get("msg").toString());
         }
         String response = BetcatPayUtils.recharge(rechargeRecords,betcatPay);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "105005", 1);
         }
@@ -68,7 +68,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         try {
             jsonObject = JSON.parseObject(response);
         }catch (Exception e){
-            LOGGER.error(e.getMessage());
+//            LOGGER.error(e.getMessage());
             return fail(e.getMessage());
         }
         int code1 = jsonObject.getIntValue("code");

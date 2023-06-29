@@ -33,12 +33,12 @@ public class BetcatPayCallbackController extends BaseController implements Const
         if (param == null || param.isEmpty()) {
             return "fail";
         }
-        LOGGER.error(param);
+//        LOGGER.error(param);
         Boolean temp = SignUtils.verify(betcatPay.payKey,param);
         if (!temp) {
             return "fail";
         }
-        LOGGER.error("认证成功");
+//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("merOrderNo");
@@ -67,12 +67,12 @@ public class BetcatPayCallbackController extends BaseController implements Const
         if (param==null || param.isEmpty()){
             return "fail";
         }
-        LOGGER.error(param);
+//        LOGGER.error(param);
         Boolean temp = SignUtils.verify(betcatPay.payOutKey,param);
         if (!temp){
             return "fail";
         }
-        LOGGER.error("认证成功");
+//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("merOrderNo");

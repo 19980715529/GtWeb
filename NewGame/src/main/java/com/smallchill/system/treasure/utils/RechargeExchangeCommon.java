@@ -280,15 +280,6 @@ public class RechargeExchangeCommon {
             rechargeRecords.setTopUpAmount(new BigDecimal(first.get("amount").toString()));
             // 修改
         }else if (rechargeRecords.getIsFirstCharge()==0){
-            // 普通充值，查询充值挡位计算获得的金币
-//            BigDecimal max = new BigDecimal(String.valueOf(channel.get("max")));
-//            BigDecimal min = new BigDecimal(String.valueOf(channel.get("min")));
-//            // 判断充值的钱是否满足渠道条件
-//            if (fee.intValue() <min.intValue() || fee.intValue()>max.intValue()){
-//                reMap.put("code",1);
-//                reMap.put("msg","104012");
-//                return reMap;
-//            }
             // 充值充值挡位 recharge_gear
             Map gear = commonService.getInfoByOne("recharge_gear.find_gear_by_id", CMap.init().set("id", rechargeRecords.getGear()));
             JSONObject gears = JSONObject.parseObject(JSON.toJSONString(gear));
@@ -351,7 +342,7 @@ public class RechargeExchangeCommon {
     }
 
     /**
-     * 充值时执行
+     * 充值时执行钱包统计
      */
     public static void rec(RechargeRecords rechargeRecords, Map channel){
         Blade blade = Blade.create(WalletRecords.class);
@@ -366,11 +357,16 @@ public class RechargeExchangeCommon {
         // 今日日期
         map.put("createTime", LocalDate.now());
         WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        WalletRecords walletRecord_total = blade.findFirstBy("clientType=-1 and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
         if (walletRecords!=null){
             // 存在就进行修改 这里修改代收次数
             Integer collectNum = walletRecords.getCollectNum();
             walletRecords.setCollectNum(collectNum+1);
             blade.update(walletRecords);
+            // 统计总包
+            Integer collectNum1 = walletRecord_total.getCollectNum();
+            walletRecord_total.setCollectNum(collectNum1+collectNum+1);
+            blade.update(walletRecord_total);
         }else {
             // 不存在就添加
             WalletRecords wallet = new WalletRecords();
@@ -382,6 +378,11 @@ public class RechargeExchangeCommon {
             wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
             wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
             blade.save(wallet);
+            // 添加总包的添加
+            if (walletRecord_total==null){
+                wallet.setClientType(-1);
+                blade.save(wallet);
+            }
         }
     }
 
@@ -401,6 +402,7 @@ public class RechargeExchangeCommon {
         // 今日日期
         map.put("createTime", LocalDate.now());
         WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        WalletRecords walletRecords_total = blade.findFirstBy("clientType=-1 and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
         if (walletRecords==null){
             // 不存在就添加
             WalletRecords wallet = new WalletRecords();
@@ -412,6 +414,10 @@ public class RechargeExchangeCommon {
             wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
             wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
             blade.save(wallet);
+            if (walletRecords_total==null){
+                wallet.setClientType(-1);
+                blade.save(wallet);
+            }
         }
     }
     /**

@@ -3,7 +3,7 @@
     var ctx="${ctxPath}";
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
-    var _filter = '{"clientType":"6","startTime":"'+getBeforeDate(0)+'"'+',"endTime":"'+getBeforeDate(0)+'"}';
+    var _filter = '{"clientType":"-1","startTime":"'+getBeforeDate(0)+'"'+',"endTime":"'+getBeforeDate(0)+'"}';
     var isAutoFlushTab=true;
     $(function(){
         backDom('钱包管理','walletRecords');
@@ -148,7 +148,7 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '';
+            var html = '<option value="-1">全部</option>';
             for (var i = 0; i < type.length; i++) {
                 html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
             }

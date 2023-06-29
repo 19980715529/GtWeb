@@ -18,8 +18,7 @@ public class GlobalTask {
 		List<Integer> list = Db.queryListInt("select clientType from [login].[dbo].ClientPos", null);
 		for (int i = 1;i<=30;i++){
 			for (int j:list){
-				Integer res = newRechargeDetailsStatics(i, j);
-				System.out.println(res);
+				newRechargeDetailsStatics(i, j);
 			}
 		}
 	}

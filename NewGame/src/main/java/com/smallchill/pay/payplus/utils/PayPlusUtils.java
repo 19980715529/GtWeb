@@ -49,7 +49,7 @@ public class PayPlusUtils {
         String sign = Utils.getSign(map, payPlus.key);
         // 生成签名全部大写
         map.put("sign", sign.toUpperCase());
-        LOGGER.error(JSON.toJSONString(map));
+//        LOGGER.error(JSON.toJSONString(map));
         response = Utils.post(payPlus.payUrl, map);
         return response;
     }
@@ -80,7 +80,7 @@ public class PayPlusUtils {
         // 生成签名全部大写
         String sign = Utils.getSign(map, payPlus.key);
         map.put("sign",sign.toUpperCase());
-        LOGGER.error(JSON.toJSONString(map));
+//        LOGGER.error(JSON.toJSONString(map));
         response = Utils.post(payPlus.payOutUrl, map);
         return response;
     }
