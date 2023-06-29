@@ -84,7 +84,8 @@ public class CallBackUtils {
         stored.put("userId", rechargeRecords.getUserId());
         stored.put("Gold", rechargeRecords.getTopUpAmount());
         stored.put("GameCoin", rechargeRecords.getGold());
-        stored.put("type",0);
+        // 0：普通充值，1：首充
+        stored.put("type",rechargeRecords.getIsFirstCharge());
         stored.put("OrderNum",rechargeRecords.getOrderNumber());
         // 执行分享存储过程
         storedProcedure(stored);
@@ -102,7 +103,8 @@ public class CallBackUtils {
         stored.put("Gold", review.getAmount());
         stored.put("GameCoin", review.getGold());
         stored.put("OrderNum",review.getOrderNumber());
-        stored.put("type",1);
+        // 3：兑换
+        stored.put("type",3);
         storedProcedure(stored);
         // 需要向游戏服务器发送请求
         Map<String, Object> gameParam = new HashMap<>();
