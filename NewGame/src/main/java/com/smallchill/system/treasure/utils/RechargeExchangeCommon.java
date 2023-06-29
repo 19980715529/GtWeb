@@ -354,11 +354,17 @@ public class RechargeExchangeCommon {
         // 今日日期
         map.put("createTime", LocalDate.now());
         WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        WalletRecords walletRecords_total = blade.findFirstBy("clientType=-1 and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
         if (walletRecords!=null){
             // 存在就进行修改 这里修改代收次数
             Integer collectNum = walletRecords.getCollectNum();
             walletRecords.setCollectNum(collectNum+1);
             blade.update(walletRecords);
+            if (walletRecords_total!=null){
+                Integer collectNum1 = walletRecords_total.getCollectNum();
+                walletRecords_total.setCollectNum(collectNum+collectNum1+1);
+                blade.update(walletRecords_total);
+            }
         }else {
             // 不存在就添加
             WalletRecords wallet = new WalletRecords();
@@ -370,6 +376,10 @@ public class RechargeExchangeCommon {
             wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
             wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
             blade.save(wallet);
+            if (walletRecords_total==null){
+                wallet.setClientType(-1);
+                blade.save(wallet);
+            }
         }
     }
 
@@ -389,6 +399,7 @@ public class RechargeExchangeCommon {
         // 今日日期
         map.put("createTime", LocalDate.now());
         WalletRecords walletRecords = blade.findFirstBy("clientType=#{clientType} and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
+        WalletRecords walletRecords_total = blade.findFirstBy("clientType=-1 and channelName=#{channelName} and mcId=#{mcId} and createTime=#{createTime}", map);
         if (walletRecords==null){
             // 不存在就添加
             WalletRecords wallet = new WalletRecords();
@@ -400,6 +411,10 @@ public class RechargeExchangeCommon {
             wallet.setPayFee(new BigDecimal(channel.get("payFee").toString()));
             wallet.setPaymentRate(new BigDecimal(channel.get("paymentRate").toString()));
             blade.save(wallet);
+            if (walletRecords_total==null){
+                wallet.setClientType(-1);
+                blade.save(wallet);
+            }
         }
     }
     /**

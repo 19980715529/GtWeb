@@ -319,9 +319,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 获取最大参数
                 CMap param =CMap.init().set("clientType", cid).set("type", type).set("cid", map.get("id"));
                 Map max_param = commonService.getInfoByOne("channel_list.param_max", param);
-//                if (max_param==null){
-//                    continue;
-//                }
                 // 获取其中一条
                 Map ch = commonService.getInfoByOne("channel_list.param_one", param);
                 if (ch==null){
@@ -545,7 +542,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
         }
         response = PayPlusUtils.recharge(rechargeRecords,channel,param);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }

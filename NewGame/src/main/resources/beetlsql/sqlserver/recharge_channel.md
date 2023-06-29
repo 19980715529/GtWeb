@@ -23,7 +23,7 @@ get_channel
     select * from [RYPlatformManagerDB].[dbo].[Channel] where id=#{id}
 first_list
 ===
-    select amount,gold,give_gold,type from [RYPlatformManagerDB].[dbo].[First_charge_config]
+    select amount,gold,give_gold,type from [RYPlatformManagerDB].[dbo].[First_charge_config] where id=1
 all_parent_list
 ===
     SELECT id,mcName FROM [RYPlatformManagerDB].[dbo].[Channel] where pid = 0
