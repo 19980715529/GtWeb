@@ -76,7 +76,9 @@ public class PayPlusController extends BaseController implements ConstShiro {
         if ("SUCCESS".equals(retCode)) {
             // 获取支付链接
             String payUrl = jsonObject.getString("payUrl");
+//            String payCode = jsonObject.getString("code");
             resultMap.put("urlPay", payUrl);
+//            resultMap.put("payCode", payCode);
             rechargeRecords.setUrlPay(payUrl);
             // 平台订单号
             String PfOrderNum = jsonObject.getString("platOrder");

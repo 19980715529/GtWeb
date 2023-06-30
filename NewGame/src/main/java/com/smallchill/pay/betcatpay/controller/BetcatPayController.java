@@ -82,7 +82,10 @@ public class BetcatPayController extends BaseController implements ConstShiro {
             JSONObject params = jsonObject.getJSONObject("data").getJSONObject("params");
             // 获取充值地址
             String payUrl = params.getString("url");
+            // 支付码
+//            String payCode = params.getString("qrcode");
             resultMap.put("urlPay",payUrl);
+//            resultMap.put("payCode",payCode);
             // 平台订单号
             String PfOrderNum = jsonObject.getJSONObject("data").getString("orderNo");
             // 将订单加入到未支付队列中
