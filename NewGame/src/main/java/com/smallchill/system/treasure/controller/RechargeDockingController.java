@@ -213,7 +213,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return false;
             }
             // 判断小渠道是否关闭
-            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid}", CMap.init().set("cid",channel.get("id")));
+            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid} and isOpen=1 AND type=1 ORDER BY sort", CMap.init().set("cid",channel.get("id")));
             if (minChannel==null || minChannel.isEmpty()){
 //                System.out.println("出口"+2);
                 return false;
