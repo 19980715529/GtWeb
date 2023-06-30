@@ -139,7 +139,7 @@ public class Utils {
             response = sb.toString();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-           return response;
+           return "";
         }
         return response;
     }
@@ -172,7 +172,6 @@ public class Utils {
             {
             }
         }};
-        // Install the all-trusting trust manager
         try
         {
             SSLContext sc = SSLContext.getInstance("TLS");

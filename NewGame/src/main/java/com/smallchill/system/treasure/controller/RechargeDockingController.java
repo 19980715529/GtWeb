@@ -252,7 +252,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
                     int id = exchangeReviewService.saveRtId(exchangeReview);
                     exchangeReview.setId(id);
                     // 判断订单是否满足自动审核条件
-                    LOGGER.error(exchangeReview.getAmount());
                     Boolean temp = AuditConditioningJudgment(exchangeReview);
                     if (temp){
                         autoReview(exchangeReview);
@@ -489,45 +488,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
             return json(resultMap, "Recharge application failed", 1);
         }
     }
-    @Resource
-    private LuckPay luckPay;
-    /**
-     * LuckyPay支付处理
-     * @param rechargeRecords
-     * @param resultMap
-     * @return
-     */
-    private AjaxResult rechargeLuckyPay(RechargeRecords rechargeRecords, JSONObject resultMap,Map<String,Object> channel) {
-        String code;
-        String PfOrderNum;
-        String response;
-        JSONObject jsonObject;
-        response = LuckyPayUtils.sendRechargeLuckyPay(rechargeRecords,luckPay);
-        LOGGER.error(response);
-        if ("".equals(response)) {
-            return json(resultMap, "Recharge application failed", 1);
-        }
-        jsonObject = JSON.parseObject(response);
-        code = jsonObject.getString("code");
-        if ("00".equals(code)) {
-            // 获取支付链接
-            String payUrl = jsonObject.getString("backUrl");
-            resultMap.put("urlPay", payUrl);
-            rechargeRecords.setUrlPay(payUrl);
-            // 设置平台订单号
-            PfOrderNum = jsonObject.getString("sysOrderNo");
-            rechargeRecords.setPfOrderNum(PfOrderNum);
-            // 将订单加入到未支付队列中
-            GlobalDelayQueue.orderQueue.add(rechargeRecords);
-            rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application success");
-        } else {
-            rechargeRecords.setMsg(jsonObject.getString("msg"));
-            rechargeRecords.setOrderStatus(3);
-            rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application failed", 1);
-        }
-    }
     /**
      * LetsPay充值逻辑
      */
@@ -542,7 +502,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
             param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
         }
         response = PayPlusUtils.recharge(rechargeRecords,channel,param);
-//        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }
@@ -629,7 +588,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         String PfOrderNum;
         String response;
         response = WePayUtils.recharge(rechargeRecords,channel);
-        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }
@@ -672,7 +630,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
         String response;
         JSONObject jsonObject;
         response = AIPayUtils.recharge(rechargeRecords,aiPay,channel);
-//        LOGGER.error(response);
         if ("".equals(response)) {
             return json(resultMap, "Recharge application failed", 1);
         }
@@ -834,7 +791,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
      */
     private AjaxResult rechargeRar(RechargeRecords rechargeRecords, JSONObject resultMap, Map channel) {
         String response;
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
         int code;
         response = RarPayUtils.sendRechargeRar(rechargeRecords, channel,rarPay);
         if (response.equals("")) {
@@ -892,9 +849,9 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return false;
             }
             // 判断小渠道是否关闭
-            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid}", CMap.init().set("cid",channel.get("id")));
+            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid} and isOpen=1 AND type=1 ORDER BY sort",
+                    CMap.init().set("cid",channel.get("id")));
             if (minChannel==null || minChannel.isEmpty()){
-//                System.out.println("出口"+2);
                 return false;
             }
             // 判断用户是否是内部员工

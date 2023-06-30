@@ -35,12 +35,17 @@ public class ExchangeUtils {
     public static boolean RarPayExchange(ExchangeReview exchangeReview, Map channel, RarPay rarPay) {
         // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
         String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
             return true;
         }
         // 获取平台订单号
-        JSONObject respJson = JSONObject.parseObject(response);
+        JSONObject respJson=null;
+        try {
+            respJson = JSONObject.parseObject(response);
+        }catch (Exception e){
+            exchangeReview.setStatus(6);
+        }
         int code = respJson.getIntValue("code");
         // 同步请求状态为0代表请求失败，订单变成失败
         if (code == 0) {
@@ -182,12 +187,6 @@ public class ExchangeUtils {
     }
 
     public static boolean PayPlusExchange(ExchangeReview exchangeReview, Map channel,Map param) {
-        String channelName = channel.get("channelName").toString();
-//        if ("super".equals(channelName)){
-//            param = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>(){});
-//        }else {
-//            param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
-//        }
         String response = PayPlusUtils.exchange(exchangeReview, channel,param);
         LOGGER.error(response);
         if ("".equals(response)) {
