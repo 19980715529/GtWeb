@@ -14,6 +14,7 @@ import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.core.toolbox.kit.ThreadKit;
 import com.smallchill.game.newmodel.Accountsinfo;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.pay.aipay.model.AIPay;
@@ -251,11 +252,14 @@ public class RechargeDockingController extends BaseController implements ConstSh
                     exchangeReview.setStatus(2);
                     int id = exchangeReviewService.saveRtId(exchangeReview);
                     exchangeReview.setId(id);
-                    // 判断订单是否满足自动审核条件
-                    Boolean temp = AuditConditioningJudgment(exchangeReview);
-                    if (temp){
-                        autoReview(exchangeReview);
-                    }
+                    // 判断订单是否满足自动审核条件,异步执行下面
+                    Runnable runnable =() -> {
+                        Boolean temp = AuditConditioningJudgment(exchangeReview);
+                        if (temp){
+                            autoReview(exchangeReview);
+                        }
+                    };
+                    ThreadKit.excAsync(runnable,false);
                 }catch (Exception e){
                     return json(null,e.getMessage(),1);
                 }

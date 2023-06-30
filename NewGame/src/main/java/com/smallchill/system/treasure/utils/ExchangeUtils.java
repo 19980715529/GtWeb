@@ -37,6 +37,7 @@ public class ExchangeUtils {
         String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
 //        LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         // 获取平台订单号
@@ -74,8 +75,9 @@ public class ExchangeUtils {
 
     public static boolean SafePayExchange(ExchangeReview exchangeReview, Map channel) {
         String response = SafePayUtils.exchange(exchangeReview, channel);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         // 获取平台订单号
@@ -96,8 +98,9 @@ public class ExchangeUtils {
     public static boolean MetaPayExchange(ExchangeReview exchangeReview, Map channel) {
 
         String response = MetaPayUtils.exchange(exchangeReview, channel);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         // 获取平台订单号
@@ -121,6 +124,7 @@ public class ExchangeUtils {
     public static boolean GlobalPayExchange(ExchangeReview exchangeReview, Map channel, GlobalPay globalPay) {
         String response = GlobalPayUtils.sendExchange(exchangeReview, channel, globalPay);
         if ("".equals(response)){
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -144,6 +148,7 @@ public class ExchangeUtils {
 
         String response = BPayUtils.sendExchangeBPay(exchangeReview, channel, bPay);
         if ("".equals(response)){
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -167,8 +172,9 @@ public class ExchangeUtils {
     public static boolean MhdPayExchange(ExchangeReview exchangeReview, MhdPay mhdPay) {
 
         String response = MhdPayUtils.exchange(exchangeReview,mhdPay);
-        LOGGER.error(response);
+//        LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -190,6 +196,7 @@ public class ExchangeUtils {
         String response = PayPlusUtils.exchange(exchangeReview, channel,param);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -214,6 +221,7 @@ public class ExchangeUtils {
         String response = CloudPayUtils.exchange(exchangeReview,cloudPay);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -236,6 +244,7 @@ public class ExchangeUtils {
         String response = WePayUtils.exchange(exchangeReview, channel);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -259,6 +268,7 @@ public class ExchangeUtils {
         String response = AIPayUtils.exchange(exchangeReview,aiPay, channel);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -284,6 +294,7 @@ public class ExchangeUtils {
         String response = OmoPayUtils.exchange(exchangeReview, channel);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         // 获取平台订单号
