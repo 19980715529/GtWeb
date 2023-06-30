@@ -6,6 +6,7 @@ import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.CMap;
+import com.smallchill.pay.rpay.model.RPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,6 +26,9 @@ import static com.smallchill.system.treasure.utils.CallBackUtils.*;
 @RestController
 @RequestMapping("/callback/Galaxy")
 public class GalaxyCallbackController extends BaseController implements ConstShiro {
+
+    @Resource
+    private RPay rPay;
     /**
      * 银河系统充值回调
      * @param param
@@ -36,18 +41,13 @@ public class GalaxyCallbackController extends BaseController implements ConstShi
             return "fail";
         }
         LOGGER.error(param);
-        String merchant = param.get("merchant").toString();
-        boolean temp;
-        if ("88052".equals(merchant)){
-            temp= HttpClientUtils.Md5GalaxyVerification(param,CLOUDPAY_KEY);
-        }else {
-            temp= HttpClientUtils.Md5GalaxyVerification(param,MHDPAY_KEY);
-        }
+//        String merchant = param.get("merchant").toString();
+        boolean temp= HttpClientUtils.Md5GalaxyVerification(param,rPay.key);
         if (!temp){
             return "fail";
         }
-        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        LOGGER.error(params);
         // 获取订单号
         String orderNum = params.getString("order_id");
         Blade blade = Blade.create(RechargeRecords.class);
@@ -76,18 +76,13 @@ public class GalaxyCallbackController extends BaseController implements ConstShi
             return "fail";
         }
         LOGGER.error(param);
-        String merchant = param.get("merchant").toString();
-        boolean temp = false;
-        if ("88052".equals(merchant)){
-            temp= HttpClientUtils.Md5GalaxyVerification(param,CLOUDPAY_KEY);
-        }else {
-            temp= HttpClientUtils.Md5GalaxyVerification(param,MHDPAY_KEY);
-        }
+//        String merchant = param.get("merchant").toString();
+        boolean temp= HttpClientUtils.Md5GalaxyVerification(param,rPay.key);
         if (!temp){
             return "fail";
         }
-        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
+        LOGGER.error(params);
         // 获取订单号
         String orderNum = params.getString("order_id");
         Blade blade = Blade.create(ExchangeReview.class);
