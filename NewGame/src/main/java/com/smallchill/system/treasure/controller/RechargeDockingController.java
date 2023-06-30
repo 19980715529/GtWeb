@@ -888,24 +888,24 @@ public class RechargeDockingController extends BaseController implements ConstSh
             // 判断大渠道是否关闭
             Map channel = Db.selectOne("select id from Pay_Channel where isExchange=1 order by sort", null);
             if (channel==null || channel.isEmpty()){
-                System.out.println("出口"+1);
+//                System.out.println("出口"+1);
                 return false;
             }
             // 判断小渠道是否关闭
             Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid}", CMap.init().set("cid",channel.get("id")));
             if (minChannel==null || minChannel.isEmpty()){
-                System.out.println("出口"+2);
+//                System.out.println("出口"+2);
                 return false;
             }
             // 判断用户是否是内部员工
             Accountsinfo accountsinfo = Blade.create(Accountsinfo.class).findById(exchangeReview.getUserId());
             if (accountsinfo.getIsInnerMember()==1){
-                System.out.println("出口"+3);
+//                System.out.println("出口"+3);
                 return false;
             }
             // 判断用户是否有备注
             if (accountsinfo.getTipsname()!=null && accountsinfo.getTipsname().length()>0){
-                System.out.println("出口"+4);
+//                System.out.println("出口"+4);
                 return false;
             }
             // 当日所有的充提差是否小于0
@@ -915,7 +915,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             BigDecimal TotalRecharge = new BigDecimal(info.get("TotalRecharge").toString());
             if (auto.getIntValue("param1")==1){
                 if (TotalRecharge.intValue()<=0){
-                    System.out.println("出口"+5);
+//                    System.out.println("出口"+5);
                     return false;
                 }
             }
@@ -925,7 +925,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 // 判断用户当日是否有充值
                 int i = Integer.parseInt(TodayRecharge);
                 if (i<=0){
-                    System.out.println("出口"+6);
+//                    System.out.println("出口"+6);
                     return false;
                 }
             }
@@ -935,28 +935,28 @@ public class RechargeDockingController extends BaseController implements ConstSh
             BigDecimal dif = TotalRecharge.subtract(TotalWithDraw);
             if (dif.intValue()<auto.getIntValue("param3")){
                 // 判断用户充提差是否满足条件
-                System.out.println("出口"+7+dif);
+//                System.out.println("出口"+7+dif);
                 return false;
             }
             // 判断用户充提倍速是否满足条件，充值金额/兑换金额
             BigDecimal divide = TotalRecharge.divide(TotalWithDraw, 2, RoundingMode.DOWN);
             if (divide.floatValue()<auto.getFloatValue("param4")){
-                System.out.println("出口"+8);
+//                System.out.println("出口"+8);
                 return false;
             }
             // 判断单次兑换金额是否满足条件
             if (exchangeReview.getAmount().intValue()>auto.getIntValue("param5")){
-                System.out.println("出口"+9);
+//                System.out.println("出口"+9);
                 return false;
             }
             // 今日兑换是否超过条件
             BigDecimal todayWithDraw = new BigDecimal(info.get("TodayWithDraw").toString());
             if (todayWithDraw.intValue() < auto.getIntValue("param6")){
                 exchangeReview.setChannelId(Integer.parseInt(minChannel.get("id").toString()));
-                System.out.println("出口"+10);
+//                System.out.println("出口"+10);
                 return true;
             }else {
-                System.out.println("出口"+11);
+//                System.out.println("出口"+11);
                 return false;
             }
         }
