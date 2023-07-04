@@ -19,6 +19,7 @@ public class ExchangeUtils {
         String response = PayPlusUtils.exchange(exchangeReview,payPlus);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);
@@ -42,6 +43,7 @@ public class ExchangeUtils {
         String response = BetcatPayUtils.exchange(exchangeReview,betcatPay);
         LOGGER.error(response);
         if ("".equals(response)) {
+            exchangeReview.setStatus(6);
             return true;
         }
         JSONObject respJson = JSONObject.parseObject(response);

@@ -2,6 +2,7 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
@@ -198,5 +199,12 @@ public class AnnouncementController extends BaseController implements ConstShiro
         List<Map> maps = Db.selectList("select Day,Award from [QPServerInfoDB].[dbo].[CheckIn_CheckInAward] where AwardType=1");
         return json(maps);
     }
-
+    /**
+     *
+     */
+    @GetMapping("/test")
+    @RateLimit(limit = 5)
+    public AjaxResult test(){
+        return success("success");
+    }
 }

@@ -14,6 +14,7 @@ import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.core.toolbox.kit.ThreadKit;
 import com.smallchill.game.newmodel.Accountsinfo;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.pay.aipay.model.AIPay;
@@ -166,14 +167,16 @@ public class RechargeDockingController extends BaseController implements ConstSh
                     // 生成兑换订单
                     int id = exchangeReviewService.saveRtId(exchangeReview);
                     exchangeReview.setId(id);
-                    // 判断订单是否满足自动审核条件
-//                    LOGGER.error(exchangeReview.getAmount());
-                    Boolean temp = AuditConditioningJudgment(exchangeReview);
-                    if (temp){
-                        autoReview(exchangeReview);
-                    }
+                    // 判断订单是否满足自动审核条件,异步执行下面
+                    Runnable runnable =() -> {
+                        Boolean temp = AuditConditioningJudgment(exchangeReview);
+                        if (temp){
+                            autoReview(exchangeReview);
+                        }
+                    };
+                    ThreadKit.excAsync(runnable,false);
                 }catch (Exception e){
-//                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                     return fail("105011");
                 }
                 // 发送请求提示前端刷新金币
@@ -213,7 +216,8 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return false;
             }
             // 判断小渠道是否关闭
-            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid} and isOpen=1 AND type=1 ORDER BY sort", CMap.init().set("cid",channel.get("id")));
+            Map minChannel = Db.selectOne("select * from Pay_ChannelPool where cid=#{cid} and isOpen=1 AND type=1 ORDER BY sort",
+                    CMap.init().set("cid",channel.get("id")));
             if (minChannel==null || minChannel.isEmpty()){
 //                System.out.println("出口"+2);
                 return false;

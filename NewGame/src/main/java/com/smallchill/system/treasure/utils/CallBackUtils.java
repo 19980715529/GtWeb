@@ -67,7 +67,7 @@ public class CallBackUtils {
                     callableStatement.execute();
                     return "";
                 }catch (Exception e){
-//                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                     return e.getMessage();
                 }
             }
@@ -84,8 +84,8 @@ public class CallBackUtils {
         stored.put("userId", rechargeRecords.getUserId());
         stored.put("Gold", rechargeRecords.getTopUpAmount());
         stored.put("GameCoin", rechargeRecords.getGold());
-        // 0：普通充值，1：首充
-        stored.put("type",rechargeRecords.getIsFirstCharge());
+        // 0：普通充值
+        stored.put("type",0);
         stored.put("OrderNum",rechargeRecords.getOrderNumber());
         // 执行分享存储过程
         storedProcedure(stored);
@@ -103,8 +103,8 @@ public class CallBackUtils {
         stored.put("Gold", review.getAmount());
         stored.put("GameCoin", review.getGold());
         stored.put("OrderNum",review.getOrderNumber());
-        // 3：兑换
-        stored.put("type",3);
+        // 1：兑换
+        stored.put("type",1);
         storedProcedure(stored);
         // 需要向游戏服务器发送请求
         Map<String, Object> gameParam = new HashMap<>();
@@ -127,6 +127,7 @@ public class CallBackUtils {
         if (status==0){
             // 使用后线程执行
             Runnable runnable = () -> {
+                // 插入订单记录表
                 extracted(rechargeRecords);
                 // 回调成功,根据超时订单号将订单从延迟列表中取消
                 GlobalDelayQueue.cancelOrder(orderNum);
@@ -135,8 +136,10 @@ public class CallBackUtils {
                 gameParam.put("Userid", rechargeRecords.getUserId());
                 gameParam.put("gameCoin", rechargeRecords.getGold());
                 gameParam.put("gold", rechargeRecords.getTopUpAmount());
+                //
                 gameParam.put("Type", 0);
                 gameParam.put("IsFirstRecharge", rechargeRecords.getIsFirstCharge());
+                SendHttp.sendGame1002(gameParam);
                 // 获取充值成功的邮件
                 Map emailParam = RechargeExchangeCommon.getEmailConf(2);
                 // 普通充值类型
@@ -146,7 +149,6 @@ public class CallBackUtils {
                     // 邮件类型首充
                     emailParam.put("goldType", 207);
                 }
-                SendHttp.sendGame1002(gameParam);
                 emailParam.put("gold", 0);
                 emailParam.put("toUserid", rechargeRecords.getUserId());
                 SendHttp.sendEmail(emailParam);
@@ -155,14 +157,17 @@ public class CallBackUtils {
                 RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),
                         rechargeRecords.getChannel(),rechargeRecords.getChannelPid(),dateFormat.format(rechargeRecords.getCreateTime()),0);
                 // 执行计算打码量存储过程
+//                查询
+                Integer baseGold;
                 if (rechargeRecords.getIsFirstCharge()==0){
-                    Integer baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
-                    // 添加用户打码量
-                    Integer normalAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=11",null);
-                    Integer specialAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=12",null);
-                    Long code = (long) baseGold *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGold()-baseGold);
-                    addUserCode(rechargeRecords.getUserId(),code);
+                    baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
+                }else {
+                    baseGold = Db.queryInt("select gold from First_charge_config where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
                 }
+                Integer normalAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=11",null);
+                Integer specialAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=12",null);
+                Long code = (long) baseGold *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGold()-baseGold);
+                addUserCode(rechargeRecords.getUserId(),code);
             };
             ThreadKit.excAsync(runnable,false);
         }
