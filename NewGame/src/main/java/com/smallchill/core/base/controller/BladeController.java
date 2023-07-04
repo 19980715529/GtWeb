@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.smallchill.common.exceptions.CustomException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -786,6 +787,13 @@ public class BladeController {
 		} finally {
 			LOGGER.error(msg, ex);
 		}
+	}
+
+	@Json
+	@ExceptionHandler(CustomException.class)
+	public AjaxResult customExceptionHandler(CustomException ex){
+		AjaxResult result = new AjaxResult();
+		return result.addFail(ex.getMessage());
 	}
 
 }

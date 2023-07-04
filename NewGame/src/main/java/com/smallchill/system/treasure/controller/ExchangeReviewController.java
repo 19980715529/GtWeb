@@ -200,10 +200,16 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             emailParam.put("gold",exchangeReview.getGold());
             // 兑换退回需要发送邮件
             emailParam.put("content",emailParam.get("content")+"["+exchangeReview.getFeedback()+"]");
-            System.out.println(exchangeReview.getFeedback());
+//            System.out.println(exchangeReview.getFeedback());
             //  兑换退回 退回时游戏服务器添加金币变动记录
             emailParam.put("goldType",211);
-            SendHttp.sendEmail(emailParam);
+            try {
+                SendHttp.sendEmail(emailParam);
+            }catch (Exception e){
+                LOGGER.error("邮件发送失败");
+                return error("邮件发送失败");
+            }
+
         }
         // 获取当前操作用户信息
         ShiroUser user = ShiroKit.getUser();

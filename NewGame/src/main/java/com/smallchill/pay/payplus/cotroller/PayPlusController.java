@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,6 +50,7 @@ public class PayPlusController extends BaseController implements ConstShiro {
      */
     @PostMapping("/recharge")
     @Transactional
+    @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
@@ -76,9 +80,10 @@ public class PayPlusController extends BaseController implements ConstShiro {
         if ("SUCCESS".equals(retCode)) {
             // 获取支付链接
             String payUrl = jsonObject.getString("payUrl");
-//            String payCode = jsonObject.getString("code");
+            String payCode = jsonObject.getString("code");
             resultMap.put("urlPay", payUrl);
-//            resultMap.put("payCode", payCode);
+            resultMap.put("payCode", payCode);
+            resultMap.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
             rechargeRecords.setUrlPay(payUrl);
             // 平台订单号
             String PfOrderNum = jsonObject.getString("platOrder");

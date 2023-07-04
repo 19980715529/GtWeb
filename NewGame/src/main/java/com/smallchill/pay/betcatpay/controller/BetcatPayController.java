@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
@@ -21,6 +22,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,6 +49,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
      */
     @PostMapping("/recharge")
     @Transactional
+    @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords = mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
@@ -62,7 +66,7 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         String response = BetcatPayUtils.recharge(rechargeRecords,betcatPay);
 //        LOGGER.error(response);
         if ("".equals(response)) {
-            return json(resultMap, "105005", 1);
+            return fail("105005");
         }
         JSONObject jsonObject;
         try {
@@ -83,9 +87,11 @@ public class BetcatPayController extends BaseController implements ConstShiro {
             // 获取充值地址
             String payUrl = params.getString("url");
             // 支付码
-//            String payCode = params.getString("qrcode");
+            String payCode = params.getString("qrcode");
             resultMap.put("urlPay",payUrl);
-//            resultMap.put("payCode",payCode);
+            resultMap.put("payCode",payCode);
+            resultMap.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            rechargeRecords.setUrlPay(payUrl);
             // 平台订单号
             String PfOrderNum = jsonObject.getJSONObject("data").getString("orderNo");
             // 将订单加入到未支付队列中

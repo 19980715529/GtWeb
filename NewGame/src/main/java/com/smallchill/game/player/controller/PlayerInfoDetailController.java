@@ -110,8 +110,8 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 			}
 		}
 		// 获取用户充值返利奖励金币
-		Integer rebateGold = Db.queryInt("select isnull(sum(Data),0) from [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] where UserId=#{UserID} and DataType=1", paras);
-		mm.put("rebateGold",rebateGold);
+//		Integer rebateGold = Db.queryInt("select isnull(sum(Data),0) from [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] where UserId=#{UserID} and DataType=1", paras);
+//		mm.put("rebateGold",rebateGold);
 		// 白银转盘金币领取
 		Map onlineData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
 				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=1 and Fake=0", paras);

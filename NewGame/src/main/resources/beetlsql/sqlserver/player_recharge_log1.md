@@ -177,7 +177,7 @@ query_list
 query_exc_list
 ===
     select isnull(SUM([amount]),0) as TotalNewExcMoney,count(distinct userId) as TotalNewExcUserNum
-    from [RYPlatformManagerDB].[dbo].[Exchange_review] as e inner join  [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c on e.channelId = c.id
+    from [RYPlatformManagerDB].[dbo].[Exchange_review] as e inner join  [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c on e.channelId = c.mcId 
     where status in (3,4)
     @if(!isEmpty(UserID)){
 	 and r.userId =#{UserID}
