@@ -382,6 +382,9 @@ new_detail
     (SELECT  NeedCodingQuantity FROM [QPGameUserDB].[dbo].[PlayerSocreInfo] with (nolock) WHERE Userid = a.UserID) as NeedCodingQuantity,
 	(SELECT  isnull(SUM(Award),0) FROM [QPGameRecordDB].[dbo].[Turntable_History] with (nolock) WHERE UserID = a.UserID and Fake=0) as RotaryReward,
 	(SELECT  isnull(sum(Data),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] with (nolock) WHERE UserId = a.UserID and DataType =1) as CodeReward,
+	(SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=216) as CheckAmount,
+	(SELECT  count(1) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=216) as CheckDays,
+    (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=212) as SharePlayerRewards,
 	(case when (DATEDIFF(DAY,b.changeScoreTime,GETDATE())>0) then 0 else b.todayScore end) as DayWaste
 	, b.js_BussniessCount, b.out_BussniessCount,
 	b.CheatRate, b.LimitScore,b.CheatRate2, b.LimitScore2, b.BloodScore,isnull(a.limitSend,0) limitGive,b.InsureScore,

@@ -1,21 +1,17 @@
 package com.smallchill.test;
 
-import com.alibaba.fastjson.JSON;
-import com.smallchill.pay.luckypay.utils.LuckyPayUtils;
-import com.smallchill.system.treasure.model.ExchangeReview;
-import com.smallchill.system.treasure.utils.SendHttp;
+//import com.github.benmanes.caffeine.cache.Cache;
+//import com.github.benmanes.caffeine.cache.Caffeine;
+//import com.github.benmanes.caffeine.cache.Scheduler;
 import com.smallchill.system.treasure.utils.Utils;
 import com.smallchill.test.base.BaseTest;
 import org.junit.Test;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static com.smallchill.core.constant.ConstKey.LUCKYPAY_APPID;
 import static com.smallchill.core.constant.ConstKey.PUBLIC_LUCKYPAY_KEY;
@@ -54,8 +50,18 @@ public class Demo15 extends BaseTest {
         System.out.println(res);
     }
     @Test
-    public void test1() {
-        String randomPhone = LuckyPayUtils.getRandomPhone(10);
-        System.out.println(randomPhone);
+    public void test1() throws InterruptedException {
+//        Cache<Integer, Integer> cache = Caffeine.newBuilder()
+//                .expireAfterWrite(1, TimeUnit.SECONDS)
+//                //可以指定调度程序来及时删除过期缓存项，而不是等待Caffeine触发定期维护
+//                //若不设置scheduler，则缓存会在下一次调用get的时候才会被动删除
+//                .scheduler(Scheduler.systemScheduler())
+//                .evictionListener((key, val, removalCause) -> {
+//                    System.out.println("淘汰缓存：key:"+key+" val:"+val);
+//                })
+//                .build();
+//        cache.put(1, 2);
+//        Thread.sleep(3000);
+//        System.out.println(cache.getIfPresent(1));//null
     }
 }

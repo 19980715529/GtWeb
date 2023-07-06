@@ -296,29 +296,13 @@ public class RechargeExchangeCommon {
             BigDecimal get_Gold = gold.add(give_gold).setScale(0,RoundingMode.HALF_UP);
             // 将充值金币存储到订单里面
             rechargeRecords.setGold(get_Gold.longValue());
-//            else if (rechargeRecords.getIsFirstCharge()==2){
-//                // 随机充值，查询随机充值配置
-//                Map map = Db.selectOne("select * from [QPGameUserDB].[dbo].[PlayerActiveInfo_RandomRecharge] where UserId=#{userId}",
-//                        CMap.init().set("userId",rechargeRecords.getUserId()));
-//                // 计算随机充值金额是否正确
-//                BigDecimal money = new BigDecimal(map.get("RechargeGold").toString());
-//                if (money.intValue()!=rechargeRecords.getTopUpAmount().intValue()){
-//                    reMap.put("code",1);
-//                    reMap.put("msg","105011");
-//                    return reMap;
-//                }
-//                // 渠道倍率goldProportion
-//                BigDecimal gpr = new BigDecimal(String.valueOf(channel.get("goldProportion")));
-//                // 奖励百分比
-//                BigDecimal percentId = new BigDecimal(map.get("PercentId").toString()).divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
-//                // 计算获得金币
-//                BigDecimal get_gold = money.multiply(gpr).multiply(percentId).setScale(0, RoundingMode.DOWN);
-//                rechargeRecords.setGold(get_gold.longValue());
-//            }
+        }else if (rechargeRecords.getIsFirstCharge()==2){
+            // 每日随机充值
+
         }else {
-           reMap.put("code",1);
-           reMap.put("msg","105011");
-           return reMap;
+            reMap.put("code",1);
+            reMap.put("msg","105011");
+            return reMap;
         }
         // 生成订单号
         String orderNo = Utils.getOrderNum(rechargeRecords.getUserId());

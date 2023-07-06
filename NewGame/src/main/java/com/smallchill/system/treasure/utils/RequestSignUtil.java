@@ -11,6 +11,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 //import org.apache.tomcat.util.http.fileupload.IOUtils;
 //import org.assertj.core.util.Strings;
@@ -95,7 +96,7 @@ public class RequestSignUtil {
         try {
             decryptSign = publicDecrypt(platSign, getPublicKey(publickey));
         } catch (Exception e) {
-            System.out.println(e.toString());
+            System.out.println(e.getMessage());
         }
 
         if (!stringBuilder.toString().equalsIgnoreCase(decryptSign)) {
@@ -202,7 +203,7 @@ public class RequestSignUtil {
     }
 
     public static String doPost(String url, JSONObject json) {
-        HttpClient client = new DefaultHttpClient();
+        HttpClient client = HttpClientBuilder.create().build();
         HttpPost post = new HttpPost(url);
         post.setHeader("x-forwarded-for", "52.76.118.232");
         String response = "";
@@ -213,17 +214,16 @@ public class RequestSignUtil {
             post.setEntity(s);
             HttpResponse res = client.execute(post);
             if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                HttpEntity entity = res.getEntity();
-                String result = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
+//                HttpEntity entity = res.getEntity();
+//                String result = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
 //                response = JSONObject.parseObject(result);
-                response = result;
+                response = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
             }else {
-                HttpEntity entity = res.getEntity();
-                String result = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
-                response = result;
+//                HttpEntity entity = res.getEntity();
+//                String result = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
+                response = EntityUtils.toString(res.getEntity(),"utf-8");// 返回json格式：
             }
         } catch (Exception e) {
-//            throw new RuntimeException(e);
             return "";
         }
         return response;
