@@ -282,13 +282,14 @@
 		var clientType = $("#clientType").val();
 		var wheres = {};
 		if (BladeTool.isNotEmpty(moneyMax) || BladeTool.isNotEmpty(moneyMin)){
-			if (moneyMin<0 || moneyMax<0){
+			if (parseInt(moneyMin)<0 || parseInt(moneyMax)<0){
 				layer.alert("充值金额不能小于0", {icon: 2,title:"发生错误"});
 				return;
 			}
 			if (BladeTool.isNotEmpty(moneyMax) && BladeTool.isNotEmpty(moneyMin)){
-				if (moneyMin>=moneyMax){
-					layer.alert("充值金额的最小区间不能大于最大区间", {icon: 2,title:"发生错误"});
+				if (parseInt(moneyMin)>=parseInt(moneyMax)){
+					console.log(moneyMin<=moneyMax)
+					layer.alert("充值金额的最小区间"+moneyMin+"不能大于最大区间"+moneyMax, {icon: 2,title:"发生错误"});
 					return;
 				}
 				wheres['moneyMin']=moneyMin;

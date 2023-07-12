@@ -41,8 +41,7 @@ public class PlatformLogController extends BaseController implements ConstShiro 
 	//@Permission({ ADMINISTRATOR, ADMIN })
 	public String index(ModelMap mm) {
 		mm.put("code", CODE);
-//		return BASE_PATH + "platform_detail_log.html";
-		return BASE_PATH + "platform_detail.html";
+		return BASE_PATH + "platform_detail1.html";
 	}
 	
 	//	@SystemControllerLog(description = "平台明细列表")
@@ -50,21 +49,21 @@ public class PlatformLogController extends BaseController implements ConstShiro 
 	@Json
 	@RequestMapping(KEY_LIST)
 	//@Permission({ ADMINISTRATOR, ADMIN })
-	public Object list() {
+	public AjaxResult list() {
 		Object gird = new Object();
 		String parameter = HttpKit.getRequest().getParameter("where");
 		if(StrKit.isBlank(parameter)) {
-			return gird;
+			return json(gird);
 		}
 		if(parameter.contains("%")){
 			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
 		}
 		// 解析查询条件
 		Map paras = JSON.parseObject(parameter, Map.class);
-		gird = commonService.getInfoList("platform.record_list", paras);
+		gird = paginateBySelf("platform.record_list");
 		Map map = new HashMap();
 		map.put("rows", gird);
-		return gird;
+		return json(gird);
 	}
 
 	/**

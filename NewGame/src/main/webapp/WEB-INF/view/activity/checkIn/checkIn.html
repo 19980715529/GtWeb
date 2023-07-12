@@ -14,7 +14,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/checkIn/list";//查询列表接口
-        var _colnames=["id","时间", "已开通总人数","新增开通签到人数","领取金额","领取人数"];
+        var _colnames=["id","时间", "已开通总人数","新增开通签到人数","领取金额","领取人数","详情"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
 
@@ -26,8 +26,9 @@
             //
             {name:"newCheckAmount", sortable:false},
             //
-            {name:"receiveCheckInUser", sortable:false}
-            // {name:"id",sortable:false,formatter:genLink},
+            {name:"receiveCheckInUser", sortable:false},
+
+            {name:"id",sortable:false,formatter:genLink},
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -35,7 +36,7 @@
             shrinkToFit : true,//适用于较少字段,响应式
             colNames:_colnames,
             colModel:_colmodel,
-            jsonReader:{id:"id"},
+            // jsonReader:{id:"id"},
             pager : pager_selector,
             postData : {where:_filter,sort: "createTime", order: "desc"},
             // multiselect : true, // 是否显示勾选框
@@ -45,7 +46,9 @@
         });
     }
     function genLink(cellvalue, options, rowObject) {
-        var html = '<a name="'+ctx + '/newrecharge/details/' + rowObject.id+'" title="充值详情" class="text-33C3F7 iframeurl" href="'+ctx + '/newrecharge/details/' + rowObject.id+'">充值详情</a>';
+        var clientType = $("#clientType").val()
+        var html = '<a name="'+ctx + '/checkIn/details？createTime=' + rowObject.createTime+'&clientType='+clientType+'" title="详情"' +
+            ' class="text-33C3F7 iframeurl" href="'+ctx + '/checkIn/details?createTime='+ rowObject.createTime+'&clientType='+clientType+'">详情</a>';
         return html;
     }
 

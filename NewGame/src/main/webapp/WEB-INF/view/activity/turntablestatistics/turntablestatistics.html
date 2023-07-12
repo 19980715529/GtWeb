@@ -14,7 +14,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/turntablestatistics/list";//查询列表接口
-        var _colnames=["id","时间", "转盘领取人数","转盘领取总金额","白银转盘领取总金币","白银转盘领取总人数","黄金转盘领取总金额","黄金转盘领取总人数","钻石转盘领取总金币","钻石转盘领取总人数"];
+        var _colnames=["id","时间", "转盘领取人数","转盘领取总金额","白银转盘领取总金币","白银转盘领取总人数","黄金转盘领取总金额","黄金转盘领取总人数","钻石转盘领取总金币","钻石转盘领取总人数","详情"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -32,8 +32,9 @@
 
             {name:"diamondAmount", sortable:false},
 
-            {name:"diamondUser", sortable:false}
-            // {name:"id",sortable:false,formatter:genLink},
+            {name:"diamondUser", sortable:false},
+
+            {name:"id",sortable:false,formatter:genLink},
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -51,7 +52,9 @@
         });
     }
     function genLink(cellvalue, options, rowObject) {
-        var html = '<a name="'+ctx + '/newrecharge/details/' + rowObject.id+'" title="充值详情" class="text-33C3F7 iframeurl" href="'+ctx + '/newrecharge/details/' + rowObject.id+'">充值详情</a>';
+        var clientType = $("#clientType").val()
+        var html = '<a name="'+ctx + '/turntablestatistics/details？createTime=' + rowObject.createTime+'&clientType='+clientType+'" title="详情"' +
+            ' class="text-33C3F7 iframeurl" href="'+ctx + '/turntablestatistics/details?createTime='+ rowObject.createTime+'&clientType='+clientType+'">详情</a>';
         return html;
     }
 

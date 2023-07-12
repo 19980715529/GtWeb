@@ -278,6 +278,7 @@ public class RechargeExchangeCommon {
             // 计算获得金币
             rechargeRecords.setGold(gold.add(gold_give).longValue());
             rechargeRecords.setTopUpAmount(new BigDecimal(first.get("amount").toString()));
+            rechargeRecords.setGiftGold(gold_give.longValue());
             // 修改
         }else if (rechargeRecords.getIsFirstCharge()==0){
             // 充值充值挡位 recharge_gear
@@ -292,13 +293,12 @@ public class RechargeExchangeCommon {
             BigDecimal extra = new BigDecimal(gears.getString("getExtra"));
             //  获取赠送的金币 基础金币*赠送比例
             BigDecimal give_gold = gold.multiply(extra);
+            // 设置赠送金币
+            rechargeRecords.setGiftGold(give_gold.longValue());
             //  最终获得金币：基础金币+渠道外赠送
             BigDecimal get_Gold = gold.add(give_gold).setScale(0,RoundingMode.HALF_UP);
             // 将充值金币存储到订单里面
             rechargeRecords.setGold(get_Gold.longValue());
-        }else if (rechargeRecords.getIsFirstCharge()==2){
-            // 每日随机充值
-
         }else {
             reMap.put("code",1);
             reMap.put("msg","105011");

@@ -38,6 +38,16 @@ public class RechargeRecords extends BaseModel implements Delayed {
     private String operator; // 操作人员
     private Integer gear; // 操作人员
 
+    private Long giftGold; // 赠送金币
+
+    public Long getGiftGold() {
+        return giftGold;
+    }
+
+    public void setGiftGold(Long giftGold) {
+        this.giftGold = giftGold;
+    }
+
     public Integer getGear() {
         return gear;
     }

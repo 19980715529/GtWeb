@@ -86,7 +86,8 @@ old_list
 
 record_list
 ===
-    select CONVERT(VARCHAR(10), createTime, 23) writeTime,* FROM [QPGameRecordDB].[dbo].[DailyGameStats]
+    select CONVERT(VARCHAR(10), createTime, 23) writeTime,*,(turntableAwardCoins+rechargeCoins+ShareRewardCoins+BindPhoneRewards) RewardCoins 
+    FROM [QPGameRecordDB].[dbo].[DailyGameStats]
     where 1=1
     @if(!isEmpty(clientType)){
         and clientType=#{clientType}
@@ -97,3 +98,4 @@ record_list
     @if(!isEmpty(EndTime)){
         and CONVERT(VARCHAR(100), createTime, 23) <= CONVERT(VARCHAR(100), #{EndTime}, 23)
     @}
+    

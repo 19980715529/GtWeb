@@ -4,16 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
-import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
-import com.smallchill.core.plugins.dao.Redis;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.StrKit;
-import com.smallchill.core.toolbox.redis.IJedis;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.treasure.model.ChannelVo;
-import com.smallchill.system.treasure.model.RechargeGear;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.web.bind.annotation.*;
 
@@ -202,9 +198,16 @@ public class AnnouncementController extends BaseController implements ConstShiro
     /**
      *
      */
-    @GetMapping("/test")
+    @GetMapping("/get/cache")
     @RateLimit(limit = 5)
-    public AjaxResult test(){
+    public AjaxResult get_cache(@RequestParam String key){
+
+        return success("success");
+    }
+    @GetMapping("/set/cache")
+    @RateLimit(limit = 5)
+    public AjaxResult set_cache(){
+
         return success("success");
     }
 }

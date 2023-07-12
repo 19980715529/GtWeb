@@ -4,49 +4,61 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"${createTime}","EndTime":"${createTime}","clientType":"${clientType}"}';
 
     $(function() {
-        backDom('回馈数据','feedbackdata');
+        backDom('转盘领取详细数据','turntablestatistics');
         initGrid();
     });
 
 
     function initGrid() {
-        var grid_url = ctx + "/feedbackdata/list";//查询列表接口
-        var _colnames=["id","时间", "回馈总金币","领取总人数","领取金币统计","充值领取金币","详情"];
+        var grid_url = ctx + "/turntablestatistics/details/list";//查询列表接口
+        var _colnames=["id","玩家id", "转盘等级","奖励金币","时间"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
-            {name:"createTime",sortable:true},
-            {name:"DailyFeedbackAmount", sortable:false},
             //
-            {name:"DailyFeedbackUser",  sortable:false},
+            {name:"UserID",sortable:true,formatter:genLinkUser},
+            //  转盘类型(0：白银 1：黄金 2：钻石)
+            {name:"Type", sortable:false,formatter:rowShow},
             //
-            {name:"accFeedbackAmount", sortable:false},
+            {name:"Award",  sortable:false},
             //
-            {name:"FeedbackRecAmount", sortable:false},
-
-            {name:"id",sortable:false,formatter:genLink},
+            {name:"Time",  sortable:false},
         ];
 
         jQuery(grid_selector).jqGrid({
             url:grid_url,
-            shrinkToFit : true,//适用于较少字段,响应式
+            shrinkToFit : false,//适用于较少字段,响应式
             colNames:_colnames,
             colModel:_colmodel,
             jsonReader:{id:"id"},
             pager : pager_selector,
-            postData : {where:_filter,sort: "createTime", order: "desc"},
+            postData : {where:_filter,sort: "Time", order: "desc"},
             // multiselect : true, // 是否显示勾选框
             // rownumbers : true, // 是否出现排序
             rowNum:100,
             height: 'auto'
         });
     }
-    function genLink(cellvalue, options, rowObject) {
-        var clientType = $("#clientType").val()
-        var html = '<a name="'+ctx + '/feedbackdata/details？createTime=' + rowObject.createTime+'&clientType='+clientType+'" title="详情"' +
-            ' class="text-33C3F7 iframeurl" href="'+ctx + '/feedbackdata/details?createTime='+ rowObject.createTime+'&clientType='+clientType+'">详情</a>';
+
+    function genLinkUser(cellvalue, options, rowObject) {
+        var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
+        return html;
+    }
+
+    function rowShow(cellvalue, options, rowObject) {
+        var html = '';
+        // 转盘类型(0：白银 1：黄金 2：钻石)
+        if(options.colModel.name ==='Type') {
+            if(cellvalue === 0) {
+                html += '<span class="label label-default">白银</span>';
+            } else if (cellvalue === 1) {
+                html += '<span class="label label-danger">黄金</span>';
+            }else if (cellvalue === 2){
+                html += '<span class="label label-info">钻石</span>';
+            }
+        }
         return html;
     }
 
@@ -100,7 +112,7 @@
             /*   alert('得到：'+datas); */
         }
     });
-
+    //
     $(function(){
         $('#start_time').val(getCurrentMonthFirst().format('yyyy-MM-dd'));
         $('#end_time').val(getBeforeDate(0));

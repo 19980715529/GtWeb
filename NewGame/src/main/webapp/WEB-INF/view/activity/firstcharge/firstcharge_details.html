@@ -4,29 +4,31 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"${createTime}","EndTime":"${createTime}","clientType":"${clientType}"}';
 
     $(function() {
-        backDom('回馈数据','feedbackdata');
+        backDom('首充详细数据','firstcharge');
         initGrid();
+        // $('#start_time').val(${createTime});
+        // $('#end_time').val(${createTime});
     });
 
 
     function initGrid() {
-        var grid_url = ctx + "/feedbackdata/list";//查询列表接口
-        var _colnames=["id","时间", "回馈总金币","领取总人数","领取金币统计","充值领取金币","详情"];
+        var grid_url = ctx + "/firstcharge/details/list";//查询列表接口
+        var _colnames=["id","玩家id", "首充金额","赠送金币","获得金币","时间"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
-            {name:"createTime",sortable:true},
-            {name:"DailyFeedbackAmount", sortable:false},
             //
-            {name:"DailyFeedbackUser",  sortable:false},
+            {name:"userId",sortable:true,formatter:genLinkUser},
             //
-            {name:"accFeedbackAmount", sortable:false},
+            {name:"topUpAmount", sortable:false},
             //
-            {name:"FeedbackRecAmount", sortable:false},
-
-            {name:"id",sortable:false,formatter:genLink},
+            {name:"gold",  sortable:false},
+            //
+            {name:"giftGold", sortable:false},
+            //
+            {name:"createTime",  sortable:false},
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -43,10 +45,8 @@
             height: 'auto'
         });
     }
-    function genLink(cellvalue, options, rowObject) {
-        var clientType = $("#clientType").val()
-        var html = '<a name="'+ctx + '/feedbackdata/details？createTime=' + rowObject.createTime+'&clientType='+clientType+'" title="详情"' +
-            ' class="text-33C3F7 iframeurl" href="'+ctx + '/feedbackdata/details?createTime='+ rowObject.createTime+'&clientType='+clientType+'">详情</a>';
+    function genLinkUser(cellvalue, options, rowObject) {
+        var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.userId+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.userId+'"><strong>' + cellvalue + '</strong></a>';
         return html;
     }
 
@@ -73,7 +73,7 @@
             </div>
         </form>
         <!-- 按钮组 -->
-        <!--        <div class="welljq well-sm" id="btns"></div>-->
+<!--        <div class="welljq well-sm" id="btns"></div>-->
         <!-- grid -->
         <table id="grid-table"></table>
         <!-- 分页 -->
@@ -100,7 +100,7 @@
             /*   alert('得到：'+datas); */
         }
     });
-
+    //
     $(function(){
         $('#start_time').val(getCurrentMonthFirst().format('yyyy-MM-dd'));
         $('#end_time').val(getBeforeDate(0));
