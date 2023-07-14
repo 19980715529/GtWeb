@@ -15,7 +15,7 @@
 
 	function initGrid() {
 		var grid_url = ctx + "/${code}/list";//查询列表接口
-		var _colnames = ["UserID", "玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "登录时间","手机号", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>",
+		var _colnames = ["UserID", "玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "登录时间","最后登录时间","手机号", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>",
 			"<span class=\"text-blue\">金币</span>","奖励金币","充值金额", "充值次数","兑换金额","兑换次数","充提差", "首选游戏", "游戏状态", "账号状态","账户类型","作弊率",
 			"<span class=\"text-blue\">最后作弊完成时间</span>"];
 		var _colmodel = [ 
@@ -23,8 +23,10 @@
 			{name : "UserID",sortable:false, formatter:genLink},
 			{name : "NickName",sortable:false, formatter:genLink},
 			{name : "RegisterDate",index : "RegisterDate"},
-				// 登录时间
-			{name : "LastLogonDate",sortable:false},
+			// 登录时间
+			{name : "LastLoginTime",sortable:false},
+			// 最后登录时间
+			{name : "LastLogoutTime",sortable:false},
 			// 电话号
 			{name : "BindPhone",sortable:false},
 				// 总输赢
