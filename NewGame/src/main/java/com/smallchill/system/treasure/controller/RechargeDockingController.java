@@ -97,8 +97,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * recharge.topUpAmount：充值的金额
      * recharge.pid: 父渠道id
      * recharge.id: 渠道id
-     * recharge.email：用户邮箱
-     * recharge.userName：用户名
+     * recharge.cardholder：用户名
      * recharge.phone：电话号
      * 响应参数格式
      * Userid userid
@@ -845,8 +844,9 @@ public class RechargeDockingController extends BaseController implements ConstSh
         Map map = Db.selectOne("select * from [RYPlatformManagerDB].[dbo].AutoReviewConfig", null);
         JSONObject auto = JSONObject.parseObject(JSON.toJSONString(map));
         if (auto.getIntValue("auto")==1){
-            // 判断大渠道是否关闭
-            Map channel = Db.selectOne("select id from Pay_Channel where isExchange=1 order by sort", null);
+            // 判断大渠道是否关闭,根据选择的打渠道进行判断
+            Map channel = Db.selectOne("select id from Pay_Channel where isExchange=1 and cname=#{cname} order by sort",
+                    CMap.init().set("cname",exchangeReview.getChannelName()));
             if (channel==null || channel.isEmpty()){
                 return false;
             }
