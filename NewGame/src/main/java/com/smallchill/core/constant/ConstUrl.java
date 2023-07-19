@@ -127,11 +127,11 @@ public interface ConstUrl {
     /**
      * WePay 充值回调地址
      */
-    String RECHARGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/recharge_WePay_callback";
+    String RECHARGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/callback/WePay/recharge";
     /**
      * WePay 兑换回调地址
      */
-    String EXCHANGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/exchange_WePay_callback";
+    String EXCHANGE_WEPAY_CALLBACK_URL = CALLBACK_IP+"/NewGame/callback/callback/WePay/exchange";
     //==================================================CloudPay===================================================
     /**
      * 银河系统充值地址 CloudPay

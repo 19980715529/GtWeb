@@ -10,6 +10,7 @@ import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
     private ExchangeReviewService exchangeReviewService;
 
 
-//    @PostMapping(value = "/test",consumes = "application/json")
+    @PostMapping(value = "/test",consumes = "application/json")
     public String rechargeTest(@RequestBody Map<String,Object> param){
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 判断订单号是否存在
@@ -60,7 +61,7 @@ public class CallbackDockingController extends BaseController implements ConstSh
         return "SUCCESS";
     }
 
-//    @PostMapping(value = "/exchange/test",consumes = "application/json")
+    @PostMapping(value = "/exchange/test",consumes = "application/json")
     public String exchangeMetaPayCallback(@RequestBody Map<String,Object> param){
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         String orderNum = params.getString("orderNum");

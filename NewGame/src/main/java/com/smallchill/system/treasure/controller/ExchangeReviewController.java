@@ -1,5 +1,4 @@
 package com.smallchill.system.treasure.controller;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -30,9 +29,11 @@ import com.smallchill.pay.cloudpay.utils.CloudPayUtils;
 import com.smallchill.pay.globalPay.model.GlobalPay;
 import com.smallchill.pay.luckypay.model.LuckPay;
 import com.smallchill.pay.luckypay.utils.LuckyPayUtils;
+import com.smallchill.pay.metapay.model.MetaPay;
 import com.smallchill.pay.mhdPay.utils.MhdPayUtils;
+import com.smallchill.pay.omopay.model.OmoPay;
 import com.smallchill.pay.payplus.model.PayPlus;
-import com.smallchill.pay.payplus.model.SuperPayPlus;
+import com.smallchill.pay.payplus.model.PhpPayPlus;
 import com.smallchill.pay.metapay.utils.MetaPayUtils;
 import com.smallchill.pay.mhdPay.model.MhdPay;
 import com.smallchill.pay.omopay.utils.OmoPayUtils;
@@ -41,7 +42,9 @@ import com.smallchill.pay.rarPay.model.RarPay;
 import com.smallchill.pay.bpay.utils.BPayUtils;
 import com.smallchill.pay.globalPay.utils.GlobalPayUtils;
 import com.smallchill.pay.rarPay.utils.RarPayUtils;
+import com.smallchill.pay.safePay.model.SafePay;
 import com.smallchill.pay.safePay.utils.SafePayUtils;
+import com.smallchill.pay.wepay.model.WePay;
 import com.smallchill.pay.wepay.utils.WePayUtils;
 import com.smallchill.system.treasure.meta.intercept.ExchangeReviewValidator;
 import com.smallchill.system.treasure.model.ExchangeReview;
@@ -80,7 +83,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     @Resource
     private PayPlus payPlus;
     @Resource
-    private SuperPayPlus superPayPlus;
+    private PhpPayPlus phpPayPlus;
     @Resource
     private BPay bPay;
     @Resource
@@ -95,6 +98,16 @@ public class ExchangeReviewController extends BaseController implements ConstShi
     private LuckPay luckPay;
     @Resource
     private BetcatPay betcatPay;
+    @Resource
+    private OmoPay omoPay;
+
+    @Resource
+    private WePay wePay;
+
+    @Resource
+    private SafePay safePay;
+    @Resource
+    private MetaPay metaPay;
     private static String BASE_PATH = "/system/exchangereview/";
     private static String CODE = "exchangereview";
     private static String LIST_SOURCE = "exchange_review.all_list";
@@ -155,7 +168,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         exchangeReview.setAuditMethod(0);
         if (progress ==1) {
             // 根据渠道id，和pid进行查询
-//            Map channel = commonService.getInfoByOne("recharge_channel.get_channel", CMap.init().set("id",exchangeReview.getChannelId()));
             Map channel = commonService.getInfoByOne("channel_list.exchange_one",
                     CMap.init().set("id",exchange.getChannelId()).set("clientType",exchangeReview.getSourcePlatform()));
             BigDecimal fee = new BigDecimal(channel.get("fee").toString());
@@ -170,14 +182,53 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             // 设置人工审核
             // 判断是哪个渠道
             switch (pid) {
-                case 35:
-                    if (ExchangeUtils.PayPlusExchange(exchangeReview,payPlus)) return error("充值服务器异常");
+                case 1:
+                    if (RarPayUtils.RarPayExchange(exchangeReview, channel,rarPay)) return error("服务异常，修改失败");
+                    break;
+                case 4:
+                    if (SafePayUtils.SafePayExchange(exchangeReview, channel,safePay)) return error("服务异常，修改失败");
+                    break;
+                case 20:
+                    if (MetaPayUtils.MetaPayExchange(exchangeReview,metaPay)) return error("服务器异常");
+                    break;
+                case 23:
+                    if (OmoPayUtils.OmoPayExchange(exchangeReview, omoPay)) return error("服务器异常");
+                    break;
+                case 26:
+                    if (AIPayUtils.AIPayExchange(exchangeReview, channel,aiPay)) return error("服务器异常");
+                    break;
+                case 29:
+                    if (WePayUtils.WePayExchange(exchangeReview, channel,wePay)) return error("服务器异常");
+                    break;
+                case 32:
+                    if (CloudPayUtils.CloudPayExchange(exchangeReview,cloudPay)) return error("服务器异常");
                     break;
                 case 2:
-                    if (ExchangeUtils.BetcatPayExchange(exchangeReview,betcatPay)) return error("充值服务器异常");
+                    if (BetcatPayUtils.BetcatPayExchange(exchangeReview,betcatPay)) return error("服务器异常");
+                    break;
+                case 35:
+                    String channelName = channel.get("channelName").toString();
+                    Map<String, String> param;
+                    if ("pix".equals(channelName)){
+                        param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
+                    }else {
+                        param = JSON.parseObject(JSON.toJSONString(phpPayPlus), new TypeReference<Map<String, String>>(){});
+                    }
+                    if (PayPlusUtils.PayPlusExchange(exchangeReview,param)) return error("服务器异常");
                     break;
                 default:
                     break;
+                case 38:
+                    if (MhdPayUtils.MhdPayExchange(exchangeReview,mhdPay)) return error("服务器异常");
+                    break;
+                case 49:
+                    if (BPayUtils.BPayExchange(exchangeReview, channel,bPay)) return error("服务器异常");
+                    break;
+                case 52:
+                    //GlobalPay
+                    if (GlobalPayUtils.GlobalPayExchange(exchangeReview, channel,globalPay)) return error("服务器异常");
+                    break;
+
                 }
         }else if(progress==4){
             // 兑换完成
@@ -200,7 +251,6 @@ public class ExchangeReviewController extends BaseController implements ConstShi
             emailParam.put("gold",exchangeReview.getGold());
             // 兑换退回需要发送邮件
             emailParam.put("content",emailParam.get("content")+"["+exchangeReview.getFeedback()+"]");
-//            System.out.println(exchangeReview.getFeedback());
             //  兑换退回 退回时游戏服务器添加金币变动记录
             emailParam.put("goldType",211);
             try {
@@ -341,7 +391,7 @@ public class ExchangeReviewController extends BaseController implements ConstShi
 
     private boolean WePayExchange(ExchangeReview exchangeReview, Map channel) {
 
-        String response = WePayUtils.exchange(exchangeReview, channel);
+        String response = WePayUtils.exchange(exchangeReview, wePay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
@@ -385,11 +435,11 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         return false;
     }
 
-    private boolean OmoPayExchange(ExchangeReview exchangeReview, Map channel) {
+    private boolean OmoPayExchange(ExchangeReview exchangeReview) {
 
         // omom 请求的金额必须是整数这里进行处理
         exchangeReview.setMoney(exchangeReview.getMoney().setScale(0, RoundingMode.FLOOR));
-        String response = OmoPayUtils.exchange(exchangeReview, channel);
+        String response = OmoPayUtils.exchange(exchangeReview, omoPay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
@@ -411,9 +461,9 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         return false;
     }
 
-    private boolean MetaPayExchange(ExchangeReview exchangeReview, Map channel) {
+    private boolean MetaPayExchange(ExchangeReview exchangeReview) {
 
-        String response = MetaPayUtils.exchange(exchangeReview, channel);
+        String response = MetaPayUtils.exchange(exchangeReview, metaPay);
         LOGGER.error(response);
         if ("".equals(response)) {
             return true;
@@ -436,34 +486,12 @@ public class ExchangeReviewController extends BaseController implements ConstShi
         return false;
     }
 
-    private boolean SafePayExchange(ExchangeReview exchangeReview, Map channel) {
 
 
-        String response = SafePayUtils.exchange(exchangeReview, channel);
-        LOGGER.error(response);
-        if ("".equals(response)) {
-            return true;
-        }
-        // 获取平台订单号
-        JSONObject respJson = JSONObject.parseObject(response);
-        String status = respJson.getString("status");
-        if ("success".equals(status)) {
-            // 申请成功，需要等待三方回调才能知道最终结果
-            exchangeReview.setStatus(1);
-        } else {
-            // 获取三方反馈
-            exchangeReview.setMsg(respJson.getString("status_mes"));
-            // 申请失败，将订单状态设置为支付失败
-            exchangeReview.setStatus(6);
-        }
-        return false;
-    }
-
-    private boolean RarPayExchange(ExchangeReview exchangeReview, Map channel) {
+    private boolean RarPayExchange(ExchangeReview exchangeReview, Map channel,RarPay rarPay) {
         // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
         String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
         // rarp      Gcash account format error   SIGN_ERROR
-        LOGGER.error(response);
         if ("".equals(response)) {
             return true;
         }

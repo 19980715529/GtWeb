@@ -45,7 +45,6 @@ public class PlayerController extends BaseController implements ConstShiro {
 		if(StrKit.isBlank(parameter)) {
 			return gird;
 		}
-//		gird = paginateBySelf("player_search.list");
 		gird = paginateBySelf("player_search.new_list1");
 		return gird;
 	}

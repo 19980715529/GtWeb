@@ -15,30 +15,31 @@ public class ExchangeUtils {
     private static final Logger LOGGER = LogManager.getLogger(ExchangeUtils.class);
 
 
-    public static boolean PayPlusExchange(ExchangeReview exchangeReview, PayPlus payPlus) {
-        String response = PayPlusUtils.exchange(exchangeReview,payPlus);
-        LOGGER.error(response);
-        if ("".equals(response)) {
-            exchangeReview.setStatus(6);
-            return true;
-        }
-        JSONObject respJson = JSONObject.parseObject(response);
-        String retCode = respJson.getString("retCode");
-        // 成功
-        if ("SUCCESS".equals(retCode)) {
-            // 请求成功 ,获取平台订单号
-            exchangeReview.setStatus(1);
-            // 获取平台订单号
-            String platOrder = respJson.getString("platOrder");
-            exchangeReview.setPfOrderNum(platOrder);
-        } else {
-            // 请求失败, 存储失败原因
-            exchangeReview.setMsg(respJson.getString("retMsg"));
-            // 将状态设置为失败
-            exchangeReview.setStatus(6);
-        }
-        return false;
-    }
+//    public static boolean PayPlusExchange(ExchangeReview exchangeReview, PayPlus payPlus) {
+//        String response = PayPlusUtils.exchange(exchangeReview,payPlus);
+//        LOGGER.error(response);
+//        if ("".equals(response)) {
+//            exchangeReview.setStatus(6);
+//            return true;
+//        }
+//        JSONObject respJson = JSONObject.parseObject(response);
+//        String retCode = respJson.getString("retCode");
+//        // 成功
+//        if ("SUCCESS".equals(retCode)) {
+//            // 请求成功 ,获取平台订单号
+//            exchangeReview.setStatus(1);
+//            // 获取平台订单号
+//            String platOrder = respJson.getString("platOrder");
+//            exchangeReview.setPfOrderNum(platOrder);
+//        } else {
+//            // 请求失败, 存储失败原因
+//            exchangeReview.setMsg(respJson.getString("retMsg"));
+//            // 将状态设置为失败
+//            exchangeReview.setStatus(6);
+//        }
+//        return false;
+//    }
+
     public static boolean BetcatPayExchange(ExchangeReview exchangeReview, BetcatPay betcatPay) {
         String response = BetcatPayUtils.exchange(exchangeReview,betcatPay);
         LOGGER.error(response);

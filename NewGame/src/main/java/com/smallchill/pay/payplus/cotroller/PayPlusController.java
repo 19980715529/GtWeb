@@ -2,6 +2,7 @@ package com.smallchill.pay.payplus.cotroller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.utils.RateLimit;
@@ -12,6 +13,7 @@ import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.pay.payplus.model.PayPlus;
+import com.smallchill.pay.payplus.model.PhpPayPlus;
 import com.smallchill.pay.payplus.utils.PayPlusUtils;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.RechargeRecords;
@@ -38,6 +40,9 @@ public class PayPlusController extends BaseController implements ConstShiro {
     @Resource
     private PayPlus payPlus;
 
+    @Resource
+    private PhpPayPlus phpPayPlus;
+
     /**
      * 需要的参数
      * recharge.isFirstCharge:0普通充值，1首充，2随机充值
@@ -63,7 +68,17 @@ public class PayPlusController extends BaseController implements ConstShiro {
         if (code==1){
             return fail(info.get("msg").toString());
         }
-        String response = PayPlusUtils.recharge(rechargeRecords,payPlus);
+        Map channel =(Map) info.get("channel");
+        String channelName = channel.get("channelName").toString();
+        Map<String, String> param;
+        if ("pix".equals(channelName)){
+            // 巴西
+            param = JSON.parseObject(JSON.toJSONString(payPlus), new TypeReference<Map<String, String>>(){});
+        }else {
+            // 菲律宾
+            param = JSON.parseObject(JSON.toJSONString(phpPayPlus), new TypeReference<Map<String, String>>(){});
+        }
+        String response = PayPlusUtils.recharge(rechargeRecords,param);
         if ("".equals(response)) {
             return json(resultMap, "105005", 1);
         }
@@ -91,11 +106,11 @@ public class PayPlusController extends BaseController implements ConstShiro {
             // 将订单加入到未支付队列中
             GlobalDelayQueue.orderQueue.add(rechargeRecords);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            if (rechargeRecords.getIsFirstCharge()==2){
-                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
-                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
-                        CMap.init().set("userId",rechargeRecords.getUserId()));
-            }
+//            if (rechargeRecords.getIsFirstCharge()==2){
+//                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+//                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+//                        CMap.init().set("userId",rechargeRecords.getUserId()));
+//            }
             return json(resultMap, "105006");
         } else {
             rechargeRecords.setMsg(jsonObject.getString("retMsg"));

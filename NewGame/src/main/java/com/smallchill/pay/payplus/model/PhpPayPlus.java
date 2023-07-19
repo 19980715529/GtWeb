@@ -7,27 +7,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Data
-@PropertySource("classpath:PayConf/LetsPaySupConfig.properties")
-public class SuperPayPlus {
+@PropertySource("classpath:PayConf/PhpPayPlusConfig.properties")
+public class PhpPayPlus extends BasePay {
     // 类型
-    @Value("${lets_sup_type}")
+    @Value("${php_type}")
     public String type;
     // 商户id
-    @Value("${lets_sup_mchId}")
+    @Value("${php_mchId}")
     public String mchId;
     // 产品
-    @Value("${lets_sup_product}")
+    @Value("${php_product}")
     public String product;
     // 密钥
-    @Value("${lets_sup_key}")
+    @Value("${php_key}")
     public String key;
     // 支付地址
-    @Value("${lets_sup_payUrl}")
+    @Value("${php_payUrl}")
     public String payUrl;
     // 代付地址
-    @Value("${lets_sup_payOutUrl}")
+    @Value("${php_payOutUrl}")
     public String payOutUrl;
     // 银行代码
-    @Value("${lets_sup_bankcode}")
+    @Value("${php_bankcode}")
     public String bankCode;
 }

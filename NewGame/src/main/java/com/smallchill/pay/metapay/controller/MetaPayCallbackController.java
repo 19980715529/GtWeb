@@ -6,6 +6,7 @@ import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.CMap;
+import com.smallchill.pay.metapay.model.MetaPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.RequestSignUtil;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Map;
 
@@ -24,6 +26,9 @@ import static com.smallchill.system.treasure.utils.CallBackUtils.*;
 @RequestMapping("/callback/MetaPay")
 public class MetaPayCallbackController extends BaseController implements ConstShiro {
 
+    @Resource
+    private MetaPay metaPay;
+
     @PostMapping(value = "/recharge",consumes = "application/json")
     public String rechargeMetaCallback(@RequestBody Map<String,Object> param){
         if (param==null){
@@ -31,7 +36,7 @@ public class MetaPayCallbackController extends BaseController implements ConstSh
         }
         // 验证签名
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
-        boolean temp = RequestSignUtil.verifySign(params, PUBLIC_KEY1);
+        boolean temp = RequestSignUtil.verifySign(params, metaPay.getPlatformPublicKey());
         if (!temp){
             return "fail";
         }
@@ -65,7 +70,7 @@ public class MetaPayCallbackController extends BaseController implements ConstSh
         }
         // 验证签名
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
-        boolean temp = RequestSignUtil.verifySign(params, PUBLIC_KEY1);
+        boolean temp = RequestSignUtil.verifySign(params, metaPay.getPlatformPublicKey());
         if (!temp){
             return "fail";
         }

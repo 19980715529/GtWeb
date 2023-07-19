@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Data
 @PropertySource("classpath:PayConf/LetsPayConfig.properties")
-public class PayPlus {
+public class PayPlus extends BasePay {
     // 类型
     @Value("${lets_type}")
     public String type;

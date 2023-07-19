@@ -36,8 +36,8 @@ public class Demo9 {
         map.put("code",21001); //range:21001:50-50000
         ExchangeReview exchangeReview = new ExchangeReview();
         exchangeReview.setAmount(new BigDecimal(555.00));
-        String res = SafePayUtils.recharge(rechargeRecords, map);
-        System.out.println(res);
+//        String res = SafePayUtils.recharge(rechargeRecords, map);
+//        System.out.println(res);
     }
 
     private static void extracted() {

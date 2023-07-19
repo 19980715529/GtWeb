@@ -3,7 +3,7 @@ all_list
     select id,(select mcName from Pay_MCPool a where a.id=b.mcId) mcName,name,
     (select cname from Pay_Channel as a where a.id=b.cid) cname,type,isOpen,code,currencyType,collectRate,paymentRate,fee,minLimit,maxLimit,isLabel,
     channelTax,sort,exchangeRatio,giveRatio,winConf,money
-    from Pay_ChannelPool as b where 1=1
+    from Pay_ChannelPool as b where isDel=0
     @if(!isEmpty(type)){
         and b.type=#{type}
     @}
@@ -12,11 +12,11 @@ all_list
     @}
 mc_list
 ===
-    select id,mcName from Pay_MCPool
+    select id,mcName from Pay_MCPool where isDel=0
 
 mc_list1
 ===
-    select mcId ID,mcName from Pay_MCPool
+    select mcId ID,mcName from Pay_MCPool where isDel=0
 
 query_mc_list
 ===

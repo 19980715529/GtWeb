@@ -1,6 +1,7 @@
 package com.smallchill.pay.bpay.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.smallchill.pay.bpay.model.BPay;
 import com.smallchill.pay.rarPay.utils.RarPayUtils;
@@ -114,5 +115,28 @@ public class BPayUtils {
             return "";
         }
         return response;
+    }
+
+    public static boolean BPayExchange(ExchangeReview exchangeReview, Map channel,BPay bPay) {
+
+        String response = BPayUtils.sendExchangeBPay(exchangeReview, channel, bPay);
+        if ("".equals(response)){
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String code = respJson.getString("code");
+        // 成功
+        if ("200".equals(code)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            String sysOrderNo = respJson.getJSONObject("data").getString("orderNo");
+            exchangeReview.setPfOrderNum(sysOrderNo);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

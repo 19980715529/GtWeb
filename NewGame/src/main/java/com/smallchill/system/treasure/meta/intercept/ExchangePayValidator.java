@@ -10,5 +10,11 @@ public class ExchangePayValidator extends BladeValidator {
         validateRequired("exchange.exchangeAmount","Wrong order info");
         validateRequired("exchange.bankNumber","Wrong order info");
         validateRequired("exchange.channelName","Wrong order info");
+        String parameter = request.getParameter("exchange.channelName");
+        if (!"pix".equals(parameter)){
+            // 巴西兑换需要判断下面的字段
+            validateRequired("recharge.cardholder","Wrong order info");
+            validateRequired("recharge.phone","Wrong order info");
+        }
     }
 }

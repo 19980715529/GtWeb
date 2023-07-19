@@ -46,7 +46,7 @@ public class CloudPayUtils {
         response = HttpClientUtils.sendPostJson(cloudPay.getPayUrl(), JSON.toJSONString(map));
         return response;
     }
-
+    // 回调使用统一的
     public static String exchange(ExchangeReview exchangeReview, CloudPay cloudPay){
         String response;
         HashMap<String, Object> map = new HashMap<>();
@@ -72,5 +72,27 @@ public class CloudPayUtils {
         LOGGER.error(JSON.toJSONString(map));
         response = HttpClientUtils.sendPostJson(cloudPay.getPayOutUrl(), JSON.toJSONString(map));
         return response;
+    }
+
+    public static boolean CloudPayExchange(ExchangeReview exchangeReview,CloudPay cloudPay) {
+
+        String response = CloudPayUtils.exchange(exchangeReview,cloudPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int status = respJson.getIntValue("status");
+        // 成功
+        if (status == 1) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

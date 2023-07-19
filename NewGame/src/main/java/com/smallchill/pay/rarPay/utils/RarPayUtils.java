@@ -1,6 +1,7 @@
 package com.smallchill.pay.rarPay.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.smallchill.pay.rarPay.model.RarPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
@@ -74,5 +75,40 @@ public class RarPayUtils {
         LOGGER.error(JSON.toJSONString(map));
         response = Utils.post(rarPay.getPayOutUrl(), map);
         return response;
+    }
+
+    public static boolean RarPayExchange(ExchangeReview exchangeReview, Map channel,RarPay rarPay) {
+        // 订单状态为1：代表发送订单成功，需要向第三方发起代付请求， 发送请求成功并不代表订单支付成功，需要回调返回支付结果
+        String response = RarPayUtils.sendExchangeRar(exchangeReview, channel,rarPay);
+        // rarp      Gcash account format error   SIGN_ERROR
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        int code = respJson.getIntValue("code");
+        // 同步请求状态为0代表请求失败，订单变成失败
+        if (code == 0) {
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 支付失败
+            exchangeReview.setStatus(6);
+        } else {
+            int status = respJson.getJSONObject("data").getIntValue("status");
+            // 订单状态:0=未支付;10=支付中;20=支付成功;30=支付失败
+            if (status == 0) {
+                // 未支付，将订单状态设置为待支付
+                exchangeReview.setStatus(1);
+            } else if (status == 10) {
+                // 支付中，将订单状态设置为待支付
+                exchangeReview.setStatus(1);
+            } else if (status == 20) {
+                // 支付成功，将订单状态设置为已完成
+                exchangeReview.setStatus(4);
+            } else if (status == 30) {
+                // 支付失败，将订单状态设置为支付失败
+                exchangeReview.setStatus(6);
+            }
+        }
+        return false;
     }
 }

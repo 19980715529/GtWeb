@@ -164,4 +164,27 @@ public class GlobalPayUtils {
         return response;
     }
 
+
+    public static boolean GlobalPayExchange(ExchangeReview exchangeReview, Map channel,GlobalPay globalPay) {
+        String response = GlobalPayUtils.sendExchange(exchangeReview, channel, globalPay);
+        if ("".equals(response)){
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String statusStr = respJson.getString("code");
+        // 成功
+        if ("10000".equals(statusStr)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            String sysOrderNo = respJson.getString("outTradeNo");
+            exchangeReview.setPfOrderNum(sysOrderNo);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
+
 }

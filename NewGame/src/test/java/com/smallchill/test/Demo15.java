@@ -4,6 +4,8 @@ import com.smallchill.system.treasure.utils.Utils;
 import com.smallchill.test.base.BaseTest;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -46,7 +48,9 @@ public class Demo15 extends BaseTest {
         System.out.println(res);
     }
     @Test
-    public void test1() throws InterruptedException {
-
+    public void test1() {
+        BigDecimal gold=new BigDecimal("9100000");
+        BigDecimal divide = gold.divide(new BigDecimal(10000), 0, RoundingMode.FLOOR);
+        System.out.println(divide);
     }
 }

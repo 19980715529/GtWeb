@@ -1,6 +1,7 @@
 package com.smallchill.pay.payplus.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.smallchill.pay.payplus.model.PayPlus;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
@@ -18,19 +19,19 @@ import static com.smallchill.core.constant.ConstUrl.RECHARGE_LETSPAY_CALLBACK_UR
 public class PayPlusUtils {
     private static final Logger LOGGER = LogManager.getLogger(PayPlusUtils.class);
 
-    public static String recharge(RechargeRecords rechargeRecords, PayPlus payPlus){
+    public static String recharge(RechargeRecords rechargeRecords, Map<String,String> params){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 商户号
-        map.put("mchId", payPlus.mchId);
+        map.put("mchId", params.get("mchId"));
         // 订单号
         map.put("orderNo", rechargeRecords.getOrderNumber());
         // 金额
         map.put("amount", rechargeRecords.getTopUpAmount().toString());
         // 产品号
-        map.put("product", payPlus.product);
+        map.put("product", params.get("product"));
         // 银行代号
-        map.put("bankcode", payPlus.bankCode);
+        map.put("bankcode", params.get("bankCode"));
         // 物品说明
         String username = RechargeExchangeCommon.RandomUsername();
         String email = RechargeExchangeCommon.RandomEmail();
@@ -46,21 +47,20 @@ public class PayPlusUtils {
         // 跳转地址
         map.put("returnUrl", "https://www.baidu.com");
         // 生成签名
-        String sign = Utils.getSign(map, payPlus.key);
+        String sign = Utils.getSign(map, params.get("key"));
         // 生成签名全部大写
         map.put("sign", sign.toUpperCase());
-//        LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(payPlus.payUrl, map);
+        response = Utils.post(params.get("payUrl"), map);
         return response;
     }
 
-    public static String exchange(ExchangeReview exchangeReview, PayPlus payPlus){
+    public static String exchange(ExchangeReview exchangeReview, Map<String,String> params){
         String response;
         HashMap<String, Object> map = new HashMap<>();
         // 转账类型
-        map.put("type",payPlus.type);
+        map.put("type",params.get("type"));
         // 商户号
-        map.put("mchId",payPlus.mchId);
+        map.put("mchId",params.get("mchId"));
         // 订单号
         map.put("mchTransNo",exchangeReview.getOrderNumber());
         // 金额
@@ -78,14 +78,43 @@ public class PayPlusUtils {
         // email:520155@gmail.com/phone:9784561230/mode:pix/cpf:555555555(必须是真实的)
         map.put("remarkInfo","email:"+email+"/phone:"+exchangeReview.getPhone()+"/mode:pix/cpf:"+exchangeReview.getBankNumber());
         // 生成签名全部大写
-        String sign = Utils.getSign(map, payPlus.key);
+        String sign = Utils.getSign(map, params.get("key"));
         map.put("sign",sign.toUpperCase());
-//        LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(payPlus.payOutUrl, map);
+        response = Utils.post(params.get("payOutUrl"), map);
         return response;
     }
 
     public static boolean isNullOrEmpty(String s) {
         return s == null || s.length() == 0;
+    }
+
+    // 兑换工具类
+    public static boolean PayPlusExchange(ExchangeReview exchangeReview, Map<String,String> map) {
+        String response = PayPlusUtils.exchange(exchangeReview,map);
+        if ("".equals(response)) {
+            exchangeReview.setStatus(6);
+            return true;
+        }
+        JSONObject respJson;
+        try {
+            respJson = JSONObject.parseObject(response);
+        }catch (Exception e){
+            return true;
+        }
+        String retCode = respJson.getString("retCode");
+        // 成功
+        if ("SUCCESS".equals(retCode)) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+            // 获取平台订单号
+            String platOrder = respJson.getString("platOrder");
+            exchangeReview.setPfOrderNum(platOrder);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("retMsg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

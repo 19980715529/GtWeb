@@ -422,7 +422,7 @@ new_list1
 	(case when (a.tipsName is null or a.tipsName='') then a.NickName else (a.NickName+'<span class="text-red">['+a.tipsName+']</span>') end) NickName,
 	a.NickName as FirstName,
 	(SELECT c.Amount FROM QPGameUserDB.dbo.AA_Shop_Prop_UserProp as c with (nolock) WHERE a.userID = c.user_id and c.Prop_Id = 1) AS Score,
-	a.RegisterDate,a.LastLogonDate,d.TotalRecharge,
+	a.RegisterDate,a.LastLoginTime,d.TotalRecharge,a.LastLogoutTime,
     (SELECT count(*) FROM QPGameUserDB.dbo.PlayerRechargeRecord as c with (nolock) WHERE a.userID = c.UserID and c.Type=0) AS RechargeCount,
     d.TotalWithDraw AS TotalExchange,
     (SELECT count(*) FROM QPGameUserDB.dbo.PlayerRechargeRecord as c with (nolock) WHERE a.userID = c.UserID and c.Type=1) AS ExchangeCount,

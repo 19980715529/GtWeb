@@ -100,4 +100,27 @@ public class AIPayUtils {
         }
         return Utils.MD5(str);
     }
+
+    public static boolean AIPayExchange(ExchangeReview exchangeReview, Map channel,AIPay aiPay) {
+
+        String response = AIPayUtils.exchange(exchangeReview,aiPay, channel);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int code = respJson.getIntValue("code");
+        if (code == 0) {
+            // 请求成功, 获取平台订单号
+            String PfOrderNum = respJson.getJSONObject("data").getString("payoutId");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("error"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
+    }
 }

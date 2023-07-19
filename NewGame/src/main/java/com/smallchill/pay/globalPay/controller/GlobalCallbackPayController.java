@@ -33,14 +33,12 @@ public class GlobalCallbackPayController extends BaseController implements Const
         if (param==null){
             return "fail";
         }
-        LOGGER.error(param);
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         String mcSign = params.remove("sign").toString();
         String sign = Utils.getSign(params,globalPay.getKey());
         if (mcSign.toUpperCase().equals(sign)){
             return "fail";
         }
-        LOGGER.error("校验成功");
         // 获取订单号
         String orderNum = params.getString("tradeNo");
         Blade blade = Blade.create(RechargeRecords.class);
@@ -68,14 +66,12 @@ public class GlobalCallbackPayController extends BaseController implements Const
         if (param==null){
             return "fail";
         }
-        LOGGER.error(param);
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         String mcSign = params.remove("sign").toString();
         String sign = Utils.getSign(params,globalPay.getKey());
         if (mcSign.toUpperCase().equals(sign)){
             return "fail";
         }
-        LOGGER.error("校验成功");
         // 根据订单号查询兑换订单
         String orderNum = params.getString("tradeNo");
         Blade blade = Blade.create(ExchangeReview.class);

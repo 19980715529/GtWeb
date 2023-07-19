@@ -33,6 +33,6 @@ public class PayChannelPool extends BaseModel {
     private Integer sort; // 排序
     private BigDecimal winConf; // 总赢配置
     private BigDecimal money;//我方收取手续费
-
+    private Integer isDel=0; // 是否删除
 
 }

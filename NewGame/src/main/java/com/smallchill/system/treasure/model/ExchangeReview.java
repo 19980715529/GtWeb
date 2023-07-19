@@ -35,5 +35,5 @@ public class ExchangeReview extends BaseModel {
     private BigDecimal money; //发送的第三方的钱
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
-    private Integer auditMethod; // 三方反馈信息
+    private Integer auditMethod; // 是否自动审核
 }

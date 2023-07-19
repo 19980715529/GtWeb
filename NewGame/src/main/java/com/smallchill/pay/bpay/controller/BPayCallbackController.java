@@ -41,7 +41,6 @@ public class BPayCallbackController extends BaseController implements ConstShiro
         if (!bb){
             return "fail";
         }
-        LOGGER.error("校验成功");
         // 获取订单号
         String orderNum = params.getString("merchantOrderNo");
         Blade blade = Blade.create(RechargeRecords.class);
@@ -68,7 +67,6 @@ public class BPayCallbackController extends BaseController implements ConstShiro
         if (param==null){
             return "fail";
         }
-        LOGGER.error(param);
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         String mcSign = params.remove("sign").toString();
         String srcData = SortUtils.getMapString(params, null, null);
@@ -76,7 +74,6 @@ public class BPayCallbackController extends BaseController implements ConstShiro
         if (!bb){
             return "fail";
         }
-        LOGGER.error("校验成功");
         // 根据订单号查询兑换订单
         String orderNum = params.getString("merchantOrderNo");
         Blade blade = Blade.create(ExchangeReview.class);

@@ -809,7 +809,6 @@ public class Blade {
 	private String getDeleteSql(String table, String col) {
 		return " DELETE FROM " + table + " WHERE " + col + " IN (#{join(ids)}) ";
 	}
-
 	private String getCountSql() {
 		return " SELECT " + this.pk + " FROM " + this.table + " ";
 	}

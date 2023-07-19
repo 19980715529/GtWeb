@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
@@ -37,6 +38,7 @@ public class GlobalPayController extends BaseController implements ConstShiro {
     private GlobalPay globalPay;
     @PostMapping("/recharge")
     @Transactional
+    @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
@@ -52,10 +54,6 @@ public class GlobalPayController extends BaseController implements ConstShiro {
             return fail(info.get("msg").toString());
         }
         Map channel =(Map) info.get("channel");
-        // 判断商家
-        int pid = Integer.parseInt(channel.get("pid").toString());
-        rechargeRecords.setChannelPid(pid);
-//        RechargeExchangeCommon.rec(rechargeRecords,channel);
         return rechargeGlobalPay(rechargeRecords,resultMap,channel);
     }
 
@@ -65,9 +63,8 @@ public class GlobalPayController extends BaseController implements ConstShiro {
         String response;
         JSONObject jsonObject;
         response = GlobalPayUtils.sendRecharge(rechargeRecords,channel, globalPay);
-//        LOGGER.error(response);
         if ("".equals(response)) {
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
         jsonObject = JSON.parseObject(response);
         code = jsonObject.getString("code");
@@ -82,17 +79,17 @@ public class GlobalPayController extends BaseController implements ConstShiro {
             // 将订单加入到未支付队列中
             GlobalDelayQueue.orderQueue.add(rechargeRecords);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            if (rechargeRecords.getIsFirstCharge()==2){
-                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
-                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
-                        CMap.init().set("userId",rechargeRecords.getUserId()));
-            }
-            return json(resultMap, "Recharge application success");
+//            if (rechargeRecords.getIsFirstCharge()==2){
+//                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+//                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+//                        CMap.init().set("userId",rechargeRecords.getUserId()));
+//            }
+            return json(resultMap, "105006");
         } else {
             rechargeRecords.setMsg(jsonObject.getString("msg"));
             rechargeRecords.setOrderStatus(3);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
     }
 

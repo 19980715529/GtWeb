@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.smallchill.pay.payplus.model.PayPlus;
-import com.smallchill.pay.payplus.model.SuperPayPlus;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
 import com.smallchill.system.treasure.utils.Utils;
 import org.junit.Test;
@@ -107,14 +106,12 @@ public class JunitTest extends BaseTest{
 	}
 	@Resource
 	private PayPlus payPlus;
-	@Resource
-	private SuperPayPlus superPayPlus;
 	@Test
 	public void test6(){
-
-		Map<String, String> map = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>() {
-		});
-		System.out.println(map);
+//
+//		Map<String, String> map = JSON.parseObject(JSON.toJSONString(superPayPlus), new TypeReference<Map<String, String>>() {
+//		});
+//		System.out.println(map);
 	}
 	@Test
 	public void test7(){

@@ -1,6 +1,8 @@
 package com.smallchill.pay.wepay.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.smallchill.pay.wepay.model.WePay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.Utils;
@@ -12,18 +14,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.smallchill.core.constant.ConstKey.*;
-import static com.smallchill.core.constant.ConstUrl.*;
-import static com.smallchill.core.constant.ConstUrl.EXCHANGE_WEPAY_URL;
+import static com.smallchill.core.constant.ConstUrl.EXCHANGE_WEPAY_CALLBACK_URL;
+import static com.smallchill.core.constant.ConstUrl.RECHARGE_WEPAY_CALLBACK_URL;
 
 public class WePayUtils {
     private static final Logger LOGGER = LogManager.getLogger(WePayUtils.class);
-    public static String recharge(RechargeRecords rechargeRecords, Map<String,Object> channel){
+    public static String recharge(RechargeRecords rechargeRecords, Map<String,Object> channel, WePay wePay){
         String response;
         Map<String, Object> map = new HashMap<>();
         map.put("version","1.0");
         // 商户号
-        map.put("mch_id",WEPAY_APPID);
+        map.put("mch_id",wePay.getMchId());
         //
         map.put("notify_url",RECHARGE_WEPAY_CALLBACK_URL);
         // 订单号
@@ -40,24 +41,24 @@ public class WePayUtils {
         // 银行代码
         map.put("goods_name","GTGame");
         // 生成签名
-        String sign = Utils.getSign(map, WEPAY_CKEY);
+        String sign = Utils.getSign(map, wePay.getCkey());
         map.put("sign",sign);
         // 不参与签名
         map.put("sign_type","MD5");
         LOGGER.error(JSON.toJSONString(map));
-        response = Utils.post(RECHARGE_WEPAY_URL, map);
+        response = Utils.post(wePay.getPayUrl(), map);
         return response;
     }
-    public static String exchange(ExchangeReview exchangeReview, Map<String,Object> channel){
+    public static String exchange(ExchangeReview exchangeReview, WePay wePay){
         String response;
         Map<String, Object> map = new HashMap<>();
         String format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
         // 获取当前时间
         map.put("apply_date",format);
         // 收款银行代码
-        map.put("bank_code","GCASH");
+        map.put("bank_code",wePay.getBankCode());
         // 商户订单
-        map.put("mch_id",WEPAY_APPID);
+        map.put("mch_id",wePay.getMchId());
         // 商家转账订单号
         map.put("mch_transferId",exchangeReview.getOrderNumber());
         // 收款账号
@@ -69,11 +70,33 @@ public class WePayUtils {
         // 收款金额
         map.put("transfer_amount",exchangeReview.getMoney());
         // 生成签名
-        String sign = Utils.getSign(map, WEPAY_PKEY);
+        String sign = Utils.getSign(map, wePay.getPkey());
         map.put("sign",sign);
         map.put("sign_type","MD5");
         LOGGER.error(JSON.toJSONString(map));
-        response= Utils.post(EXCHANGE_WEPAY_URL, map);
+        response= Utils.post(wePay.getPayOutUrl(), map);
         return response;
+    }
+
+    public static boolean WePayExchange(ExchangeReview exchangeReview, Map channel,WePay wePay) {
+
+        String response = WePayUtils.exchange(exchangeReview, wePay);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        String result = respJson.getString("respCode");
+        if ("SUCCESS".equals(result)) {
+            // 请求成功 ,获取平台订单号
+            String PfOrderNum = respJson.getString("tradeNo");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("errorMsg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

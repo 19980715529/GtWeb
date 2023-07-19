@@ -12,6 +12,7 @@ import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.system.treasure.meta.intercept.ChannelPoolValidator;
 import com.smallchill.system.treasure.model.PayChannelPool;
@@ -119,9 +120,16 @@ public class ChannelPoolController extends BaseController implements ConstShiro 
     @RequestMapping(KEY_REMOVE)
     @Permission(ADMINISTRATOR)
     public AjaxResult remove(@RequestParam String ids) {
+        Integer[] Ids = Convert.toIntArray(ids);
+        for (int id : Ids) {
+            boolean temp = Db.isExist("select * from Pay_ChannelList where chPoolId=#{cid}", CMap.init().set("cid", id));
+            if (temp){
+                return fail("请先删除关联数据");
+            }
+        }
         Blade blade = Blade.create(PayChannelPool.class);
-        int cnt = blade.deleteByIds(ids);
-        if (cnt > 0) {
+        boolean b = blade.updateBy("isDel=1", "id IN (#{join(ids)})", CMap.init().set("ids", Ids));
+        if (b) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
         } else {

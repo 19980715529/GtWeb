@@ -1,6 +1,7 @@
 package com.smallchill.pay.mhdPay.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.smallchill.pay.mhdPay.model.MhdPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
@@ -67,5 +68,26 @@ public class MhdPayUtils {
         LOGGER.error(JSON.toJSONString(map));
         response = HttpClientUtils.sendPostJson(mhdPay.getPayOutUrl(), JSON.toJSONString(map));
         return response;
+    }
+
+    public static boolean MhdPayExchange(ExchangeReview exchangeReview,MhdPay mhdPay) {
+        String response = MhdPayUtils.exchange(exchangeReview,mhdPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        JSONObject respJson = JSONObject.parseObject(response);
+        int status = respJson.getIntValue("status");
+        // 成功
+        if (status == 1) {
+            // 请求成功 ,获取平台订单号
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("message"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

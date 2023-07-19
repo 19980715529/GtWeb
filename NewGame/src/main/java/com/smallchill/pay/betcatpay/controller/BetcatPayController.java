@@ -59,12 +59,10 @@ public class BetcatPayController extends BaseController implements ConstShiro {
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
-//        LOGGER.error(code);
         if (code==1){
             return fail(info.get("msg").toString());
         }
         String response = BetcatPayUtils.recharge(rechargeRecords,betcatPay);
-//        LOGGER.error(response);
         if ("".equals(response)) {
             return fail("105005");
         }
@@ -98,11 +96,11 @@ public class BetcatPayController extends BaseController implements ConstShiro {
             GlobalDelayQueue.orderQueue.add(rechargeRecords);
             rechargeRecords.setPfOrderNum(PfOrderNum);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            if (rechargeRecords.getIsFirstCharge()==2){
-                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
-                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
-                        CMap.init().set("userId",rechargeRecords.getUserId()));
-            }
+//            if (rechargeRecords.getIsFirstCharge()==2){
+//                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+//                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+//                        CMap.init().set("userId",rechargeRecords.getUserId()));
+//            }
             return json(resultMap, "105006");
         }
     }

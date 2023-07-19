@@ -42,12 +42,11 @@ public class CallBackUtils {
                     callableStatement.setInt("GameCoin",Integer.parseInt(map.get("GameCoin").toString()));
                     int type = Integer.parseInt(map.get("type").toString());
                     callableStatement.setInt("Type",type);
-//                    callableStatement.setString("OrderNum","");
                     callableStatement.setString("OrderNum",map.get("OrderNum").toString());
                     callableStatement.execute();
                     return "";
                 }catch (Exception e){
-//                    LOGGER.error(e.getMessage());
+                    LOGGER.error(e.getMessage());
                     return e.getMessage();
                 }
             }
@@ -75,7 +74,7 @@ public class CallBackUtils {
         return o;
     }
     /**
-     * 充值成功后执行后需要存储过程
+     * 充值成功后需要执行存储过程
      * @param rechargeRecords
      */
     private static void extracted(RechargeRecords rechargeRecords) {
@@ -157,17 +156,12 @@ public class CallBackUtils {
                 RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),
                         rechargeRecords.getChannel(),rechargeRecords.getChannelPid(),dateFormat.format(rechargeRecords.getCreateTime()),0);
                 // 执行计算打码量存储过程
-//                查询
-                Integer baseGold;
-                if (rechargeRecords.getIsFirstCharge()==0){
-                    baseGold = Db.queryInt("select gold from Pay_RechargeGear where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
-                }else {
-                    baseGold = Db.queryInt("select gold from First_charge_config where id=#{id}", CMap.init().set("id", rechargeRecords.getGear()));
-                }
                 Integer normalAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=11",null);
                 Integer specialAddGoldOdd = Db.queryInt("select value from  [QPGameUserDB].[dbo].[config] where id=12",null);
-                Long code = (long) baseGold *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGold()-baseGold);
+                Long code = (rechargeRecords.getGold()-rechargeRecords.getGiftGold()) *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGiftGold());
                 addUserCode(rechargeRecords.getUserId(),code);
+                // 新增充值统计
+                addedRechargeStatistics(rechargeRecords.getPackageName());
             };
             ThreadKit.excAsync(runnable,false);
         }
@@ -237,4 +231,27 @@ public class CallBackUtils {
                     CMap.init().set("userId",rechargeRecords.getUserId()));
         }
     }
+    /**
+     * 新增充值统计  QPGameRecordDB
+     */
+    public static void addedRechargeStatistics(Integer clientType){
+        Db.executeCall(new OnConnection<Integer>() {
+            @Override
+            public Integer call(Connection connection) throws SQLException {
+                try {
+                    CallableStatement statement = connection.prepareCall("{? = call [QPGameRecordDB].[dbo].[NewRechargeStatics2](?,?)}");
+                    statement.registerOutParameter(1, Types.INTEGER);
+                    statement.setInt(2,0);
+                    statement.setInt(3,clientType);
+                    statement.execute();
+                    return statement.getInt(1);
+                }catch (Exception e){
+                    LOGGER.error(e.getMessage());
+                    return -1;
+                }
+            }
+        });
+    }
+
+
 }

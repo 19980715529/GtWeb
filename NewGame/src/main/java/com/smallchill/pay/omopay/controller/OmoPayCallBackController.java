@@ -6,6 +6,7 @@ import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.CMap;
+import com.smallchill.pay.omopay.model.OmoPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,6 +25,9 @@ import static com.smallchill.system.treasure.utils.CallBackUtils.*;
 @RestController
 @RequestMapping("/callback/OmoPay")
 public class OmoPayCallBackController extends BaseController implements ConstShiro {
+
+    @Resource
+    private OmoPay omoPay;
     /**
      * OMOM 充值回调
      */
@@ -33,7 +38,7 @@ public class OmoPayCallBackController extends BaseController implements ConstShi
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,OMOM_KEY);
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,omoPay.getKey());
         if (!temp){
             return "fail";
         }
@@ -71,7 +76,7 @@ public class OmoPayCallBackController extends BaseController implements ConstShi
             return "fail";
         }
         LOGGER.error(param);
-        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,OMOM_KEY);
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,omoPay.getKey());
         if (!temp){
             return "fail";
         }

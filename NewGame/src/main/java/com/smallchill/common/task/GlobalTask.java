@@ -16,6 +16,7 @@ public class GlobalTask {
 	public void StatisticsEveryDay(){
 		// 查询包id
 		List<Integer> list = Db.queryListInt("select clientType from [login].[dbo].ClientPos", null);
+		list.add(-1);
 		for (int i = 1;i<=30;i++){
 			for (int j:list){
 				newRechargeDetailsStatics(i, j);

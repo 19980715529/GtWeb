@@ -119,7 +119,7 @@ public class PayChannelController extends BaseController implements ConstShiro {
     }
 
     /**
-    删除
+    逻辑删除
      */
     @Json
     @RequestMapping(KEY_REMOVE)
@@ -134,8 +134,8 @@ public class PayChannelController extends BaseController implements ConstShiro {
             }
         }
         Blade blade = Blade.create(PayChannel.class);
-        int cnt = blade.deleteByIds(ids);
-        if (cnt > 0) {
+        boolean b = blade.updateBy("isDel=1", "id IN (#{join(ids)})", CMap.init().set("ids", Ids));
+        if (b) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
         } else {

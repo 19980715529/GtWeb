@@ -19,4 +19,5 @@ public class PayChannel extends BaseModel {
     private Integer isExchange; // 兑换
     private Integer sort; // 排序
     private String code; // 编码
+    private Integer isDel=0; // 是否删除
 }

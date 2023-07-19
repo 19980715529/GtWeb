@@ -7,7 +7,7 @@ import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.pay.payplus.model.PayPlus;
-import com.smallchill.pay.payplus.model.SuperPayPlus;
+import com.smallchill.pay.payplus.model.PhpPayPlus;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.HttpClientUtils;
@@ -28,23 +28,29 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
     @Resource
     private PayPlus payPlus;
     @Resource
-    private SuperPayPlus superPayPlus;
+    private PhpPayPlus phpPayPlus;
     @PostMapping("/recharge")
     public String rechargeLetsPayCallback(@RequestParam Map<String,Object> param){
         // 验证签名
         if (param==null){
             return "fail";
         }
-//        LOGGER.error(param);
         String mchId = param.get("mchId").toString();
         if (mchId==null){
             return "fail";
         }
-        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,payPlus.key);
+        String key="";
+        if (payPlus.getMchId().equals(mchId)){
+            // 巴西
+            key= payPlus.getKey();
+        }else {
+            // 菲律宾
+            key= phpPayPlus.getKey();
+        }
+        Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,key);
         if (!temp){
             return "fail";
         }
-//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("orderNo");
@@ -73,7 +79,6 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         if (param==null){
             return "fail";
         }
-//        LOGGER.error(param);
         // 去除msg,不参与签名
         String msg = param.remove("msg").toString();
         String mchId = param.get("mchId").toString();
@@ -82,15 +87,16 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         }
         String key="";
         if (payPlus.getMchId().equals(mchId)){
+            // 巴西
             key= payPlus.getKey();
         }else {
-            key= superPayPlus.getKey();
+            // 菲律宾
+            key= phpPayPlus.getKey();
         }
         Boolean temp = HttpClientUtils.Md5OmoOrLetsPayVerification(param,key);
         if (!temp){
             return "fail";
         }
-//        LOGGER.error("认证成功");
         JSONObject params = JSONObject.parseObject(JSON.toJSONString(param));
         // 获取订单号
         String orderNum = params.getString("mchTransNo");
@@ -102,13 +108,11 @@ public class PayPlusCallbackController extends BaseController implements ConstSh
         // 获取订单状态 2； 成功，3：失败 1:处理中
         int status = params.getIntValue("status");
         if (status==2){
-//            synchronized (lock){
             if (exchangeReview.getStatus()==3||exchangeReview.getStatus()==4){
                 return "success";
             }
             // 回调成功
             successExcExecuted(exchangeReview);
-//            }
         }else if (status==3){
             // 支付失败兑换变为支付失败
             exchangeReview.setStatus(6);

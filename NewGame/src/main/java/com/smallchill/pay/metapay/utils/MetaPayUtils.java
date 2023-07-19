@@ -3,6 +3,7 @@ package com.smallchill.pay.metapay.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.pay.cloudpay.utils.CloudPayUtils;
+import com.smallchill.pay.metapay.model.MetaPay;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.RequestSignUtil;
@@ -21,12 +22,12 @@ import static com.smallchill.core.constant.ConstUrl.EXCHANGE_META_URL;
 public class MetaPayUtils {
     private static final Logger LOGGER = LogManager.getLogger(MetaPayUtils.class);
 
-    public static String recharge(RechargeRecords records, Map<String,Object> channel){
+    public static String recharge(RechargeRecords records, MetaPay metaPay){
         String response="";
         HashMap<String, Object> params = new HashMap<>();
-        params.put("appId",META_APPID);
+        params.put("appId",metaPay.getAppId());
         // 代收渠道
-        params.put("channel",3);
+        params.put("channel",metaPay.getChannel());
         // 平台订单号
         params.put("referenceNo", records.getOrderNumber());
         // 金额
@@ -42,25 +43,24 @@ public class MetaPayUtils {
         // 用户邮箱
         params.put("email","gtpay@gmail.com");
         //
-        params.put("productType","GCASH_ONLINE");
+        params.put("productType",metaPay.getProductType());
         //
         params.put("notificationURL",RECHARGE_META_CALLBACK_URL);
         // 生成签名
-        String sign = RequestSignUtil.getSign(params, PRIVATE_KEY);
+        String sign = RequestSignUtil.getSign(params, metaPay.getMetaPrivateKey());
         params.put("sign",sign);
         JSONObject jsonParams = JSONObject.parseObject(JSON.toJSONString(params));
-//        LOGGER.error(jsonParams.toJSONString());
-        response = RequestSignUtil.doPost(RECHARGE_META_URL, jsonParams);
+        response = RequestSignUtil.doPost(metaPay.getPayUrl(), jsonParams);
         return response;
     }
 
-    public static String exchange(ExchangeReview exchangeReview, Map<String,Object> channel){
+    public static String exchange(ExchangeReview exchangeReview,MetaPay metaPay){
         String response="";
         HashMap<String, Object> map = new HashMap<>();
         // 商户号
-        map.put("appId",META_APPID);
+        map.put("appId",metaPay.getAppId());
         // 代付渠道
-        map.put("pickupCenter",7);
+        map.put("pickupCenter",metaPay.getPickupCenter());
         // 订单号
         map.put("referenceNo", exchangeReview.getOrderNumber());
         // 代付金额
@@ -74,7 +74,7 @@ public class MetaPayUtils {
         // 电话号
         map.put("mobileNumber",exchangeReview.getPhone());
         // 证件类型
-        map.put("certificateType","SSS");
+        map.put("certificateType",metaPay.getCertificateType());
         // 证件号码，没有随机10位
         map.put("certificateNo",getRandomNickname(10));
         // 居住地址
@@ -86,12 +86,11 @@ public class MetaPayUtils {
         // 回调url
         map.put("notificationURL",EXCHANGE_META_PAY_CALLBACK_URL);
         // 生成签名
-        String sign = RequestSignUtil.getSign(map, PRIVATE_KEY);
+        String sign = RequestSignUtil.getSign(map, metaPay.getMetaPrivateKey());
         map.put("sign",sign);
         JSONObject jsonParams = JSONObject.parseObject(JSON.toJSONString(map));
         // 发起请求
-//        LOGGER.error(jsonParams.toJSONString());
-        response = RequestSignUtil.doPost(EXCHANGE_META_URL, jsonParams);
+        response = RequestSignUtil.doPost(metaPay.getPayOutUrl(), jsonParams);
         return response;
     }
 
@@ -102,5 +101,31 @@ public class MetaPayUtils {
             val.append(random.nextInt(10));
         }
         return val.toString();
+    }
+
+
+    public static boolean MetaPayExchange(ExchangeReview exchangeReview,MetaPay metaPay) {
+
+        String response = MetaPayUtils.exchange(exchangeReview, metaPay);
+        LOGGER.error(response);
+        if ("".equals(response)) {
+            return true;
+        }
+        // 获取平台订单号
+        JSONObject respJson = JSONObject.parseObject(response);
+        // 获取请求状态
+        int code = respJson.getIntValue("platRespCode");
+        if (code == 0) {
+            // 请求成功, 获取平台订单号
+            String PfOrderNum = respJson.getString("transId");
+            exchangeReview.setPfOrderNum(PfOrderNum);
+            exchangeReview.setStatus(1);
+        } else {
+            // 请求失败, 存储失败原因
+            exchangeReview.setMsg(respJson.getString("msg"));
+            // 将状态设置为失败
+            exchangeReview.setStatus(6);
+        }
+        return false;
     }
 }

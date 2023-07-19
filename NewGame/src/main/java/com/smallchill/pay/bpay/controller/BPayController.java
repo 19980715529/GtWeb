@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
+import com.smallchill.common.utils.RateLimit;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
@@ -36,6 +37,7 @@ public class BPayController extends BaseController implements ConstShiro {
 
     @PostMapping("/recharge")
     @Transactional
+    @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
@@ -45,7 +47,6 @@ public class BPayController extends BaseController implements ConstShiro {
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
-        LOGGER.error("小渠道id:"+channelId);
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
         int code = Integer.parseInt(info.get("code").toString());
         if (code==1){
@@ -55,8 +56,6 @@ public class BPayController extends BaseController implements ConstShiro {
         // 判断商家
         int pid = Integer.parseInt(channel.get("pid").toString());
         rechargeRecords.setChannelPid(pid);
-//        RechargeExchangeCommon.rec(rechargeRecords,channel);
-
         return rechargeBPay(rechargeRecords,resultMap,channel);
     }
 
@@ -68,7 +67,7 @@ public class BPayController extends BaseController implements ConstShiro {
         response = BPayUtils.sendRechargeBPay(rechargeRecords,channel,bPay);
         LOGGER.error(response);
         if ("".equals(response)) {
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
         jsonObject = JSON.parseObject(response);
         code = jsonObject.getString("code");
@@ -83,17 +82,17 @@ public class BPayController extends BaseController implements ConstShiro {
             // 将订单加入到未支付队列中
             GlobalDelayQueue.orderQueue.add(rechargeRecords);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            if (rechargeRecords.getIsFirstCharge()==2){
-                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
-                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
-                        CMap.init().set("userId",rechargeRecords.getUserId()));
-            }
-            return json(resultMap, "Recharge application success");
+//            if (rechargeRecords.getIsFirstCharge()==2){
+//                // [QPGameUserDB].[dbo].[PlayerActiveInfo]这个表的 activeid=4 subActveid=1的ispick重置为1
+//                Db.update("update [QPGameUserDB].[dbo].[PlayerActiveInfo] set IsPick=1 where ActiveID =4 and SubActiveID=1 and UserID=#{userId}",
+//                        CMap.init().set("userId",rechargeRecords.getUserId()));
+//            }
+            return json(resultMap, "105006");
         } else {
             rechargeRecords.setMsg(jsonObject.getString("message"));
             rechargeRecords.setOrderStatus(3);
             rechargeRecordsService.saveRtId(rechargeRecords);
-            return json(resultMap, "Recharge application failed", 1);
+            return json(resultMap, "105005", 1);
         }
     }
 }

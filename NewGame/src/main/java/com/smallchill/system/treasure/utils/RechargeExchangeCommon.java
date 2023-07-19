@@ -296,9 +296,27 @@ public class RechargeExchangeCommon {
             // 设置赠送金币
             rechargeRecords.setGiftGold(give_gold.longValue());
             //  最终获得金币：基础金币+渠道外赠送
-            BigDecimal get_Gold = gold.add(give_gold).setScale(0,RoundingMode.HALF_UP);
+            BigDecimal get_Gold = gold.add(give_gold).setScale(0,RoundingMode.FLOOR);
             // 将充值金币存储到订单里面
             rechargeRecords.setGold(get_Gold.longValue());
+        }else if(rechargeRecords.getIsFirstCharge()==2){
+            // 获取充值金额
+            BigDecimal gold = new BigDecimal(Db.queryStr("select Dailyfeedback from [QPGameUserDB].[dbo].[ActiveInfo_NoviceTaskRecord] where UserID=#{UserID}",
+                    CMap.init().set("UserID", user.get("UserID"))));
+            amount = gold.divide(new BigDecimal(channel.get("goldProportion").toString()), 0, RoundingMode.FLOOR);
+            if( amount.intValue()>250){
+                amount=new BigDecimal(250);
+            }
+            if( amount.intValue()<=0){
+                reMap.put("code",1);
+                reMap.put("msg","105010");
+                return reMap;
+            }
+            rechargeRecords.setTopUpAmount(amount);
+            // 设置赠送金币
+            rechargeRecords.setGiftGold(0L);
+            // 设置充值获得金币
+            rechargeRecords.setGold(gold.longValue());
         }else {
             reMap.put("code",1);
             reMap.put("msg","105011");
