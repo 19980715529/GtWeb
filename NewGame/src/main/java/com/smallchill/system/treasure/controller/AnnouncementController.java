@@ -52,7 +52,7 @@ public class AnnouncementController extends BaseController implements ConstShiro
      */
     @PostMapping("/customer")
     public AjaxResult customer(){
-        List<Map> list = Db.selectList("select id,name,resources from CustomerService");
+        List<Map> list = Db.selectList("select id,name,resources from CustomerService  where isOpen=1");
         return json(list);
     }
     /**
@@ -169,10 +169,12 @@ public class AnnouncementController extends BaseController implements ConstShiro
         return json(channelVos);
     }
 
+
+
     // 获取充值挡位
     @GetMapping("/recharge/gear")
     public AjaxResult getGear(){
-        List<Map> payChannel = Db.selectList("select * from Pay_RechargeGear order by sort");
+        List<Map> payChannel = Db.selectList("select id,gold,getExtra,amount,sort,skuId from Pay_RechargeGear where isDel=1 order by sort");
         return json(payChannel);
     }
 

@@ -74,12 +74,13 @@ public class PlayerCoinLogController extends BaseController implements ConstShir
 		if(parameter.contains("%")){
 			parameter = URLKit.decode(parameter, CharsetKit.UTF_8);
 		}
-		Object gird = new Object();
+		Object gird;
 		Map paras = JSON.parseObject(parameter, Map.class);
 		Object changeType_id = paras.get("ChangeType_Id");
 		if (changeType_id==null){
 			changeType_id = "";
 		}
+		LOGGER.error("changeType_id"+changeType_id.toString());
 		String ServerId = JSON.toJSONString(paras.get("ServerID")).replaceAll("\"", "");
         if (ServerId != null && !ServerId.equals("") && !ServerId.equals("null")) {
             Gameroomitem room = Blade.create(Gameroomitem.class).findFirstBy(" where ServerID=" + ServerId, null);

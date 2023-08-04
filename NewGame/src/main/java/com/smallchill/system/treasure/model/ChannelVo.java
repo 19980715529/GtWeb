@@ -15,5 +15,6 @@ public class ChannelVo extends BaseModel {
     private List<Integer> exchangeGear;
     private Integer isRecharge;
     private Integer isExchange;
+    private String area;
     private List<Map> types = new ArrayList<>();
 }

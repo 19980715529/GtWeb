@@ -1,5 +1,6 @@
 package com.smallchill.game.newmodel.treasuredb;
 
+import lombok.Data;
 import org.beetl.sql.core.annotatoin.AutoID;
 import org.beetl.sql.core.annotatoin.Table;
 
@@ -14,15 +15,61 @@ import com.smallchill.core.base.model.BaseModel;
 public class Killbuguser extends BaseModel {
 	private Integer id ;
 	private Integer maxRecharge ;
-	private Integer winScoreMax ;
+	private Integer CheatValue ;
 	private Integer pointControlNum ;
 	private Integer isOpen ;
 	private Integer cheatRate ;
 	private Long cheatValuePercentMin ;
 	private Long cheatValuePercentMax ;
-	private Long maxExchange ;
+	private Long maxExchange=0L ;
 	private Long minRecharge ;
-	
+
+	private Long ToDayScore ; // 当日输赢
+
+	private Long TotalControlNum;
+	private Long TotalScore;
+	private Long TodayMinRechange;
+
+	public Integer getCheatValue() {
+		return CheatValue;
+	}
+
+	public void setCheatValue(Integer cheatValue) {
+		CheatValue = cheatValue;
+	}
+
+	public Long getTodayMinRechange() {
+		return TodayMinRechange;
+	}
+
+	public void setTodayMinRechange(Long todayMinRechange) {
+		TodayMinRechange = todayMinRechange;
+	}
+
+	public Long getToDayScore() {
+		return ToDayScore;
+	}
+
+	public void setToDayScore(Long toDayScore) {
+		ToDayScore = toDayScore;
+	}
+
+	public Long getTotalControlNum() {
+		return TotalControlNum;
+	}
+
+	public void setTotalControlNum(Long totalControlNum) {
+		TotalControlNum = totalControlNum;
+	}
+
+	public Long getTotalScore() {
+		return TotalScore;
+	}
+
+	public void setTotalScore(Long totalScore) {
+		TotalScore = totalScore;
+	}
+
 	public Killbuguser() {
 	}
 	
@@ -42,13 +89,6 @@ public class Killbuguser extends BaseModel {
 		this.maxRecharge = maxRecharge;
 	}
 
-	public Integer getWinScoreMax() {
-		return winScoreMax;
-	}
-
-	public void setWinScoreMax(Integer winScoreMax) {
-		this.winScoreMax = winScoreMax;
-	}
 
 	public Integer getPointControlNum() {
 		return pointControlNum;

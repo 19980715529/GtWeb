@@ -12,14 +12,15 @@
 
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["id","购买金额", "获得金币","排序","赠送数量","赠送类型"];
+        var _colnames=["id","购买金额", "获得金币","排序","赠送数量","赠送类型","商品编号"];
         var _colmodel=[
             {name:"id",sortable: false,hidden:true},
             {name:"amount",sortable: false},
             {name:"gold", sortable:false},
             {name:"sort", sortable:false},
             {name:"giveNum", sortable:false},
-            {name:"type", sortable:false,formatter:rowShow}
+            {name:"type", sortable:false,formatter:rowShow},
+            {name:"skuId", sortable:false}
         ];
 
         jQuery(grid_selector).jqGrid({

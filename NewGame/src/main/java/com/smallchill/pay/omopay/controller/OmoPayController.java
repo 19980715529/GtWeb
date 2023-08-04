@@ -5,12 +5,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.utils.RateLimit;
+import com.smallchill.core.annotation.Before;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.pay.core.intercept.PayValidator;
 import com.smallchill.pay.omopay.model.OmoPay;
 import com.smallchill.pay.omopay.utils.OmoPayUtils;
 import com.smallchill.system.service.RechargeRecordsService;
@@ -39,13 +41,12 @@ public class OmoPayController extends BaseController implements ConstShiro {
 
     @PostMapping("/recharge")
     @Transactional
+    @Before(PayValidator.class)
     @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);
         // 根据用户id查询用户数据
-        HashMap<String, Object> user_map = new HashMap<>();
-        user_map.put("UserID",rechargeRecords.getUserId());
-        Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
+        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",rechargeRecords.getUserId()));
         JSONObject resultMap = new JSONObject();
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));

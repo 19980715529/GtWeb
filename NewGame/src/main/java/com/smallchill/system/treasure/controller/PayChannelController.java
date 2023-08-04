@@ -44,7 +44,7 @@ public class PayChannelController extends BaseController implements ConstShiro {
     @RequestMapping("/")
     public String index(ModelMap mm) {
         mm.put("code", CODE);
-        return BASE_PATH+"/paychannel.html";
+        return BASE_PATH+"paychannel.html";
     }
 
     /**
@@ -128,7 +128,7 @@ public class PayChannelController extends BaseController implements ConstShiro {
         // 判断是否有关联的的数据，有不可以删除
         Integer[] Ids = Convert.toIntArray(ids);
         for (int id : Ids) {
-            boolean temp = Db.isExist("select * from Pay_ChannelPool where cid=#{cid}", CMap.init().set("cid", id));
+            boolean temp = Db.isExist("select * from Pay_ChannelPool where cid=#{cid} and isDel=0", CMap.init().set("cid", id));
             if (temp){
                 return fail("请先删除关联数据");
             }

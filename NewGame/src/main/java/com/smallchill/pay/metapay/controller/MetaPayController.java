@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.utils.RateLimit;
+import com.smallchill.core.annotation.Before;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
@@ -12,6 +13,7 @@ import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.game.service.CommonService;
 import com.smallchill.pay.betcatpay.utils.BetcatPayUtils;
+import com.smallchill.pay.core.intercept.PayValidator;
 import com.smallchill.pay.metapay.model.MetaPay;
 import com.smallchill.pay.metapay.utils.MetaPayUtils;
 import com.smallchill.system.service.RechargeRecordsService;
@@ -38,6 +40,7 @@ public class MetaPayController extends BaseController implements ConstShiro {
 
     @PostMapping("/recharge")
     @Transactional
+    @Before(PayValidator.class)
     @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge() {
         RechargeRecords rechargeRecords = mapping("recharge", RechargeRecords.class);

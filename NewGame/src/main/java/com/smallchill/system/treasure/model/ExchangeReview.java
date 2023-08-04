@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 @Table(name = "Exchange_review")
-@Data
 @BindID(name = "id")
 public class ExchangeReview extends BaseModel {
     private Integer id;
@@ -36,4 +35,180 @@ public class ExchangeReview extends BaseModel {
     private String channelName; // 大渠道名称
     private String msg; // 三方反馈信息
     private Integer auditMethod; // 是否自动审核
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public String getPfOrderNum() {
+        return pfOrderNum;
+    }
+
+    public void setPfOrderNum(String pfOrderNum) {
+        this.pfOrderNum = pfOrderNum;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getBankNumber() {
+        return bankNumber;
+    }
+
+    public void setBankNumber(String bankNumber) {
+        this.bankNumber = bankNumber;
+    }
+
+    public String getCardholder() {
+        return cardholder;
+    }
+
+    public void setCardholder(String cardholder) {
+        this.cardholder = cardholder;
+    }
+
+    public String getBank() {
+        return bank;
+    }
+
+    public void setBank(String bank) {
+        this.bank = bank;
+    }
+
+    public Integer getSourcePlatform() {
+        return sourcePlatform;
+    }
+
+    public void setSourcePlatform(Integer sourcePlatform) {
+        this.sourcePlatform = sourcePlatform;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public Long getGold() {
+        return gold;
+    }
+
+    public void setGold(Long gold) {
+        this.gold = gold;
+    }
+
+    public Long getConsumptionCode() {
+        return consumptionCode;
+    }
+
+    public void setConsumptionCode(Long consumptionCode) {
+        this.consumptionCode = consumptionCode;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
+    }
+
+    public String getOperator() {
+        return operator;
+    }
+
+    public void setOperator(String operator) {
+        this.operator = operator;
+    }
+
+    public Integer getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(Integer channelId) {
+        this.channelId = channelId;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public Date getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
+    }
+
+    public BigDecimal getMoney() {
+        return money;
+    }
+
+    public void setMoney(BigDecimal money) {
+        this.money = money;
+    }
+
+    public String getChannelName() {
+        return channelName;
+    }
+
+    public void setChannelName(String channelName) {
+        this.channelName = channelName;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public Integer getAuditMethod() {
+        return auditMethod;
+    }
+
+    public void setAuditMethod(Integer auditMethod) {
+        this.auditMethod = auditMethod;
+    }
 }

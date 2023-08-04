@@ -44,12 +44,12 @@
         });
     }
     function genLink(cellvalue, options, rowObject) {
-        var html = '<a name="'+ctx + '/checkIn/details/' + rowObject.id+'" title="详情" class="text-33C3F7 iframeurl" href="'+ctx + '/newrecharge/details/' + rowObject.id+'">详情</a>';
+        var html = '<a name="'+ctx + '/checkIn/details/' + rowObject.UserID+'" title="详情" class="text-33C3F7 iframeurl" href="'+ctx + '/newrecharge/details/' + rowObject.UserID+'">详情</a>';
         return html;
     }
 
     function genLinkUser(cellvalue, options, rowObject) {
-        var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.userId+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.userId+'"><strong>' + cellvalue + '</strong></a>';
+        var html = '<a name="'+ctx + '/player/detailinfo/' + rowObject.UserID+'" title="玩家详情" class="text-33C3F7 iframeurl" href="'+ctx + '/player/detailinfo/' + rowObject.UserID+'"><strong>' + cellvalue + '</strong></a>';
         return html;
     }
 

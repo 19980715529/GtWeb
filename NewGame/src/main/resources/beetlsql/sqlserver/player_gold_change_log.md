@@ -21,7 +21,7 @@ new_gold_change_log
 	@}
 	@if(!isEmpty(ChangeType_Id)){
 	 	@if(ChangeType_Id=='-4'){
-		 	and p.ChangeType_Id in (5,207)
+		 	and p.ChangeType_Id in (5,207,221,218)
 	  	@}else if(ChangeType_Id=='-8') {
 	  		and p.ChangeType_Id in (206,211)
 	  	@}else if(ChangeType_Id=='-9'){

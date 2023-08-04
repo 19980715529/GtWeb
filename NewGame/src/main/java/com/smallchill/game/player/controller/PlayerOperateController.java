@@ -272,6 +272,30 @@ public class PlayerOperateController extends BaseController implements ConstShir
 		mm.put("code", CODE);
 		return BASE_PATH + "player_edit_bindPhone.html";
 	}
+	//修改代理等级
+	@RequestMapping("/agent/{id}")
+	@Permission({ ADMINISTRATOR, ADMIN })
+	public String editAgent(@PathVariable Integer id, ModelMap mm){
+		Map map = new HashMap();
+		map.put("UserID", id);
+		Map user = commonService.getInfoByOne("player_operate.new_info", map);
+		mm.put("player", user);
+		mm.put("code", CODE);
+		return BASE_PATH + "player_edit_Agent.html";
+	}
+	@Json
+	@RequestMapping("/updateAgent")
+	@Permission({ ADMINISTRATOR, ADMIN })
+	public AjaxResult updateAgent() {
+		String agentLevel = HttpKit.getRequest().getParameter("player.AgentLevel");
+		String UserID = HttpKit.getRequest().getParameter("player.UserID");
+		int temp = Db.update("[QPGameUserDB].[dbo].[PlayerShare]", "UserID", CMap.init().set("AgentLevel", agentLevel).set("UserID", UserID));
+		if (temp>0){
+			return success(UPDATE_SUCCESS_MSG);
+		}
+		return error(UPDATE_FAIL_MSG);
+	}
+
 	// GM充值页面跳转
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@RequestMapping("/editRecharge/{id}")

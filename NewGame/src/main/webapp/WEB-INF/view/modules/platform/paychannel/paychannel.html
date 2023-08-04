@@ -12,7 +12,7 @@
     });
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["渠道id","渠道名称","兑换挡位","排序","充值是否开启","兑换是否开启"];
+        var _colnames=["渠道id","渠道名称","兑换挡位","排序","充值是否开启","兑换是否开启","地区"];
         var _colmodel=[
             {name:"id",sortable:false},
             {name:"cname",sortable:false},
@@ -20,6 +20,7 @@
             {name:"sort",index: "sort"},
             {name:"isRecharge",sortable:false,formatter:rowShow},
             {name:"isExchange",sortable:false,formatter:rowShow},
+            {name:"code",sortable:false},
         ];
 
         jQuery(grid_selector).jqGrid({

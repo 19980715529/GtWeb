@@ -22,6 +22,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -75,9 +77,9 @@ public class CallBackUtils {
     }
     /**
      * 充值成功后需要执行存储过程
-     * @param rechargeRecords
+     * @param rechargeRecords rechargeSuccessStoredProcedure
      */
-    private static void extracted(RechargeRecords rechargeRecords) {
+    private static void rechargeSuccessStoredProcedure(RechargeRecords rechargeRecords) {
         // 执行存储过程
         HashMap<String, Object> stored = new HashMap<>();
         stored.put("userId", rechargeRecords.getUserId());
@@ -93,10 +95,10 @@ public class CallBackUtils {
     }
 
     /**
-     * 兑换需要执行的存储过程
+     * 兑换需要执行的存储过程  exchangeSuccessStoredProcedure
      * @param review
      */
-    private static void extracted(ExchangeReview review) {
+    private static void exchangeSuccessStoredProcedure(ExchangeReview review) {
         HashMap<String, Object> stored = new HashMap<>();
         stored.put("userId", review.getUserId());
         stored.put("Gold", review.getAmount());
@@ -127,7 +129,7 @@ public class CallBackUtils {
             // 使用后线程执行
             Runnable runnable = () -> {
                 // 插入订单记录表
-                extracted(rechargeRecords);
+                rechargeSuccessStoredProcedure(rechargeRecords);
                 // 回调成功,根据超时订单号将订单从延迟列表中取消
                 GlobalDelayQueue.cancelOrder(orderNum);
                 // 向游戏服务器发送请求
@@ -161,7 +163,7 @@ public class CallBackUtils {
                 Long code = (rechargeRecords.getGold()-rechargeRecords.getGiftGold()) *normalAddGoldOdd + specialAddGoldOdd*(rechargeRecords.getGiftGold());
                 addUserCode(rechargeRecords.getUserId(),code);
                 // 新增充值统计
-                addedRechargeStatistics(rechargeRecords.getPackageName());
+                addedRechargeStatistics(rechargeRecords.getPackageName(),rechargeRecords.getUserId());
             };
             ThreadKit.excAsync(runnable,false);
         }
@@ -200,18 +202,22 @@ public class CallBackUtils {
         // 回调成功
         exchangeReview.setStatus(4);
         exchangeReview.setEndTime(new Date());
-        // 执行存储过程
-        extracted(exchangeReview);
-        // 兑换成功发送邮件
-        Map emailParam = RechargeExchangeCommon.getEmailConf(4);
-        emailParam.put("gold", 0);
-        emailParam.put("toUserid", exchangeReview.getUserId());
-        emailParam.put("goldType",206);
-        SendHttp.sendEmail(emailParam);
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        RechargeExchangeCommon.walletStatistics(exchangeReview.getOrderNumber(),
-                exchangeReview.getSourcePlatform(),exchangeReview.getChannelName(),exchangeReview.getChannelId(),
-                dateFormat.format(exchangeReview.getCreateTime()),1);
+        Runnable runnable = () -> {
+            // 执行存储过程
+            exchangeSuccessStoredProcedure(exchangeReview);
+            // 兑换成功发送邮件
+            Map emailParam = RechargeExchangeCommon.getEmailConf(4);
+            emailParam.put("gold", 0);
+            emailParam.put("toUserid", exchangeReview.getUserId());
+            emailParam.put("goldType",206);
+            SendHttp.sendEmail(emailParam);
+            RechargeExchangeCommon.walletStatistics(exchangeReview.getOrderNumber(),
+                    exchangeReview.getSourcePlatform(),exchangeReview.getChannelName(),exchangeReview.getChannelId(),
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),1);
+            // 新增充值统计
+            addedRechargeStatistics(exchangeReview.getSourcePlatform(),exchangeReview.getUserId());
+        };
+        ThreadKit.excAsync(runnable,false);
     }
 
     /**
@@ -234,15 +240,15 @@ public class CallBackUtils {
     /**
      * 新增充值统计  QPGameRecordDB
      */
-    public static void addedRechargeStatistics(Integer clientType){
+    public static void addedRechargeStatistics(Integer clientType,Integer userId){
         Db.executeCall(new OnConnection<Integer>() {
             @Override
             public Integer call(Connection connection) throws SQLException {
                 try {
                     CallableStatement statement = connection.prepareCall("{? = call [QPGameRecordDB].[dbo].[NewRechargeStatics2](?,?)}");
                     statement.registerOutParameter(1, Types.INTEGER);
-                    statement.setInt(2,0);
-                    statement.setInt(3,clientType);
+                    statement.setInt(2,clientType);
+                    statement.setInt(3,userId);
                     statement.execute();
                     return statement.getInt(1);
                 }catch (Exception e){

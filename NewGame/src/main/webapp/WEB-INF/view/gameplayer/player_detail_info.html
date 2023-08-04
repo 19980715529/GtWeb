@@ -245,8 +245,8 @@
             <tr>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">注册时间:</td>
                 <td style="">${user.RegisterDate!}</td>
-                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">3日总输赢:</td>
-                <td style="">${user.Day3Waste!0}</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">2日总输赢:</td>
+                <td style="">${user.Day2Waste!0}</td>
             </tr>
             <tr>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">账号类型:</td>
@@ -381,20 +381,23 @@
                 <td>${user.AccountTypeName!'无'}</td>
             </tr>
             <tr>
-                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">奖励金币数:</td>
-                <td>
-                    使用转盘获得总金币：<span class="text-red">${onlineData.gold+dailyData.gold+codeData.gold}</span>;
-                    白银转盘使用奖励金币数：<span class="text-red">${onlineData.gold}</span>;<br>
-                    黄金转盘使用奖励金币数：<span class="text-red">${dailyData.gold}</span>;
-                    钻石转盘使用奖励金币数：<span class="text-red">${codeData.gold}</span>;
-                    分享代理金币：<span class="text-red">${share}</span>;
-                </td>
-                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">转盘使用次数:</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">转盘相关:</td>
                 <td>
                     转盘使用次数：<span class="text-red">${onlineData.num+dailyData.num+codeData.num}</span>;
-                    白银转盘使用次数：<span class="text-red">${onlineData.num}</span>,
-                    黄金转盘使用次数：<span class="text-red">${dailyData.num}</span>,
-                    钻石转盘使用次数：<span class="text-red">${codeData.num}</span>,
+                    白银转盘次数：<span class="text-red">${onlineData.num}</span>,
+                    黄金转盘次数：<span class="text-red">${dailyData.num}</span>,
+                    钻石转盘次数：<span class="text-red">${codeData.num}</span>,<br/>
+
+                    转盘使用总金币：<span class="text-red">${onlineData.gold+dailyData.gold+codeData.gold}</span>;
+                    白银转盘金币：<span class="text-red">${onlineData.gold}</span>;
+                    黄金转盘金币：<span class="text-red">${dailyData.gold}</span>;
+                    钻石转盘金币：<span class="text-red">${codeData.gold}</span>;
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">签到相关:</td>
+                <td>
+                    签到天数：<span class="text-red">${user.CheckDays!0}</span>;
+                    签到获得：<span class="text-red">${user.CheckAmount!0}</span>,
+                    <!--每日回馈获得：<span class="text-red">${user.chargeGold!0}</span>;-->
                 </td>
             </tr>
             <tr>
@@ -403,20 +406,60 @@
                     充值奖励获得：<span class="text-red">${user.chargeGold!0}</span>;
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">玩家来源:</td>
-                <td>${user.IsDrain}&nbsp;&nbsp;(提示：1：引流量状态，0：非引流量状态; 0代表审核)</td>
+                <td><span class="text-red">${user.IsDrain}</span>&nbsp;&nbsp; （提示：1：引流状态；0：非引流状态；为0时登录游戏进入A面，谷歌审核状态）</td>
             </tr>
             <tr>
-                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">活动奖励:</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">每日回馈:</td>
                 <td>
-                    签到天数：<span class="text-red">${user.CheckDays!0}</span>,
-                    签到获得：<span class="text-red">${user.CheckAmount!0}</span>,
-<!--                    每日回馈获得：<span class="text-red">${user.chargeGold!0}</span>;-->
+                    今日积累：<span class="text-red">
+                    @if(user.CumulativeToday < 0){
+					    @{ var ls = numberHandle(-user.CumulativeToday);
+                            ${ls}
+                        @}
+					@} else {
+					    @{ var ls = numberHandle(user.CumulativeToday);
+                            ${ls}
+                        @}
+					@}
+                </span>,
+                    今日已领取：<span class="text-red">${user.DailyFeedback!0}</span>,
+<!--                    今日完成充值：<span class="text-red">${user.chargeGold!0}</span>;-->
                 </td>
-                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">任务奖励:</td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">任务相关:</td>
                 <td>
-<!--                    新手任务总计：<span class="text-red">${user.chargeGold!0}</span>,-->
-                    邀请好友：<span class="text-red">${user.SharePlayerRewards!0}</span>,
-<!--                    充值任务：<span class="text-red">${user.chargeGold!0}</span>;-->
+<!--                    邀请好友人数 就是下级人数：<span class="text-red">${user.chargeGold!0}</span>,-->
+                    邀请好友人数：<span class="text-red">${user.AgentDownUserCount!0}</span>,
+                    邀请任务金币：<span class="text-red">${user.inviteTask!0}</span>,<br/>
+                    累计任务金币：<span class="text-red">${user.GrandTotalTask!0}</span>,
+                    下注任务金币：<span class="text-red">${user.placeBetTask!0}</span>,
+                </td>
+            </tr>
+            <tr>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">代理相关:</td>
+                <td>
+                    @if(user.AgentLevel == 0){
+                        代理身份：<span class="text-red">普通代理</span>,
+                    @}else{
+                        代理身份：<span class="text-red">VIP代理</span>,
+                    @}
+                    邀请码：<span class="text-red">${user.InviteCode!无}</span>,
+                    @if(user.BindParentUserID == 0){
+                        上级代理：<span class="text-red">无</span>;
+                    @}else{
+                        上级代理：<span class="text-red">${user.BindParentUserID!无}</span>;
+                    @}
+                    下级总人数：<span class="text-red">${user.AgentDownUserCount!0}</span>;<br>
+                    下下级充值总人数：<span class="text-red">${user.ddownUserCount!0}</span>;
+                    代理总返利：<span class="text-red">${user.AgentRebate!0}</span>;<br>
+                    代理下级总充值：<span class="text-red">${user.RechargeAmount!0}</span>;
+                    代理下下级总充值：<span class="text-red">${user.DownRechargeAmount!0}</span>;
+                </td>
+                <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">邮件相关:</td>
+                <td>
+                    未领取邮件数：<span class="text-red">${mail.unReceiveCount!0}</span>,
+                    未领取附件金币总和：<span class="text-red">${mail.unReceiveGold!0}</span>,<br/>
+                    已领取邮件数：<span class="text-red">${mail.receiveCount!0}</span>;
+                    已领取附件金币总和：<span class="text-red">${mail.receiveGold!0}</span>;
                 </td>
             </tr>
             <tr>
@@ -703,6 +746,15 @@
                                         type="button" data-url="/player/bindPhone/" data-addtabs="edit_bindPhone"
                                         data-title="绑定手机" data-icon="fa fa" data-type="window">
                                     <i class="ace-icon fa fa-check bigger-110">绑定手机</i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <button id="Agent" class="btn btn-info bg-007EFF no-border margin-space"
+                                        type="button" data-url="/player/agent/" data-addtabs="edit_Agent"
+                                        data-title="修改代理" data-icon="fa fa" data-type="window">
+                                    <i class="ace-icon fa fa-check bigger-110">修改代理</i>
                                 </button>
                             </td>
                         </tr>

@@ -6,8 +6,10 @@ import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.db.config.model.ActiveList;
 import com.smallchill.db.config.model.FirstRecharge;
 import com.smallchill.game.service.CommonService;
@@ -114,9 +116,10 @@ public class FirstRechargeController extends BaseController implements ConstShir
     @RequestMapping(KEY_REMOVE)
     @Permission(ADMINISTRATOR)
     public AjaxResult remove(@RequestParam String ids, ModelMap mm) {
-        int cnt =Blade.create(FirstRecharge.class).deleteByIds(ids);
+        Integer[] Ids = Convert.toIntArray(ids);
+        boolean temp = Blade.create(FirstRecharge.class).updateBy("isDel=0", "id IN (#{join(ids)})", CMap.init().set("ids", Ids));
         mm.put("code",CODE);
-        if (cnt > 0) {
+        if (temp) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
         } else {

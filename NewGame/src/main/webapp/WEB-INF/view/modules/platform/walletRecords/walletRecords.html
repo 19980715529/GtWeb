@@ -13,11 +13,10 @@
     });
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["id","时间","大渠道","钱包名称","代收费率", "代付费率","代付附加","代收数额","代收手续费","代收次数","成功次数",
+        var _colnames=["id","大渠道","钱包名称","代收费率", "代付费率","代付附加","代收数额","代收手续费","代收次数","成功次数",
             "代付数额","代付手续费","代付成功次数","净利润","总手续费"];
         var _colmodel=[
             {name:"id",index:"id",hidden:true},
-            {name:"createTime",sortable:false},
             {name:"channelName",sortable:false},
             {name:"mcName", sortable: false},
             {name:"collectRate",sortable: false},
@@ -41,7 +40,7 @@
             colModel:_colmodel,
             jsonReader:{id:"id"},
             pager : pager_selector,
-            postData: {where: _filter,sort:"createTime",order:"desc"},
+            postData: {where: _filter},
             rowNum:100,
             height: 'auto',
             gridComplete:function () {

@@ -10,9 +10,11 @@ import com.smallchill.pay.betcatpay.model.BetcatPay;
 import com.smallchill.pay.betcatpay.utils.SignUtils;
 import com.smallchill.system.treasure.model.ExchangeReview;
 import com.smallchill.system.treasure.model.RechargeRecords;
-import com.smallchill.system.treasure.utils.HttpClientUtils;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.Date;

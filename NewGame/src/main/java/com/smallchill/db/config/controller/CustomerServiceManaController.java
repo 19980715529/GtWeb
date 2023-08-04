@@ -47,7 +47,7 @@ public class CustomerServiceManaController extends BaseController implements Con
     @RequestMapping(KEY_LIST)
     //@Permission({ ADMINISTRATOR, ADMIN })
     public Object list() {
-        List<Map> list = Db.selectList("select id,name,resources from CustomerService");
+        List<Map> list = Db.selectList("select id,name,resources,isOpen from CustomerService");
         return list;
     }
 
@@ -99,7 +99,8 @@ public class CustomerServiceManaController extends BaseController implements Con
         String id = HttpKit.getRequest().getParameter("customer.id");
         String name = HttpKit.getRequest().getParameter("customer.name");
         String resources = HttpKit.getRequest().getParameter("customer.resources");
-        int update = Db.update("CustomerService", "id", CMap.init().set("name", name).set("resources", resources).set("id",id));
+        String isOpen = HttpKit.getRequest().getParameter("customer.isOpen");
+        int update = Db.update("CustomerService", "id", CMap.init().set("name", name).set("resources", resources).set("id",id).set("isOpen", isOpen));
         mm.put("code",CODE);
         if (update<0){
             return fail(UPDATE_FAIL_MSG);

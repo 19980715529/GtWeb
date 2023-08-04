@@ -103,8 +103,6 @@ public class RechargeDockingController extends BaseController implements ConstSh
     private SafePay safePay;
 
 
-
-
     /**兑换接口
      * 获取前端参数：
      * 用户id: exchange.userId
@@ -112,29 +110,33 @@ public class RechargeDockingController extends BaseController implements ConstSh
      * 银行卡号：exchange.bankNumber
      * 渠道类型: exchange.channelName
      * // 下面参数是菲律宾需要
-     * recharge.cardholder：用户名
-     * recharge.phone：电话号
+     * exchange.cardholder：用户名
+     * exchange.phone：电话号
      * @return
      */
     @Json
     @Before(ExchangePayValidator.class)
     @PostMapping("/exchangePay")
     public AjaxResult replacePay(){
+        Map<String, String[]> parameterMap = HttpKit.getRequest().getParameterMap();
+        LOGGER.error(JSON.toJSONString(parameterMap));
         String userId = HttpKit.getRequest().getParameter("exchange.userId");
+        String phone = getRequest().getParameter("exchange.phone");
         BigDecimal exAmount = new BigDecimal(HttpKit.getRequest().getParameter("exchange.exchangeAmount"));
         ExchangeReview exchangeReview = mapping("exchange", ExchangeReview.class);
         exchangeReview.setAmount(exAmount);
+        exchangeReview.setPhone(phone);
+        LOGGER.error(JSON.toJSONString(exchangeReview));
         // 根据用户id查询用户数据
-        HashMap<String, Object> user_map = new HashMap<>();
-        user_map.put("UserID",exchangeReview.getUserId());
-        Map user = commonService.getInfoByOne("player_operate.new_info", user_map);
+        Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",exchangeReview.getUserId()));
         if (user==null){
             // 用户不存在
             return fail("105001");
         }
         // 获取用户绑定的电话
-        String phone = exchangeReview.getPhone();
-        if ("".equals(phone)){
+        System.out.println(phone);
+        if (phone.length()<=0){
+            System.out.println("定手机号");
             return fail("105002");
         }
         // 用户来源平台
@@ -198,6 +200,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return fail("105001");
             case 2:
                 //  未绑定手机
+                System.out.println("未绑定手机号");
                 return fail("105002");
             case 3:
                 // 未发起首充
@@ -212,6 +215,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 return fail("105011");
         }
     }
+
     /**
      * 判断兑换条件
      */
@@ -391,7 +395,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
             // 查询需求打码量
             long needCode = Long.parseLong(Db.queryStr("select NeedCodingQuantity from [QPGameUserDB].[dbo].[PlayerSocreInfo] where Userid=#{Userid}",
                     CMap.init().set("Userid", UserId)));
-            List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear gear,isRecharge,isExchange from Pay_Channel where isDel=0 order by sort");
+            List<Map> payChannel = Db.selectList("select id,cname channel_name,exchangeGear gear,isRecharge,isExchange,code as area from Pay_Channel where isDel=0 order by sort");
             for (Map map:payChannel) {
                 ChannelVo channelVo = JSON.parseObject(JSON.toJSONString(map), ChannelVo.class);
                 // 兑换时需要兑换比率
@@ -424,7 +428,7 @@ public class RechargeDockingController extends BaseController implements ConstSh
                 channelVo.getTypes().add(max_param);
             }
         }else {
-            List<Map> payChannel = Db.selectList("select id,cname channel_name,isRecharge,isExchange from Pay_Channel where isDel=0 order by sort");
+            List<Map> payChannel = Db.selectList("select id,cname channel_name,isRecharge,isExchange,code as area from Pay_Channel where isDel=0 order by sort");
             for (Map map:payChannel) {
                 ChannelVo channelVo = JSON.parseObject(JSON.toJSONString(map), ChannelVo.class);
                 channelVos.add(channelVo);

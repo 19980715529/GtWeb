@@ -100,11 +100,12 @@
                 };
             }
             , cols: [[
-                {field: 'id', title: 'ID', width: 150, sort: true, fixed: 'left'}
+                {type: 'numbers', title: '序号', width: 80, fixed: 'left' }// 序号
+                , {field: 'id', title: 'ID', width: 150, sort: true, fixed: 'left'}
                 , {field: 'writeTime', title: '日期', width: 150, fixed: 'left'}
                 , {field: 'newUserCount', title: '新增用户', width: 150, sort: true}
-                , {field: 'regUser', title: '游客', width: 150}
-                , {field: 'newUser', title: '注册用户', width: 150}
+                , {field: 'newUser', title: '游客', width: 150}
+                , {field: 'regUser', title: '注册用户', width: 150}
                 , {field: 'activeUser', title: '登录人数', width: 150}
                 , {field: 'recNum', title: '当日日充值人数', sort: true, width: 150}
                 , {field: 'recMoney', title: '当日充值金额', sort: true, width: 150}

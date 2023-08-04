@@ -382,10 +382,23 @@ new_detail
     (SELECT  NeedCodingQuantity FROM [QPGameUserDB].[dbo].[PlayerSocreInfo] with (nolock) WHERE Userid = a.UserID) as NeedCodingQuantity,
 	(SELECT  isnull(SUM(Award),0) FROM [QPGameRecordDB].[dbo].[Turntable_History] with (nolock) WHERE UserID = a.UserID and Fake=0) as RotaryReward,
 	(SELECT  isnull(sum(Data),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] with (nolock) WHERE UserId = a.UserID and DataType =1) as CodeReward,
-	(SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=216) as CheckAmount,
-	(SELECT  count(1) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=216) as CheckDays,
+	(SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=223) as CheckAmount,
+    (SELECT  CheckDays FROM [QPGameUserDB].[dbo].[CheckIn_PlayerCheckInfo] with (nolock) WHERE UserID = a.UserID) as CheckDays,
+    (SELECT  AgentLevel FROM [QPGameUserDB].[dbo].[PlayerShare] with (nolock) WHERE UserID = a.UserID) as AgentLevel,
+    (SELECT  count(1) FROM [QPGameUserDB].[dbo].[PlayerShare] with (nolock) WHERE BindParentUserID = a.UserID) as AgentDownUserCount,
+    (SELECT  InviteCode FROM [QPGameUserDB].[dbo].[PlayerShare] with (nolock) WHERE UserID = a.UserID) as InviteCode,
+    (SELECT  BindParentUserID FROM [QPGameUserDB].[dbo].[PlayerShare] with (nolock) WHERE UserID = a.UserID) as BindParentUserID,
+    (SELECT  count(DISTINCT RechargeUserID) FROM [QPGameUserDB].[dbo].[PlayerShareRechargeRebate] with (nolock) WHERE RechargeUserID = a.UserID and AgentType=2) as ddownUserCount,
+    (SELECT  isnull(sum(Rebate),0) FROM [QPGameUserDB].[dbo].[PlayerShareRechargeRebate] with (nolock) WHERE AgentUserID = a.UserID and AgentType!=0) as AgentRebate,
+    (SELECT  isnull(sum(RechargeAmount),0)/10000 FROM [QPGameUserDB].[dbo].[PlayerShareRechargeRebate] with (nolock) WHERE AgentUserID = a.UserID and AgentType=1) as RechargeAmount,
+    (SELECT  isnull(sum(RechargeAmount),0)/10000 FROM [QPGameUserDB].[dbo].[PlayerShareRechargeRebate] with (nolock) WHERE AgentUserID = a.UserID and AgentType=2) as DownRechargeAmount,
     (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=212) as SharePlayerRewards,
-	(case when (DATEDIFF(DAY,b.changeScoreTime,GETDATE())>0) then 0 else b.todayScore end) as DayWaste
+    (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=217) as inviteTask,
+    (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=218) as GrandTotalTask,
+    (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=219) as placeBetTask,
+    ((select LastDayLose from QPGameUserDB.dbo.PlayerSocreInfo with (nolock) where Userid=a.UserID)/(select Reward from [QPServerInfoDB].[dbo].[ActiveList] where ActiveID=5)) as CumulativeToday,
+    (SELECT  ISNULL(SUM(Amount),0) FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock) WHERE User_Id = a.UserID and Prop_Id=1 and ChangeType_Id=220 and DateDiff(dd,LogTime,getdate())=0) as DailyFeedback,
+	(select TodayScore from QPGameUserDB.dbo.PlayerSocreInfo with (nolock) where Userid=a.UserID) as DayWaste
 	, b.js_BussniessCount, b.out_BussniessCount,
 	b.CheatRate, b.LimitScore,b.CheatRate2, b.LimitScore2, b.BloodScore,isnull(a.limitSend,0) limitGive,b.InsureScore,
 	(case when (DATEDIFF(day,'1900-01-01',b.lastEndCheatTime)=0) then '无' else CONVERT(VARCHAR(100), b.lastEndCheatTime, 120) end) lastEndCheatTime
@@ -395,8 +408,7 @@ new_detail
 	(case when a.FirstServerId=0 then '无' else (select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] where ServerID=a.FirstServerId) end) as FirstEnterServerName,
 	isnull((select (case when ServerID=0 then '大厅' else (select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] where ServerID=l.ServerID) end) FROM [QPTreasureDB].[dbo].[GameScoreLocker] l with (nolock) where l.UserID=a.UserID),'离线') as OnlineServerName,
 		(select Amount FROM [QPGameUserDB].[dbo].[AA_Shop_Prop_UserProp] pu with (nolock) where pu.User_Id=a.UserID and pu.Prop_Id=2) as UserMedal,
-	(select SUM(Amount) FROM [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] with (nolock)
-	where Prop_Id=1 and ChangeType_Id=1 and DATEDIFF(DAY,LogTime,DATEADD(DAY,-3,GETDATE()))<0 and 	DATEDIFF(DAY,LogTime,GETDATE())>=0 and User_Id=a.UserID) Day3Waste
+	(select TodayScore+LastDaySocre from QPGameUserDB.dbo.PlayerSocreInfo with (nolock) where Userid=a.UserID) Day2Waste
 	,isnull((select SUM(prop_count) FROM [QPGameUserDB].[dbo].[AA_GiveRecord] with (nolock) where to_user=a.UserID and [open]=0),0) UnRcvGold
 	,isnull((SELECT name FROM QPGameUserDB.dbo.AccountTypeName where clientType=a.ClientType),(case when a.ClientType=0 then '大厅' else '包'+cast(a.ClientType as varchar) end)) as AccountTypeName
 	,isnull((select top 1 [Body] FROM [QPGameUserDB].[dbo].[AccountsTipNameDesc] d where d.UserID=a.UserID),'') TipDesc
@@ -442,7 +454,7 @@ new_list1
       ,(case when a.IsDrain=1 then '引流' else '非引流' end) isDrain
 	,(case when isnull(a.LimitLogin,0) = 0 then '正常' else '锁定' end) as NullityName,a.clientType,b.CheatRate,
 	(case when (DATEDIFF(day,'1900-01-01',b.lastEndCheatTime)=0) then '无' else CONVERT(VARCHAR(100), b.lastEndCheatTime, 120) end) lastEndCheatTime
-	FROM QPGameUserDB.dbo.AccountsInfo AS a with (nolock),
+	FROM [QPGameUserDB].[dbo].[AccountsInfo] AS a with (nolock),
     [QPTreasureDB].[dbo].[GameScoreInfo] b with (nolock),
     [QPGameUserDB].[dbo].[PlayerSocreInfo] d with (nolock)
 	WHERE a.UserID=b.UserID and d.Userid=a.UserID and a.isRobit=0
@@ -576,3 +588,11 @@ new_list1
     @if(!isEmpty(ExchangeEnd)){
         and TotalExchange <= #{ExchangeEnd}
     @}
+
+mail_info
+===
+    * 用户邮箱统计 IsClaim=0 没有领取
+    select (select count(1) from QPGameUserDB.dbo.PlayerMails where IsClaim=0) unReceiveCount,
+    (select isnull(sum(Gold),0) from QPGameUserDB.dbo.PlayerMails where IsClaim=0) unReceiveGold,
+    (select count(1) from QPGameUserDB.dbo.PlayerMails where IsClaim=1) receiveCount,
+    (select isnull(sum(Gold),0) from QPGameUserDB.dbo.PlayerMails where IsClaim=1) receiveGold

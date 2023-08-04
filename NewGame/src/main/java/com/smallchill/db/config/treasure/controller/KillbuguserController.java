@@ -30,7 +30,7 @@ public class KillbuguserController extends BaseController implements ConstShiro 
 	@Autowired
 	private CommonService commonService;
 	
-	@DoControllerLog(name="进入拳皇配置列表页面")
+	@DoControllerLog(name="进入杀蝗虫配置列表页面")
 	@RequestMapping("/")
 	@Permission(ADMINISTRATOR)
 	public String index(ModelMap mm) {
@@ -53,7 +53,7 @@ public class KillbuguserController extends BaseController implements ConstShiro 
 		return BASE_PATH + "killbuguser_add.html";
 	}
 	
-	@DoControllerLog(name="新增拳皇配置")
+	@DoControllerLog(name="新增杀蝗虫配置")
 	@Json
 	@RequestMapping(KEY_SAVE)
 	@Permission(ADMINISTRATOR)
@@ -79,7 +79,7 @@ public class KillbuguserController extends BaseController implements ConstShiro 
 		return BASE_PATH + "killbuguser_edit.html";
 	}
 	
-	@DoControllerLog(name="修改拳皇配置")
+	@DoControllerLog(name="修改杀蝗虫配置")
 	@Json
 	@RequestMapping(KEY_UPDATE)
 	@Permission(ADMINISTRATOR)
@@ -106,7 +106,7 @@ public class KillbuguserController extends BaseController implements ConstShiro 
 		return BASE_PATH + "killbuguser_view.html";
 	}
 	
-	@DoControllerLog(name="删除拳皇配置")
+	@DoControllerLog(name="删除杀蝗虫配置")
 	@Json
 	@RequestMapping(KEY_REMOVE)
 	@Permission(ADMINISTRATOR)

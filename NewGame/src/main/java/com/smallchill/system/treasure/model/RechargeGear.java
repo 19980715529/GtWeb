@@ -16,4 +16,6 @@ public class RechargeGear extends BaseModel {
     private BigDecimal getExtra;
     private Long amount;
     private Integer sort;
+    private Integer isDel; // 是否删除
+    private String skuId; // 商品id
 }

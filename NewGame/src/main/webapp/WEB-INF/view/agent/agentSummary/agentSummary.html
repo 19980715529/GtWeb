@@ -1,0 +1,229 @@
+@layout("/common/_container.html"){
+<script src="${ctxPath}/static/layui-v2.8.4/layui/layui.js"></script>
+<link href="${ctxPath}/static/layui-v2.8.4/layui/css/layui.css" rel="stylesheet">
+<form class="layui-form layui-row layui-col-space16">
+    <div class="layui-row">
+        <div class="layui-col-xs12">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">包来源:</label>
+            </div>
+            <div class="layui-input-inline">
+                <select id="clientType" name="clientType">
+                </select>
+            </div>
+            <div class="layui-input-inline">
+                <label class="layui-form-label">用户id:</label>
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" id="user_Id" name="user_Id" placeholder="代理id" class="layui-input">
+            </div>
+            <div class="layui-input-inline" id="ID-laydate-range">
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">返利总值:</label>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="start_rebate" id="start_rebate"
+                           class="layui-input" placeholder="start">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="end_rebate" id="end_rebate" class="layui-input"
+                           placeholder="end">
+                </div>
+            </div>
+            <div class="layui-input-inline" id="ID-laydate-ranges">
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">下级充值人数:</label>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="startRecharge" id="startRecharge"
+                           class="layui-input" placeholder="start">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="endRecharge" id="endRecharge" class="layui-input"
+                           placeholder="end">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-btn-container layui-col-xs12">
+        <button class="layui-btn" lay-submit lay-filter="demo-table-search">查询</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+<script type="text/html" id="UserID">
+    <a href="${ctxPath}/player/detailinfo/{{= d.UserID }}" style="color:royalblue;font-size:16px" target="_blank">{{= d.UserID }}</a>
+</script>
+<script type="text/html" id="details">
+    <a href="${ctxPath}/subordinateQuery/?AgentUserID={{= d.UserID }}" style="color:royalblue;font-size:16px" target="_blank">详情</a>
+</script>
+<div class="layui-row">
+</div>
+<div class="total-block">
+    <label class=""> 汇总数据： </label>
+    vip代理人数：<span class="text-red" id="vipAgent"><b>0</b></span>
+    普通代理人数：<span class="text-red" id="agent"><b>0</b></span>
+    返利总值：<span class="text-red" id="totalRebate"><b>0</b></span>
+</div>
+<div class="total-block">
+    <label class=""> 当日数据： </label>
+    今日下级总新增：<span class="text-red" id="NewtoDayDown"><b>0</b></span>
+    今日下级总充值：<span class="text-red" id="NewRecharge"><b>0</b></span>
+    今日返利总值：<span class="text-red" id="NewRebate"><b>0</b></span>
+</div>
+<div class="total-block">
+    <label class=""> 查询数据： </label>
+    vip代理人数：<span class="text-red" id="vipProxy"><b>0</b></span>
+    普通代理人数：<span class="text-red" id="OrdinaryAgent"><b>0</b></span>
+    返利总值：<span class="text-red" id="rebateTotals"><b>0</b></span>
+    今日下级总新增：<span class="text-red" id="todayDownNewTotal"><b>0</b></span>
+    今日下级总充值：<span class="text-red" id="todayDownTotal"><b>0</b></span>
+    今日总返利：<span class="text-red" id="todayRebates"><b>0</b></span>
+</div>
+<table class="layui-hide" id="ID-table-demo-search"></table>
+<script>
+    var ctx = "${ctxPath}";
+    var _filter = '';
+    console.log(ctx + "/${code}/list")
+    layui.use(function () {
+        var table = layui.table;
+        var form = layui.form;
+        // 创建表格实例
+        table.render({
+            elem: '#ID-table-demo-search'
+            , url: ctx + "/${code}/list" // 此处为静态模拟数据，实际使用时需换成真实接口
+            , toolbar: true
+            , defaultToolbar: ['filter', 'exports', 'print']  //工具
+            , where: {
+                where: _filter,
+                sort: "downUser",
+                order: "desc",
+                _search: false,
+                nd: new Date().getTime(),
+                sidx: "",
+                sord: "asc"
+            }
+            , limit: 50
+            , limits: [10, 50, 100]
+            , request: {
+                pageName: 'page', // 页码的参数名称，默认：page
+                limitName: 'rows' // 每页数据条数的参数名，默认：limit
+            },
+            parseData: function (res) { // res 即为原始返回的数据
+                return {
+                    "code": res.code, // 解析接口状态
+                    "msg": res.msg, // 解析提示文本
+                    "count": res.data.records, // 解析数据长度
+                    "data": res.data.rows // 解析数据列表
+                };
+            }
+            , cols: [[
+                {type: 'numbers', title: '序号', width: 80, fixed: 'left' }// 序号
+                , {field: 'UserID', title: '代理id',align:'center', width: 150, fixed: 'left',templet: '#UserID'}
+                , {field: 'proxy', title: '代理身份',align:'center', width: 120, sort: true,templet:function (d){
+                        if (d.proxy==1){
+                            return '<span class="layui-badge layui-bg-green">vip代理</span>';
+                        }else {
+                            return '<span class="layui-badge-rim">普通代理</span>';
+                        }
+                    }}
+                , {field: 'ClientType', title: '包来源',align:'center', width: 100}
+                , {field: 'downUser', title: '下级人数',align:'center', width: 120}
+                , {field: 'downRechargeUser', title: '下级充值人数',align:'center', width: 120}
+                , {field: 'downRebate', title: '下级返利',align:'center', sort: true, width: 120}
+                , {field: 'ddownRebate', title: '下下级返利',align:'center', sort: true, width: 150}
+                , {field: 'rebateTotal', title: '返利总值',align:'center', sort: true, width: 150}
+                , {field: 'todayDownNew', title: '今日下级新增',align:'center', sort: true, width: 120}
+                , {field: 'todayDownTotal', title: '今日下级总充值',align:'center', sort: true, width: 150}
+                , {field: 'todayRebate', title: '今日返利',align:'center', sort: true, width: 150}
+                , {field: 'UserID', title: '详情',align:'center', sort: true, width: 120,templet:"#details"}
+            ]]
+            , totalRow: false // 开启合计行
+            , page: true
+            , height: 590
+        });
+        query({})
+        new Ajax("${ctxPath}/${code}/summary", function (data) {
+            var temp = data.data;
+            console.log(data);
+            if (data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+                $("#vipAgent").text(fmoney(temp.totalInfo.vipAgent, 0));//
+                $("#agent").text(fmoney(temp.totalInfo.agent, 0));//
+                $("#totalRebate").text(fmoney(temp.totalInfo.totalRebate, 0));//
+                // 每日
+                $("#NewtoDayDown").text(fmoney(temp.toDayInfo.NewtoDayDown, 0));//
+                $("#NewRecharge").text(fmoney(temp.toDayInfo.NewRecharge, 0));//
+                $("#NewRebate").text(fmoney(temp.toDayInfo.NewRebate, 0));//
+            }
+        }).start();
+        // 搜索提交
+        form.on('submit(demo-table-search)', function (data) {
+            var field = data.field; // 获得表单字段
+            console.log(field)
+            query(field)
+            // 执行搜索重载
+            table.reload('ID-table-demo-search', {
+                page: {
+                    curr: 1 // 重新从第 1 页开始
+                }
+                , where: {
+                    "where": JSON.stringify(field),
+                    sort: "downUser",
+                    order: "desc",
+                    _search: false,
+                    nd: new Date().getTime(),
+                    sidx: "",
+                    sord: "asc"
+                }
+            }
+            // 查询数据
+            );
+            // layer.msg('搜索成功<br>此处为静态模拟数据，实际使用时换成真实接口即可');
+            return false; // 阻止默认 form 跳转
+        });
+    });
+    function query(param) {
+        $.ajax({
+            url:"${ctxPath}/${code}/query" , // 请求路径
+            type:"post" , //请求方式
+            //data: "username=jack&age=23",//请求参数
+            data:JSON.stringify(param),
+            dataType:"json",//设置接受到的响应数据的格式
+            contentType: 'application/json',
+            success:function (data) {
+                var temp = data.data
+                if (data.code===0){
+                    $("#vipProxy").text(fmoney(temp.vipProxy, 0));
+                    $("#OrdinaryAgent").text(fmoney(temp.OrdinaryAgent, 0));
+                    $("#rebateTotals").text(fmoney(temp.rebateTotals, 0));
+                    $("#todayDownNewTotal").text(fmoney(temp.todayDownNewTotal, 0));
+                    $("#todayDownTotals").text(fmoney(temp.todayDownTotals, 0));
+                    $("#todayRebates").text(fmoney(temp.todayRebates, 0));
+                }
+            },//响应成功后的回调函数
+            error:function () {
+                alert("出错啦...")
+            },//表示如果请求响应出现错误，会执行的回调函数
+        });
+    }
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if (data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '<option value="">请选择</option>';
+            for (var i = 0; i < type.length; i++) {
+                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+            }
+            $("#clientType").html(html);
+        }
+        // 渲染select
+        layui.use('form', function () {
+            var form = layui.form;
+            form.render("select");
+        });
+    }).start();
+</script>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

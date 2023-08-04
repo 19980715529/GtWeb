@@ -36,9 +36,18 @@ public class RechargeRecords extends BaseModel implements Delayed {
     private String msg;  // 三方反馈信息
     private String phone; // 电话
     private String operator; // 操作人员
-    private Integer gear; // 操作人员
+    private Integer gear; // 挡位id
 
     private Long giftGold; // 赠送金币
+    private String skuId; // 赠送金币
+
+    public String getSkuId() {
+        return skuId;
+    }
+
+    public void setSkuId(String skuId) {
+        this.skuId = skuId;
+    }
 
     public Long getGiftGold() {
         return giftGold;

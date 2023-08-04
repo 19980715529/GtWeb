@@ -46,7 +46,7 @@ day_reg
 
 new_list1
 ===
-	  SELECT id,CONVERT(VARCHAR(10), writedate, 120) writedate,totalNewUser,totalNewRec,totalTourist,newRecUser,newExcUser,notRoom,drainCount,undrainCount 
+	  SELECT id,CONVERT(VARCHAR(10), writedate, 120) writedate,totalNewUser,totalNewRec,totalTourist,newRecNum,newExcUser,notRoom,drainCount,undrainCount 
         FROM [QPGameRecordDB].[dbo].[DailyDataMonitorRecords] where 1=1
 	  @if(!isEmpty(StartTime_datelt)){
 	  	and DATEDIFF(day, #{StartTime_datelt}, writedate)>=0

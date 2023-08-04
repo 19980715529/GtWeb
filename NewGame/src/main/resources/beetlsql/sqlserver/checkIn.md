@@ -14,7 +14,7 @@ list_details
 ===
     select a.UserID,a.CheckDays,b.Amount,b.LogTime 
     from QPGameUserDB.dbo.CheckIn_PlayerCheckInfo as a 
-    join QPGameRecordDB.dbo.AA_ZZ_Log_PropChange as b on a.UserID=b.User_Id
+    join QPGameUserDB.dbo.AA_ZZ_Log_PropChange as b on a.UserID=b.User_Id
     join QPGameUserDB.dbo.AccountsInfo as c on a.UserID = c.UserID
     where ChangeType_Id=216 
     @if(!isEmpty(clientType)){

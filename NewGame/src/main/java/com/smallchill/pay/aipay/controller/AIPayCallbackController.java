@@ -59,7 +59,6 @@ public class AIPayCallbackController extends BaseController implements ConstShir
                 return "ok";
             }
             successRecExecuted(orderNum,rechargeRecords);
-//            }
         }else if (status==2){
             // 从延迟队列中移除并且更新状态
             failRecExecuted(rechargeRecords);

@@ -12,11 +12,12 @@
 
     function initGrid(){
         var grid_url = ctx+"/${code}/list";//查询列表接口
-        var _colnames=["id","客服名称", "账号/地址"];
+        var _colnames=["id","客服名称", "账号/地址","是否开启"];
         var _colmodel=[
             {name:"id",sortable: false,hidden:true},
             {name:"name",sortable: false},
-            {name:"resources", sortable:false}
+            {name:"resources", sortable:false},
+            {name:"isOpen", sortable:false,formatter:rowShow}
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -30,6 +31,17 @@
             rowNum:100,
             height: 'auto'
         });
+    }
+    function rowShow(cellvalue,options,rowObject) {
+        var html = "";
+        if(options.colModel.name ==='isOpen') {
+            if(cellvalue == 1){
+                html = "开启";
+            }else if (cellvalue == 0){
+                html = "关闭";
+            }
+        }
+        return html;
     }
 </script>
 <!-- 配置grid -->

@@ -6,12 +6,14 @@ import com.alibaba.fastjson.TypeReference;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.utils.RateLimit;
+import com.smallchill.core.annotation.Before;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Db;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.pay.core.intercept.PayValidator;
 import com.smallchill.pay.payplus.model.PayPlus;
 import com.smallchill.pay.payplus.model.PhpPayPlus;
 import com.smallchill.pay.payplus.utils.PayPlusUtils;
@@ -55,6 +57,7 @@ public class PayPlusController extends BaseController implements ConstShiro {
      */
     @PostMapping("/recharge")
     @Transactional
+    @Before(PayValidator.class)
     @RateLimit(limit = 1,period = 30)
     public AjaxResult recharge(){
         RechargeRecords rechargeRecords=mapping("recharge", RechargeRecords.class);

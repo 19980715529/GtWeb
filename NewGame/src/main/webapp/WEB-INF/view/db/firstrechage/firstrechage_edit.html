@@ -21,7 +21,7 @@
                 </tr>
                 <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送数量: </td>
-                    <td><input type="text" name="firstrechage.give_gold" value="${firstrechage.giveNum}" /></td>
+                    <td><input type="text" name="firstrechage.give_gold" value="${firstrechage.give_gold}" /></td>
                 </tr>
                 <tr>
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">赠送类型: </td>
@@ -29,6 +29,10 @@
                         <input type="radio" name="firstrechage.type" value="2" ${firstrechage.type==2?"checked":""}>转盘次数</input>
                         <input type="radio" name="firstrechage.type" value="1" ${firstrechage.type==1?"checked":""}>金币数量</input>
                     </td>
+                </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">商品id: </td>
+                    <td><input type="text" name="firstrechage.skuId" value="${firstrechage.skuId}" /></td>
                 </tr>
                 </tbody>
             </table>

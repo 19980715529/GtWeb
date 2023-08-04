@@ -282,6 +282,7 @@ public class RechargeExchangeCommon {
             // 修改
         }else if (rechargeRecords.getIsFirstCharge()==0){
             // 充值充值挡位 recharge_gear
+            LOGGER.error(rechargeRecords.getGear());
             Map gear = commonService.getInfoByOne("recharge_gear.find_gear_by_id", CMap.init().set("id", rechargeRecords.getGear()));
             JSONObject gears = JSONObject.parseObject(JSON.toJSONString(gear));
             // 设置充值金额

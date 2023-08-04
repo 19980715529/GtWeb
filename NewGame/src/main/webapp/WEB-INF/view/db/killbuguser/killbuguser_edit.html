@@ -8,25 +8,45 @@
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最小充值: </td>
 					<td><input name="killbuguser.minRecharge" value="${killbuguser.minRecharge!0}" class="form-control"/>
-						<input type="hidden" name="killbuguser.id" value="${killbuguser.id!}"/>大于设定值
+						<input type="hidden" name="killbuguser.id" value="${killbuguser.id!}"/>大于等于
 					</td>
 				</tr>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大充值: </td>
-					<td><input name="killbuguser.maxRecharge" value="${killbuguser.maxRecharge!0}" class="form-control"/>小于和等于
+					<td><input name="killbuguser.maxRecharge" value="${killbuguser.maxRecharge!0}" class="form-control"/>小于
 					</td>
 				</tr>
 				<tr>
-					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大输赢: </td>
-					<td><input name="killbuguser.winScoreMax" value="${killbuguser.winScoreMax!0}" class="form-control"/></td>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当日最小充值: </td>
+					<td><input name="killbuguser.TodayMinRechange" value="${killbuguser.TodayMinRechange!0}" class="form-control"/>大于和等于
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当日总输赢: </td>
+					<td><input name="killbuguser.ToDayScore" value="${killbuguser.ToDayScore!0}" class="form-control"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">总输赢: </td>
+					<td><input name="killbuguser.TotalScore" value="${killbuguser.TotalScore!0}" class="form-control"/>
+					</td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">当日点控次数: </td>
+					<td><input name="killbuguser.pointControlNum" value="${killbuguser.pointControlNum!0}" class="form-control"/></td>
 				</tr>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">点控次数: </td>
-					<td><input name="killbuguser.pointControlNum" value="${killbuguser.pointControlNum!0}" class="form-control"/></td>
+					<td><input name="killbuguser.TotalControlNum" value="${killbuguser.TotalControlNum!0}" class="form-control"/>
+					</td>
 				</tr>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">作弊率: </td>
 					<td><input name="killbuguser.cheatrate" value="${killbuguser.cheatRate!0}" class="form-control"/></td>
+				</tr>
+				<tr>
+					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">作弊控制值: </td>
+					<td><input name="killbuguser.CheatValue" value="${killbuguser.CheatValue!0}" class="form-control"/></td>
 				</tr>
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最小作弊值: </td>
@@ -36,10 +56,10 @@
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大作弊值: </td>
 					<td><input name="killbuguser.cheatvaluepercentmax" value="${killbuguser.cheatValuePercentMax!0}" class="form-control"/></td>
 				</tr>
-				<tr>
-					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大兑换: </td>
-					<td><input name="killbuguser.maxExchange" value="${killbuguser.maxExchange!0}" class="form-control"/>小于和等于</td>
-				</tr>
+<!--				<tr>-->
+<!--					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">最大兑换: </td>-->
+<!--					<td><input name="killbuguser.maxExchange" value="${killbuguser.maxExchange!0}" class="form-control"/>小于和等于</td>-->
+<!--				</tr>-->
 				<tr>
 					<td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">是否启用: </td>
 					<td>

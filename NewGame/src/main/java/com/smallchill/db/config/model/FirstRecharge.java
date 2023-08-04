@@ -23,4 +23,6 @@ public class FirstRecharge extends BaseModel {
     private Integer sort; //排序
     private Long give_gold; // 赠送的数量
     private Integer type; //赠送类型 1：金币 2：转盘
+    private Integer isDel; // 是否删除
+    private String skuId; // 商品id
 }
