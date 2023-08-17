@@ -12,7 +12,7 @@ all_list
 list_details
 ===
     select a.Log_Id id,a.User_Id,a.Amount,a.LogTime from [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] as a join [QPGameUserDB].[dbo].[AccountsInfo] as b on a.User_Id=b.UserID
-    where a.Prop_Id=1
+    where a.Prop_Id=1 and ChangeType_Id=220
     @if(!isEmpty(clientType)){
         @if(clientType != '-1'){
             and b.ClientType=#{clientType}

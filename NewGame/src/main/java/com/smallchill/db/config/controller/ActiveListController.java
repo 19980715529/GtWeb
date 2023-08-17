@@ -6,8 +6,10 @@ import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.cache.CacheKit;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.db.config.model.ActiveList;
 import com.smallchill.game.service.CommonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,9 +116,9 @@ public class ActiveListController extends BaseController implements ConstShiro {
     @RequestMapping(KEY_REMOVE)
     @Permission(ADMINISTRATOR)
     public AjaxResult remove(@RequestParam String ids,ModelMap mm) {
-        int cnt =Blade.create(ActiveList.class).deleteByIds(ids);
+        boolean temp = Blade.create(ActiveList.class).updateBy("isOpen=0", "id IN (#{join(ids)})", CMap.init().set("ids", Convert.toIntArray(ids)));
         mm.put("code",CODE);
-        if (cnt > 0) {
+        if (temp) {
             CacheKit.removeAll(SYS_CACHE);
             return success(DEL_SUCCESS_MSG);
         } else {

@@ -2,6 +2,12 @@ package com.smallchill.game.player.controller;
 
 import java.util.Map;
 
+import com.smallchill.common.vo.ShiroUser;
+import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
+import com.smallchill.core.toolbox.support.Convert;
+import com.smallchill.system.model.UserPack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -30,6 +36,18 @@ public class PlayerOnlineLogController extends BaseController implements ConstSh
 	@DoControllerLog(name="进入在线玩家列表页面")
 	@RequestMapping(KEY_PLAYER_ONLINE_LIST)
 	public String onlinelist(ModelMap mm) {
+		ShiroUser user = ShiroKit.getUser();
+		Integer id =(Integer) user.getId();
+		// 查询包id
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+		if (pack!=null){
+			String clientType = pack.getClientType();
+			Integer[] ids = Convert.toIntArray(clientType);
+			mm.put("clientType", ids[0]);
+		}else {
+			mm.put("clientType", -9);
+		}
 		mm.put("code", CODE);
 		return BASE_PATH + "player_online_list.html";
 	}

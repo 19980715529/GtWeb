@@ -5,8 +5,8 @@ new_recharge_log
 	 and r.userId =#{UserID}
 	@}
 	  @if(!isEmpty(OrderID)){
-	 and r.orderNumber =#{OrderID}
-	@}
+	    and r.orderNumber =#{OrderID}
+    @}
 	  @if(!isEmpty(ChannelID)){
 	 and r.channelPid =#{ChannelID}
 	@}
@@ -20,7 +20,9 @@ new_recharge_log
         and r.isThatTay=#{recType}
     @}
     @if(!isEmpty(clientType)){
-        and r.packageName=#{clientType}
+        @if(clientType!='-1'){
+            and r.packageName=#{clientType}
+        @}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,r.createTime,#{createTime})<=0
@@ -126,7 +128,9 @@ recharge_unstatistics
     	 and a.userId =#{UserID}
     @}
     @if(!isEmpty(clientType)){
-    	 and packageName =#{clientType}
+        @if(clientType!='-1'){
+            and packageName =#{clientType}
+        @}
     @}
     @if(!isEmpty(orderStatus)){
     	 and orderStatus =#{orderStatus}

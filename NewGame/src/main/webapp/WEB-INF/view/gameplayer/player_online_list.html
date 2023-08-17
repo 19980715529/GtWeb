@@ -5,7 +5,7 @@
 	var ctx = "${ctxPath}";
 	var grid_selector = "#grid-table";
 	var pager_selector = "#grid-pager";
-
+	var _filter='{"PackageName":"${clientType}"}';
 	$(function() {
 		backDom('玩家在线列表','play_user_online_list');
 		initGrid();
@@ -51,7 +51,7 @@
 			colNames : _colnames,
 			colModel : _colmodel,
 			pager : pager_selector,
-			postData : {},
+			postData : {where:_filter},
 			multiselect : false,
 			rownumbers : false,
 			rowNum:100,
@@ -199,9 +199,13 @@
 	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
         	var type = data.data;
-        	var html = '<option value="">请选择</option>';
-        	for (var i = 0; i < type.length; i++) {
-				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			var html = ''; //
+			for (var i = 0; i < type.length; i++) {
+				if (type[i]==-1){
+					html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+				}else {
+					html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+				}
 			}
         	$("#ptypeid").html(html);
         }

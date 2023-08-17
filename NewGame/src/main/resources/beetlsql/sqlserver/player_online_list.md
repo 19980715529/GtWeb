@@ -93,7 +93,9 @@ new_list
 		 and t.ServerID =#{ServerID}
 	  @}
 	  @if(!isEmpty(PackageName)){
-		 and t.clientType =#{PackageName}
+        @if(PackageName!='-1'){
+            and t.clientType =#{PackageName}
+        @}
 	  @}
 	  @if(!isEmpty(RegisterDate_dategt)){
 	  	and DATEDIFF(day, #{RegisterDate_dategt}, t.RegisterDate)>=0

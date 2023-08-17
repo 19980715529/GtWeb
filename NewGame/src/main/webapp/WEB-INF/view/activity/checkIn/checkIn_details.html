@@ -113,9 +113,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="-1">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }

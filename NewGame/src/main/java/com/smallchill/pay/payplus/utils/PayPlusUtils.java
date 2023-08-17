@@ -72,7 +72,7 @@ public class PayPlusUtils {
         // 账号,cpf
         map.put("accountNo",exchangeReview.getBankNumber());
         // 银行代码
-        map.put("bankCode","cpf");
+        map.put("bankCode",params.get("bankCode"));
         // 备注
         String email = RechargeExchangeCommon.RandomEmail();
         // email:520155@gmail.com/phone:9784561230/mode:pix/cpf:555555555(必须是真实的)

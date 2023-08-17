@@ -3,7 +3,14 @@ package com.smallchill.test;
 import com.smallchill.system.treasure.utils.Utils;
 import com.smallchill.test.base.BaseTest;
 import org.junit.Test;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
@@ -52,5 +59,21 @@ public class Demo15 extends BaseTest {
         BigDecimal gold=new BigDecimal("9100000");
         BigDecimal divide = gold.divide(new BigDecimal(10000), 0, RoundingMode.FLOOR);
         System.out.println(divide);
+    }
+
+    @Test
+    public void testReaderFile() throws IOException {
+        ResourceLoader resourceLoader = new DefaultResourceLoader();
+        Resource resource = resourceLoader.getResource("classpath:google.json");
+        InputStream is = resource.getInputStream();
+        InputStreamReader isr = new InputStreamReader(is);
+        BufferedReader br = new BufferedReader(isr);
+        String data = null;
+        while((data = br.readLine()) != null) {
+            System.out.println(data);
+        }
+        br.close();
+        isr.close();
+        is.close();
     }
 }

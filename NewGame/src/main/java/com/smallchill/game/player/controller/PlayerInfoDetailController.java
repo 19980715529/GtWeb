@@ -113,29 +113,26 @@ public class PlayerInfoDetailController extends BaseController implements ConstS
 		// 获取用户充值返利奖励金币
 //		Integer rebateGold = Db.queryInt("select isnull(sum(Data),0) from [QPGameRecordDB].[dbo].[AA_ZZ_Log_CodeRebateHistory] where UserId=#{UserID} and DataType=1", paras);
 //		mm.put("rebateGold",rebateGold);
-		// 白银转盘金币领取
+		// 白银转盘金币领取 silver
 		Map onlineData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
-				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=1 and Fake=0", paras);
-		mm.put("onlineData",onlineData);
-		// 黄金转盘金币领取
-		Map dailyData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
 				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=0 and Fake=0", paras);
+		mm.put("onlineData",onlineData);
+		// 黄金转盘金币领取 gold
+		Map dailyData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
+				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=1 and Fake=0", paras);
 		mm.put("dailyData",dailyData);
-		// 钻石
+		// 钻石 diamond
 		Map codeData = Db.selectOne("select isnull(sum(Award),0) gold,count(1) num from " +
-				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=3 and Fake=1", paras);
+				"[QPGameRecordDB].[dbo].[Turntable_History] where UserID=#{UserID} and Type=2 and Fake=1", paras);
 		mm.put("codeData",codeData);
 		// 分析代理金币
 		Map shareMap = Db.selectOne("select isnull(sum(Amount),0) gold from [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] where User_Id=#{UserID} and ChangeType_Id in (212,213)", paras);
-		// 邮件数据
-		Map mail = commonService.getInfoByOne("player_search.mail_info", paras);
 		mm.put("share",Long.parseLong(shareMap.get("gold").toString()));
 		mm.put("reMobile", reMobile);
 		mm.put("LastLogonMachine", LastLogonMachine);
 		mm.put("sumMachine",MacqueryInt);
 		mm.put("reLastLogonIP", reLastLogonIP);
 		mm.put("sumLastLogonIP",IPqueryInt);
-		mm.put("mail",mail);
 
 		Changeviplevel changeviplevel = Blade.create(Changeviplevel.class).findFirstBy("account='"+accounts+"'", null);
 		mm.put("code", CODE);

@@ -49,7 +49,7 @@
         $("#cid").val(text.split("-")[1])
     })
     // 获取包来源列表
-    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfos", function (data) {
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;

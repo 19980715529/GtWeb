@@ -49,8 +49,32 @@
 <table class="layui-hide" id="ID-table-demo-search"></table>
 <script>
     var ctx = "${ctxPath}";
-    var _filter = '{"StartTime":"' + getCurrentMonthFirst().format('yyyy-MM-dd') + '","EndTime":"' + getBeforeDate(0) + '","clientType":"-1"}';
+
     console.log(ctx + "/${code}/list")
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if (data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = ''; //
+            for (var i = 0; i < type.length; i++) {
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
+            }
+            $("#clientType").html(html);
+        }
+        // 渲染select
+        layui.use('form', function () {
+            var form = layui.form;
+            form.render("select");
+        });
+    }).start();
+
+    var _filter = '{"StartTime":"' + getCurrentMonthFirst().format('yyyy-MM-dd') + '","EndTime":"' + getBeforeDate(0) + '","clientType":"${clientType}"}';
+
     layui.use(function () {
         var laydate = layui.laydate;
         // 日期范围 - 左右面板独立选择模式
@@ -120,7 +144,7 @@
                 , {field: 'rechargeArpu', title: '充值ARPU', sort: true, width: 150}
                 , {field: 'ARPPU', title: 'ARPPU', sort: true, width: 150}
                 , {field: 'RewardCoins', title: '金币奖励', sort: true, width: 150}
-                , {field: 'turntableTotal', title: '转盘使用总次数', sort: true, width: 150}
+                // , {field: 'turntableTotal', title: '转盘使用总次数', sort: true, width: 150}
                 , {field: 'ttl', title: '吞吐率', sort: true, width: 150}
                 , {field: 'maxonline', title: '最高在线', sort: true, width: 150}
                 , {field: 'payUserNum', title: '付费登录', sort: true, width: 150}
@@ -169,23 +193,7 @@
             return false; // 阻止默认 form 跳转
         });
     });
-    // 获取平台列表
-    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
-        console.log(data);
-        if (data.code === 0 && BladeTool.isNotEmpty(data.data)) {
-            var type = data.data;
-            var html = '<option value="-1">请选择</option>';
-            for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
-            }
-            $("#clientType").html(html);
-        }
-        // 渲染select
-        layui.use('form', function () {
-            var form = layui.form;
-            form.render("select");
-        });
-    }).start();
+
 </script>
 <!-- 引入列表页所需js -->
 @include("/common/_listscript.html"){}

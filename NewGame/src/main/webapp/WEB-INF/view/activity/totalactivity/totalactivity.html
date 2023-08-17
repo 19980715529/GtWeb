@@ -4,7 +4,7 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"${clientType}"}';
 
     $(function() {
         backDom('整体数据','totalactivity');
@@ -15,7 +15,7 @@
     function initGrid() {
         var grid_url = ctx + "/totalactivity/list";//查询列表接口
         var _colnames=["id","时间", "赠送总金币","首充赠送总金币","首充赠送总人数","签到赠送总金币","签到赠送总人数","转盘活动赠送总金币","转盘活动赠送总人数",
-            "每日回馈领取总金币","每日回馈领取总人数","新手任务赠送总金币","新手任务赠送总人数"];
+            "每日回馈领取总金币","每日回馈领取总人数","新手任务赠送总金币","新手任务赠送总人数","每日任务完成数量","每日任务完成金币"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -41,7 +41,9 @@
 
             {name:"noviceTaskUser",  sortable:false},
 
-            // {name:"id",sortable:false,formatter:genLink},
+            {name:"dailyTasksCount",sortable:false},
+
+            {name:"dailyTasksAmount",sortable:false},
         ];
 
         jQuery(grid_selector).jqGrid({
@@ -123,9 +125,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="-1">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }

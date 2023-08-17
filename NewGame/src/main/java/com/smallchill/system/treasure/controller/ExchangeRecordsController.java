@@ -2,16 +2,22 @@ package com.smallchill.system.treasure.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.smallchill.common.base.BaseController;
+import com.smallchill.common.vo.ShiroUser;
 import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.CharsetKit;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.kit.URLKit;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.system.model.UserPack;
 import com.smallchill.system.service.ExchangeReviewService;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.Utils;
@@ -44,8 +50,20 @@ public class ExchangeRecordsController extends BaseController implements ConstSh
      */
     @DoControllerLog(name="进入兑换界面")
     @RequestMapping("/")
-    @Permission(ADMINISTRATOR)
+    @Permission({ADMINISTRATOR,ADMIN})
     public String records(ModelMap mm){
+        ShiroUser user = ShiroKit.getUser();
+        Integer id =(Integer) user.getId();
+        // 查询包id
+        Blade blade = Blade.create(UserPack.class);
+        UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+        if (pack!=null){
+            String clientType = pack.getClientType();
+            Integer[] ids = Convert.toIntArray(clientType);
+            mm.put("clientType", ids[0]);
+        }else {
+            mm.put("clientType", -9);
+        }
         mm.put("code",CODE);
         return "/modules/platform/plog/platform_exchange_records.html";
     }

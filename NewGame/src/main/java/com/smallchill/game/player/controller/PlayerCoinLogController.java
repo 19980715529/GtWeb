@@ -309,22 +309,28 @@ public class PlayerCoinLogController extends BaseController implements ConstShir
 		// 兑换统计
         Map exchange = commonService.getInfoByOne("player_gold_change_log.new_exchange", parseObject2);
 		//银行取款
-        Object withdrawals = commonService.getInfoByOne("player_gold_change_log.bank_withdrawals", parseObject2);
+//        Object withdrawals = commonService.getInfoByOne("player_gold_change_log.bank_withdrawals", parseObject2);
         //银行存款
-        Object deposit = commonService.getInfoByOne("player_gold_change_log.bank_deposit", parseObject2);
+//        Object deposit = commonService.getInfoByOne("player_gold_change_log.bank_deposit", parseObject2);
 		// 转盘获得金币
-		Map turntable = commonService.getInfoByOne("player_gold_change_log.rotary_give_gold", parseObject2);
+//		Map turntable = commonService.getInfoByOne("player_gold_change_log.rotary_give_gold", parseObject2);
 		// 邮件金币变动
 		Map email = commonService.getInfoByOne("player_gold_change_log.email_give_gold", parseObject2);
+		// 每日回馈 Daily feedback
+		Map agent = commonService.getInfoByOne("player_gold_change_log.agent_gold", parseObject2);
+		// 奖励金币 award
+		Map awardGold = commonService.getInfoByOne("player_gold_change_log.award_gold", parseObject2);
 		Map m = new HashMap();
         m.put("send", send);//赠送统计
         m.put("receive", receive);//接收统计
         m.put("recharge", recharge);//充值统计
         m.put("exchanges", exchange);//兑换统计
-        m.put("withdrawals", withdrawals);//银行取款
-        m.put("deposit", deposit);//银行存款
-		m.put("turntable",turntable); // 转盘获得金币
-		m.put("emailList",email); // 转盘获得金币
+//        m.put("withdrawals", withdrawals);//银行取款
+//        m.put("deposit", deposit);//银行存款
+//		m.put("turntable",turntable); // 转盘获得金币
+		m.put("emailList",email); // 邮件获得金币
+		m.put("agent",agent); //每日回馈金币
+		m.put("awardGold",awardGold); //奖励金币
         return json(m);
     }
 

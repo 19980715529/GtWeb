@@ -4,7 +4,7 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"${clientType}"}';
 
     $(function() {
         backDom('首充数据统计','firstcharge');
@@ -14,7 +14,7 @@
 
     function initGrid() {
         var grid_url = ctx + "/firstcharge/list";//查询列表接口
-        var _colnames=["id","时间", "首充金额","首充人数","首充30元人数","首充50元人数","首充100元人数","共计赠送金币","详情"];
+        var _colnames=["id","时间", "首充金额","首充人数","首充挡位一人数","首充挡位二人数","首充挡位三人数","共计赠送金币","详情"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -22,11 +22,11 @@
             //
             {name:"firstRecUser",  sortable:false},
             //
-            {name:"firstRec30", sortable:false},
+            {name:"firstRec1", sortable:false},
             //
-            {name:"firstRec50", sortable:false},
+            {name:"firstRec2", sortable:false},
             //
-            {name:"firstRec100", sortable:false},
+            {name:"firstRec3", sortable:false},
             //
             {name:"firstRechargeAmount",  sortable:false},
             //
@@ -41,8 +41,8 @@
             jsonReader:{id:"id"},
             pager : pager_selector,
             postData : {where:_filter,sort: "createTime", order: "desc"},
-            // multiselect : true, // 是否显示勾选框
-            // rownumbers : true, // 是否出现排序
+            multiselect : false, // 是否显示勾选框
+            rownumbers : true, // 是否出现排序
             rowNum:100,
             height: 'auto'
         });
@@ -114,9 +114,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="-1">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }

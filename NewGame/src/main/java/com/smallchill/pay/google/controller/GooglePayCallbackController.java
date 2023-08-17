@@ -4,25 +4,31 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.androidpublisher.AndroidPublisher;
 import com.google.api.services.androidpublisher.AndroidPublisherScopes;
 import com.google.api.services.androidpublisher.model.ProductPurchase;
+import com.google.api.services.androidpublisher.model.SubscriptionPurchase;
 import com.smallchill.common.base.BaseController;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
-import com.smallchill.pay.google.model.GooglePayDto;
 import com.smallchill.system.service.RechargeRecordsService;
 import com.smallchill.system.treasure.model.RechargeRecords;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.GeneralSecurityException;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,25 +42,11 @@ public class GooglePayCallbackController extends BaseController implements Const
 
     //    packageName为应用程序包名、productId商品id、purchaseToken谷歌返回的收据
     @PostMapping("/recharge")
-    public AjaxResult checkOrder(@RequestBody GooglePayDto googlePayDto) {
+    public AjaxResult checkOrder(@RequestParam String packageName,@RequestParam String productId,@RequestParam String purchaseToken) {
         try {
+            LOGGER.error(packageName,productId,purchaseToken);
             //使用服务帐户Json文件获取Google凭据
-            List<String> scopes = new ArrayList<>();
-            scopes.add(AndroidPublisherScopes.ANDROIDPUBLISHER);
-            ResourceLoader resourceLoader = new DefaultResourceLoader();
-            Resource resource = resourceLoader.getResource("classpath:static/刚下载的json文件，这里放到了static目录下");
-            GoogleCredential credential = GoogleCredential.fromStream(resource.getInputStream())
-                    .createScoped(scopes);
-            // 使用谷歌凭据和收据从谷歌获取购买信息
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            JacksonFactory jsonFactory = new JacksonFactory();
-            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential)
-                    .setApplicationName("应用程序名").build();
-            AndroidPublisher.Purchases purchases = publisher.purchases();
-            final AndroidPublisher.Purchases.Products.Get request = purchases.products().get(googlePayDto.getPackageName(),
-                    googlePayDto.getProductId(),googlePayDto.getPurchaseToken());
-            System.out.println("==============="+request+"================");
-            final ProductPurchase purchase = request.execute();
+            ProductPurchase purchase = iniProductPurchase(packageName, productId, purchaseToken);
             /**
              * 返回参数
              * {
@@ -100,5 +92,62 @@ public class GooglePayCallbackController extends BaseController implements Const
             LOGGER.error(e.getMessage());
             return fail("服务器异常");
         }
+    }
+
+    //初始化AndroidPublisher
+
+    /**
+     * p12
+     */
+    private SubscriptionPurchase getP12(String packageName,String subscriptionId,String purchaseToken){
+        try {
+            ClassPathResource classPathResource = new ClassPathResource("googleP12");
+            InputStream input = classPathResource.getInputStream();
+            HttpTransport transport = GoogleNetHttpTransport.newTrustedTransport();
+            PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(
+                    SecurityUtils.getPkcs12KeyStore(),
+                    input, //文件流
+                    "notasecret", "privatekey", "notasecret");
+            GoogleCredential credential = new GoogleCredential.Builder()
+                    .setTransport(transport).setJsonFactory(JacksonFactory.getDefaultInstance())
+                    .setServiceAccountId("serviceAccountEmail") // 替换掉serviceAccountEmail
+                    .setServiceAccountScopes(AndroidPublisherScopes.all())
+                    .setServiceAccountPrivateKey(privateKey).build();
+            AndroidPublisher publisher = new AndroidPublisher.Builder(transport,
+                    JacksonFactory.getDefaultInstance(), credential).build();
+            AndroidPublisher.Purchases.Subscriptions subscriptions = publisher.purchases().subscriptions();
+            AndroidPublisher.Purchases.Subscriptions.Get subscription = subscriptions.get(packageName, subscriptionId, purchaseToken);
+            SubscriptionPurchase execute = subscription.execute();
+            return execute;
+        } catch (Exception e) {
+            LOGGER.info("[请求谷歌api出错了]");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private ProductPurchase iniProductPurchase(String packageName,String subscriptionId,String purchaseToken) {
+        try {
+            //使用服务帐户Json文件获取Google凭据
+            List<String> scopes = new ArrayList<>();
+            scopes.add(AndroidPublisherScopes.ANDROIDPUBLISHER);
+            ResourceLoader resourceLoader = new DefaultResourceLoader();
+            Resource resource = resourceLoader.getResource("classpath:google.json");
+            GoogleCredential credential = GoogleCredential.fromStream(resource.getInputStream())
+                    .createScoped(scopes);
+//        使用谷歌凭据和收据从谷歌获取购买信息
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            JacksonFactory jsonFactory = new JacksonFactory();
+            AndroidPublisher publisher = new AndroidPublisher.Builder(httpTransport, jsonFactory, credential)
+                    .setApplicationName("应用程序名").build();
+            AndroidPublisher.Purchases purchases = publisher.purchases();
+            final AndroidPublisher.Purchases.Products.Get request = purchases.products().get(packageName, subscriptionId,purchaseToken);
+            return request.execute();
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return null;
+        }
+
+
     }
 }

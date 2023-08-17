@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.smallchill.system.model.UserPack;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -161,6 +162,17 @@ public class UserController extends BaseController implements ConstShiro{
 			return error(UPDATE_FAIL_MSG);
 		}
 	}
+	@DoControllerLog(name="进入包分配界面")
+	@RequestMapping("/userEditClientType/{id}")
+	@Permission({ ADMINISTRATOR, ADMIN })
+	public String userEditClientType(@PathVariable Integer id,ModelMap mm){
+		// 查询所有包
+		System.out.println("用户id:"+id);
+		// 查询用户拥有的包
+		mm.put("uid",id);
+		return BASE_PATH + "user_edit_clientType.html";
+	}
+
 
 	@RequestMapping(KEY_VIEW + "/{id}")
 	@Permission({ ADMINISTRATOR, ADMIN })
@@ -482,6 +494,36 @@ public class UserController extends BaseController implements ConstShiro{
 		mm.put("roleId", roleId);
 		mm.put("name", Func.decodeUrl(name));
 		return BASE_PATH + "user_roleassign.html";
+	}
+
+	@Json
+	@RequestMapping("/saveClientType")
+	public AjaxResult saveClientType(){
+		// 判断用户包是否存在
+		Blade blade = Blade.create(UserPack.class);
+		String ids = getParameter("ids");
+		String uid = getParameter("uid");
+		boolean temp = blade.isExist("select * from user_pack where uid=#{uid}", CMap.init().set("uid", uid));
+		CMap map = CMap.init().set("uid", uid).set("clientType", ids);
+		if (!temp){
+			// 存在进行添加
+			int i = blade.saveRtId(map);
+			if (i>0) {
+				CacheKit.removeAll(SYS_CACHE);
+				return success("添加成功");
+			} else {
+				return error("添加失败");
+			}
+		}else {
+			// 不存在修改
+			boolean b = blade.updateBy("clientType=#{clientType}", "uid=#{uid}", map);
+			if (b) {
+				CacheKit.removeAll(SYS_CACHE);
+				return success("修改成功");
+			} else {
+				return error("修改失败");
+			}
+		}
 	}
 	
 	@Json

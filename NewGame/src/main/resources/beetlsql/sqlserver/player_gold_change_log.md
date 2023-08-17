@@ -26,6 +26,10 @@ new_gold_change_log
 	  		and p.ChangeType_Id in (206,211)
 	  	@}else if(ChangeType_Id=='-9'){
             and p.ChangeType_Id in (209,210)
+        @}else if(ChangeType_Id=='-11'){
+            and p.ChangeType_Id in (214,220,223,217,218,219,222)
+        @}else if(ChangeType_Id=='-10'){
+            and p.ChangeType_Id in (212,213)
         @}else{
             and p.ChangeType_Id =#{ChangeType_Id}
         @}
@@ -2560,7 +2564,7 @@ new_recharge
 	SELECT isnull(SUM(Amount),0) TScore,'-4' as ServerId
     	,'充值' as RoomName
     	FROM [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] as p with (nolock)
-    	where p.ChangeType_Id  in (5,207,215)
+    	where p.ChangeType_Id  in (5,207,221)
     	@if(!isEmpty(UserID)){
     	 and p.User_Id =#{UserID}
     	@}
@@ -2634,7 +2638,7 @@ bank_deposit
 	  @}
 rotary_give_gold
 ===
-    select isnull(SUM(Award),0) TScore,'-7' as ServerId,'转盘金币奖励' as RoomName FROM [QPGameRecordDB].[dbo].[Turntable_History] as p with (nolock) 
+    select isnull(SUM(Award),0) TScore,'-7' as ServerId,'转盘' as RoomName FROM [QPGameRecordDB].[dbo].[Turntable_History] as p with (nolock) 
     where Fake=1
     @if(!isEmpty(UserID)){
         and p.UserID =#{UserID}
@@ -2645,7 +2649,34 @@ rotary_give_gold
 	  @if(!isEmpty(EndTime)){
 		 and CONVERT(VARCHAR(100), p.Time, 20) <= CONVERT(VARCHAR(100), #{EndTime}, 20)
 	  @}
-        	  
-shuiguo777
+
+agent_gold
 ===
-    SELECT *  FROM  
+    SELECT isnull(SUM(Amount),0) TScore,'-10' as ServerId
+    	,'代理' as RoomName
+    	FROM [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] as p with (nolock)
+    	where p.ChangeType_Id in (212,213)
+    	@if(!isEmpty(UserID)){
+    	 and p.User_Id =#{UserID}
+    	@}
+	 @if(!isEmpty(BeginTime)){
+		 and CONVERT(VARCHAR(100), p.LogTime, 20) >= CONVERT(VARCHAR(100), #{BeginTime}, 20)
+	  @}
+	  @if(!isEmpty(EndTime)){
+		 and CONVERT(VARCHAR(100), p.LogTime, 20) <= CONVERT(VARCHAR(100), #{EndTime}, 20)
+	  @}
+award_gold
+===
+    SELECT isnull(SUM(Amount),0) TScore,'-11' as ServerId
+    	,'奖励金币' as RoomName
+    	FROM [QPGameUserDB].[dbo].[AA_ZZ_Log_PropChange] as p with (nolock)
+    	where p.ChangeType_Id in (214,220,223,217,218,219,222)
+    	@if(!isEmpty(UserID)){
+    	 and p.User_Id =#{UserID}
+    	@}
+	 @if(!isEmpty(BeginTime)){
+		 and CONVERT(VARCHAR(100), p.LogTime, 20) >= CONVERT(VARCHAR(100), #{BeginTime}, 20)
+	  @}
+	  @if(!isEmpty(EndTime)){
+		 and CONVERT(VARCHAR(100), p.LogTime, 20) <= CONVERT(VARCHAR(100), #{EndTime}, 20)
+	  @}

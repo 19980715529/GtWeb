@@ -3,7 +3,7 @@
     var ctx="${ctxPath}";
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
-    var _filter = '{"type":"","clientType":"6","cid":""}';
+    var _filter = '{"type":"","clientType":"","cid":""}';
     var isAutoFlushTab=true;
     $(function(){
         // backDom('充值渠道管理','channellist');
@@ -89,11 +89,11 @@
 </div>
 <script>
     // 获取平台列表
-    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfos", function (data) {
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '';
+            var html = '<option value="">请选择</option>';
             for (var i = 0; i < type.length; i++) {
                 html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
             }

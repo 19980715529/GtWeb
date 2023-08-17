@@ -1,14 +1,19 @@
 package com.smallchill.game.statistics.controller;
 
 import com.smallchill.common.base.BaseController;
+import com.smallchill.common.vo.ShiroUser;
 import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
 import com.smallchill.core.constant.ConstShiro;
+import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.kit.HttpKit;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.system.model.UserPack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +37,26 @@ public class AddedRechargeStatisticsController extends BaseController implements
     @Autowired
     private CommonService commonService;
 
-    @DoControllerLog(name="进入用户充值统计页面")
+    @DoControllerLog(name="进入新增充值统计页面")
     @RequestMapping("/")
     public String index(ModelMap mm) {
+        ShiroUser user = ShiroKit.getUser();
+        Integer id =(Integer) user.getId();
+        // 查询包id
+        Blade blade = Blade.create(UserPack.class);
+        UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+        if (pack!=null){
+            String clientType = pack.getClientType();
+            Integer[] ids = Convert.toIntArray(clientType);
+            mm.put("clientType", ids[0]);
+        }else {
+            mm.put("clientType", -9);
+        }
         mm.put("code", CODE);
         return BASE_PATH + "newrecharge_statistics.html";
     }
 
-    @DoControllerLog(name="进入用户充值统计页面")
+    @DoControllerLog(name="进入新增充值详情统计页面")
     @RequestMapping("/details/{id}")
     public String details(@PathVariable Integer id, ModelMap mm) {
         mm.put("code", CODE);

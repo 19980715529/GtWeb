@@ -16,7 +16,9 @@ all_list
     from [QPGameUserDB].[dbo].[PlayerShare] as a) t 
     where 1=1
     @if(!isEmpty(clientType)){
-        and t.ClientType=#{clientType}
+        @if(clientType!='-1'){
+         and t.ClientType=#{clientType}
+        @}
     @}
     @if(!isEmpty(start_rebate)){
         and t.rebateTotal>=#{start_rebate}

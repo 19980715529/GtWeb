@@ -16,7 +16,7 @@ list_details
     from QPGameUserDB.dbo.CheckIn_PlayerCheckInfo as a 
     join QPGameUserDB.dbo.AA_ZZ_Log_PropChange as b on a.UserID=b.User_Id
     join QPGameUserDB.dbo.AccountsInfo as c on a.UserID = c.UserID
-    where ChangeType_Id=216 
+    where ChangeType_Id=223 
     @if(!isEmpty(clientType)){
         @if(clientType != '-1'){
             and c.ClientType=#{clientType}

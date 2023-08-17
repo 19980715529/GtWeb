@@ -1,0 +1,76 @@
+
+<script src="${ctxPath}/static/layui-v2.8.4/layui/layui.js"></script>
+<link href="${ctxPath}/static/layui-v2.8.4/layui/css/layui.css" rel="stylesheet">
+<!-- 给容器追加 class="layui-form-pane"，即可显示为方框风格 -->
+<form class="layui-form layui-form-pane" action="form.html">
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="title" autocomplete="off" placeholder="请输入" lay-verify="required" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典编码</label>
+        <div class="layui-input-block">
+            <input type="text" name="code" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">值</label>
+        <div class="layui-input-block">
+            <input type="text" name="value" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">额外值</label>
+        <div class="layui-input-block">
+            <input type="text" name="param" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">排序</label>
+        <div class="layui-input-block">
+            <input type="text" name="num" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">字典父编码</label>
+        <div class="layui-input-block">
+            <input type="password" name="pcode" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item" pane>
+        <label class="layui-form-label">是否禁用</label>
+        <div class="layui-input-block">
+            <input type="radio" name="isOpen" value="0" title="启用" checked>
+            <input type="radio" name="isOpen" value="1" title="禁用">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入内容" name="tips" class="layui-textarea"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <button class="layui-btn" lay-submit lay-filter="demo2">确认</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+<script>
+    layui.use(['form'], function(){
+        var form = layui.form;
+        var layer = layui.layer;
+        // 提交事件
+        form.on('submit(demo2)', function(data){
+            var field = data.field; // 获取表单字段值
+            // 显示填写结果，仅作演示用
+            layer.alert(JSON.stringify(field), {
+                title: '当前填写的字段值'
+            });
+            // 此处可执行 Ajax 等操作
+            return false; // 阻止默认 form 跳转
+        });
+    });
+</script>

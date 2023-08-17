@@ -1,0 +1,144 @@
+@layout("/common/_container.html"){
+<script src="${ctxPath}/static/layui-v2.8.4/layui/layui.js"></script>
+<link href="${ctxPath}/static/layui-v2.8.4/layui/css/layui.css" rel="stylesheet">
+<table class="layui-hide" id="ID-treeTable-demo"></table>
+<script type="text/html" id="TPL-treeTable-demo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+    </div>
+</script>
+<script type="text/html" id="TPL-treeTable-demo-tools">
+    <div class="layui-btn-container">
+        <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="addChild">新增</a>
+        <a class="layui-btn layui-btn-xs" lay-event="more">更多 <i class="layui-icon layui-icon-down"></i></a>
+    </div>
+</script>
+<script>
+    var ctx = "${ctxPath}";
+    layui.use(function(){
+        var treeTable = layui.treeTable;
+        var layer = layui.layer;
+        var dropdown = layui.dropdown;
+        // 渲染
+        var inst = treeTable.render({
+            elem: '#ID-treeTable-demo',
+            url: ctx+'/dict_data/list', // 此处为静态模拟数据，实际使用时需换成真实接口
+            tree: {
+                /*
+                // 异步加载子节点
+                async: {
+                  enable: true,
+                  url: '/static/json/treeTable/demo-async.json', // 此处为静态模拟数据，实际使用时需换成真实接口
+                  autoParam: ["parentId=id"]
+                }
+                */
+                // customName: {
+                //
+                // },
+            },
+            maxHeight: '501px',
+            toolbar: '#TPL-treeTable-demo',
+            cols: [[
+                {type: 'checkbox', fixed: 'left'},
+                {field: 'id', title: 'ID', width: 80, sort: true, fixed: 'left'},
+                {field: 'name', title: '字典名称', width: 180, fixed: 'left'},
+                {field: 'value', title: '字典参数'},
+                {field: 'param', title: '字典额外参数'},
+                {field: 'num', title: '排序', sort: true},
+                {field: 'pcode', title: '父编码'},
+                {field: 'isOpen', title: '是否启用'},
+                { fixed: "right", title: "操作", width: 181, align: "center", toolbar: "#TPL-treeTable-demo-tools"}
+            ]],
+            page: false
+            , request: {
+                pageName: 'page', // 页码的参数名称，默认：page
+                limitName: 'rows' // 每页数据条数的参数名，默认：limit
+            },
+            parseData: function (res) { // res 即为原始返回的数据
+                return {
+                    "code": res.code, // 解析接口状态
+                    "msg": res.msg, // 解析提示文本
+                    "count": res.data.records, // 解析数据长度
+                    "data": res.data.rows // 解析数据列表
+                };
+            }
+        });
+        // 表头工具栏工具事件
+        treeTable.on("toolbar(ID-treeTable-demo)", function (obj) {
+            var config = obj.config;
+            var tableId = config.id;
+            var status = treeTable.checkStatus(tableId);
+            // 获取选中行
+            if (obj.event === "getChecked") {
+                // if(!status.data.length) return layer.msg('无选中数据'); 添加
+                // console.log(status);
+                layer.open({
+                    type: 2, // page 层类型
+                    area: ['500px', '650px'],
+                    title: '添加',
+                    shade: 0.6, // 遮罩透明度
+                    shadeClose: true, // 点击遮罩区域，关闭弹层
+                    maxmin: true, // 允许全屏最小化
+                    anim: 0, // 0-6 的动画形式，-1 不开启
+                    content: ['${ctxPath}/dict_data/add','yes']
+                });
+            }
+        });
+        // 单元格工具事件
+        treeTable.on('tool('+ inst.config.id +')', function (obj) {
+            var layEvent = obj.event; // 获得 lay-event 对应的值
+            var trElem = obj.tr;
+            var trData = obj.data;
+            var tableId = obj.config.id;
+            if (layEvent === "detail") {
+                layer.msg("查看操作：" + trData.name);
+            } else if (layEvent === "addChild") {
+                var data = { id: Date.now(), name: "新节点" };
+                var newNode2 = treeTable.addNodes(tableId, {
+                    parentIndex: trData["LAY_DATA_INDEX"],
+                    index: -1,
+                    data: data
+                });
+            } else if (layEvent === "more") {
+                // 下拉菜单
+                dropdown.render({
+                    elem: this, // 触发事件的 DOM 对象
+                    show: true, // 外部事件触发即显示
+                    align: "right", // 右对齐弹出
+                    data: [
+                        {
+                            title: "修改积分",
+                            id: "edit"
+                        },
+                        {
+                            title: "删除",
+                            id: "del"
+                        }
+                    ],
+                    click: function (menudata) {
+                        if (menudata.id === "del") {
+                            layer.confirm("真的删除行么", function (index) {
+                                obj.del(); // 等效如下
+                                // treeTable.removeNode(tableId, trElem.attr('data-index'))
+                                layer.close(index);
+                            });
+                        } else if (menudata.id === "edit") {
+                            layer.prompt({
+                                value: trData.experience,
+                                title: "输入新的积分"
+                            }, function (value, index) {
+                                obj.update({ experience: value }); // 等效如下
+                                // treeTable.updateNode(tableId, trElem.attr('data-index'), {experience: value});
+                                layer.close(index);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

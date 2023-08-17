@@ -29,14 +29,14 @@
 
         jQuery(grid_selector).jqGrid({
             url:grid_url,
-            shrinkToFit : false,//适用于较少字段,响应式
+            shrinkToFit : true,//适用于较少字段,响应式
             colNames:_colnames,
             colModel:_colmodel,
             jsonReader:{id:"id"},
             pager : pager_selector,
             postData : {where:_filter,sort: "Time", order: "desc"},
-            // multiselect : true, // 是否显示勾选框
-            // rownumbers : true, // 是否出现排序
+            multiselect : false, // 是否显示勾选框
+            rownumbers : true, // 是否出现排序
             rowNum:100,
             height: 'auto'
         });
@@ -54,7 +54,7 @@
             if(cellvalue === 0) {
                 html += '<span class="label label-default">白银</span>';
             } else if (cellvalue === 1) {
-                html += '<span class="label label-danger">黄金</span>';
+                html += '<span class="label label-warning">黄金</span>';
             }else if (cellvalue === 2){
                 html += '<span class="label label-info">钻石</span>';
             }
@@ -122,9 +122,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="-1">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }

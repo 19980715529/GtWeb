@@ -8,7 +8,14 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.smallchill.common.vo.ShiroUser;
+import com.smallchill.core.plugins.dao.Blade;
+import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
+import com.smallchill.core.toolbox.Func;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
+import com.smallchill.core.toolbox.support.Convert;
+import com.smallchill.system.model.UserPack;
 import org.beetl.sql.core.OnConnection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -40,6 +47,18 @@ public class PlatformLogController extends BaseController implements ConstShiro 
 	@RequestMapping("/")
 	//@Permission({ ADMINISTRATOR, ADMIN })
 	public String index(ModelMap mm) {
+		ShiroUser user = ShiroKit.getUser();
+		Integer id =(Integer) user.getId();
+		// 查询包id
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+		if (pack!=null){
+			String clientType = pack.getClientType();
+			Integer[] ids = Convert.toIntArray(clientType);
+			mm.put("clientType", ids[0]);
+		}else {
+			mm.put("clientType", -9);
+		}
 		mm.put("code", CODE);
 		return BASE_PATH + "platform_detail1.html";
 	}

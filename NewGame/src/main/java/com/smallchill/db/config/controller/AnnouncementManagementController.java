@@ -1,6 +1,7 @@
 package com.smallchill.db.config.controller;
 
 import com.smallchill.common.base.BaseController;
+import com.smallchill.common.vo.ShiroUser;
 import com.smallchill.core.annotation.Before;
 import com.smallchill.core.annotation.DoControllerLog;
 import com.smallchill.core.annotation.Json;
@@ -8,10 +9,13 @@ import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
+import com.smallchill.core.toolbox.support.Convert;
 import com.smallchill.db.config.meta.intercept.AnnouncementManagementValidator;
 import com.smallchill.game.service.CommonService;
+import com.smallchill.system.model.UserPack;
 import com.smallchill.system.treasure.model.AnnouncementManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -43,6 +47,18 @@ public class AnnouncementManagementController extends BaseController implements 
     @RequestMapping("/")
     @Permission(ADMINISTRATOR)
     public String index(ModelMap mm){
+        ShiroUser user = ShiroKit.getUser();
+        Integer id =(Integer) user.getId();
+        // 查询包id
+        Blade blade = Blade.create(UserPack.class);
+        UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+        if (pack!=null){
+            String clientType = pack.getClientType();
+            Integer[] ids = Convert.toIntArray(clientType);
+            mm.put("clientType", ids[0]);
+        }else {
+            mm.put("clientType", -9);
+        }
         mm.put("code",CODE);
         return BASE_PATH+"announcement.html";
     }

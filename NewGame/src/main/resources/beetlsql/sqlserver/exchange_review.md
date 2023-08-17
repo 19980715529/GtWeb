@@ -14,7 +14,9 @@ all_list
          and orderNumber = #{orderNum}
       @}
     @if(!isEmpty(clientType)){
-         and sourcePlatform = #{clientType}
+        @if(clientType!='-1'){
+            and sourcePlatform = #{clientType}
+        @}
       @}
     @if(!isEmpty(orderType)){
          and status = #{orderType}

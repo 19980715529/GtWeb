@@ -1,6 +1,9 @@
 all_list
 ===
-    select * from [QPGameRecordDB].dbo.NewRechargeRecord where clientType=#{clientType} 
+    select * from [QPGameRecordDB].dbo.NewRechargeRecord where 1=1 
+    @if(!isEmpty(clientType)){
+        and clientType=#{clientType}
+    @}
     @if(!isEmpty(StartTime)){
         and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)
     @}

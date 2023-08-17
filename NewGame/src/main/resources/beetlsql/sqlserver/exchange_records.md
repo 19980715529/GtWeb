@@ -9,7 +9,10 @@ all_list
         and orderNumber=#{orderNum}
     @}
     @if(!isEmpty(clientType)){
-        and sourcePlatform=#{clientType}
+        @if(clientType!='-1'){
+            and sourcePlatform=#{clientType}
+        @}
+        
     @}
     @if(!isEmpty(StartTime)){
          and CONVERT(VARCHAR(100), createTime, 23) >= CONVERT(VARCHAR(100), #{StartTime}, 23)

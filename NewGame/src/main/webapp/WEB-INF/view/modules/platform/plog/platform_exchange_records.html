@@ -4,7 +4,7 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getBeforeDate(0) +'","EndTime":"' +getBeforeDate(0)+'"}';
+    var _filter = '{"StartTime":"' +getBeforeDate(0) +'","EndTime":"' +getBeforeDate(0)+'","clientType":"${clientType}"}';
 
     $(function() {
         backDom('兑换记录','exchange_records');
@@ -154,13 +154,18 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }
     }).start();
+
     $(function(){
         // 获取当月第一天
         $('#start_time').val(getBeforeDate(0));

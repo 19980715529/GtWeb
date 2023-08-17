@@ -44,7 +44,6 @@ public class RateLimitAspect extends BladeController {
         // 获取接口访问次数
         AtomicInteger counter = counters.getOrDefault(url_ip, new AtomicInteger(0));
         int count = counter.incrementAndGet();
-        System.out.println("接口"+url_ip+"访问次数："+count);
         if (count > limit) {
             throw new CustomException("105014");
         }

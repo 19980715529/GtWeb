@@ -147,7 +147,7 @@
 						</span>,
                     领取的奖励数额：
                     <span class="text-red">
-                        ${onlineData.gold+dailyData.gold+codeData.gold+share}
+                        ${user.dailyTasks!+onlineData.gold!0+dailyData.gold!0+codeData.gold!0+share!0+user.giftGold!0+user.DailyFeedbackTotal!0+user.AgentRebate!0+user.CheckAmount!0+user.inviteTask!0+user.GrandTotalTask!0+user.placeBetTask!0+user.unReceiveGold!0+user.receiveGold!0}
                     </span>
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">奖券:</td>
@@ -403,7 +403,7 @@
             <tr>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">首充获得:</td>
                 <td>
-                    充值奖励获得：<span class="text-red">${user.chargeGold!0}</span>;
+                    充值奖励获得：<span class="text-red">${user.giftGold!0}</span>;
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">玩家来源:</td>
                 <td><span class="text-red">${user.IsDrain}</span>&nbsp;&nbsp; （提示：1：引流状态；0：非引流状态；为0时登录游戏进入A面，谷歌审核状态）</td>
@@ -411,25 +411,17 @@
             <tr>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">每日回馈:</td>
                 <td>
-                    今日积累：<span class="text-red">
-                    @if(user.CumulativeToday < 0){
-					    @{ var ls = numberHandle(-user.CumulativeToday);
-                            ${ls}
-                        @}
-					@} else {
-					    @{ var ls = numberHandle(user.CumulativeToday);
-                            ${ls}
-                        @}
-					@}
-                </span>,
+                    今日积累：<span class="text-red">${user.CumulativeToday!0}</span>,
                     今日已领取：<span class="text-red">${user.DailyFeedback!0}</span>,
-<!--                    今日完成充值：<span class="text-red">${user.chargeGold!0}</span>;-->
+                    汇总：<span class="text-red">${user.DailyFeedbackTotal!0}</span>;
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">任务相关:</td>
                 <td>
 <!--                    邀请好友人数 就是下级人数：<span class="text-red">${user.chargeGold!0}</span>,-->
                     邀请好友人数：<span class="text-red">${user.AgentDownUserCount!0}</span>,
-                    邀请任务金币：<span class="text-red">${user.inviteTask!0}</span>,<br/>
+                    邀请任务金币：<span class="text-red">${user.inviteTask!0}</span>,
+                    每日任务金币：<span class="text-red">${user.dailyTasks!0}</span>,
+                    <br/>
                     累计任务金币：<span class="text-red">${user.GrandTotalTask!0}</span>,
                     下注任务金币：<span class="text-red">${user.placeBetTask!0}</span>,
                 </td>
@@ -446,7 +438,8 @@
                     @if(user.BindParentUserID == 0){
                         上级代理：<span class="text-red">无</span>;
                     @}else{
-                        上级代理：<span class="text-red">${user.BindParentUserID!无}</span>;
+                        上级代理：<a title="关联查询" class="iframeurl" href="${ctxPath}/player/detailinfo/${user.BindParentUserID!}"><span
+                            class="text-33C3F7">${user.BindParentUserID!无}</span></a>
                     @}
                     下级总人数：<span class="text-red">${user.AgentDownUserCount!0}</span>;<br>
                     下下级充值总人数：<span class="text-red">${user.ddownUserCount!0}</span>;
@@ -456,10 +449,10 @@
                 </td>
                 <td style="vertical-align: middle !important;text-align:right;" class="bg-f3f1f1">邮件相关:</td>
                 <td>
-                    未领取邮件数：<span class="text-red">${mail.unReceiveCount!0}</span>,
-                    未领取附件金币总和：<span class="text-red">${mail.unReceiveGold!0}</span>,<br/>
-                    已领取邮件数：<span class="text-red">${mail.receiveCount!0}</span>;
-                    已领取附件金币总和：<span class="text-red">${mail.receiveGold!0}</span>;
+                    未领取邮件数：<span class="text-red">${user.unReceiveCount!0}</span>,
+                    未领取附件金币总和：<span class="text-red">${user.unReceiveGold!0}</span>,<br/>
+                    已领取邮件数：<span class="text-red">${user.receiveCount!0}</span>;
+                    已领取附件金币总和：<span class="text-red">${user.receiveGold!0}</span>;
                 </td>
             </tr>
             <tr>

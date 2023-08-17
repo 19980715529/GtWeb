@@ -10,7 +10,9 @@ all_list
     SUM(netProfit) netProfit,SUM(totalFee) totalFee,SUM(collectNum) collectNum
     FROM Pay_walletRecords as b where 1=1
     @if(!isEmpty(clientType)){
-        and b.clientType=#{clientType}
+        @if(clientType!='-1'){
+            and b.clientType=#{clientType}
+        @}
     @}
     @if(!isEmpty(startTime)){
         and CONVERT(VARCHAR(100), b.createTime, 23) >= CONVERT(VARCHAR(100), #{startTime}, 23)

@@ -9,10 +9,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.common.vo.ShiroUser;
 import com.smallchill.core.aop.SystemControllerLog;
+import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
+import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.core.toolbox.support.Convert;
+import com.smallchill.system.model.UserPack;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -44,12 +49,36 @@ public class PlayerRechargeLogController extends BaseController implements Const
 	@RequestMapping(KEY_PLAYER_RECHARGE_LOG)
 	public String rechargelog(@RequestParam(name="id", required=false) Integer id, ModelMap mm) {
 		mm.put("code", CODE);
+		ShiroUser user = ShiroKit.getUser();
+		Integer uid =(Integer) user.getId();
+		// 查询包id
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", uid));
+		if (pack!=null){
+			String clientType = pack.getClientType();
+			Integer[] ids = Convert.toIntArray(clientType);
+			mm.put("clientType", ids[0]);
+		}else {
+			mm.put("clientType", -9);
+		}
 		mm.put("id", id);
 		return BASE_PATH + "player_recharge_log.html";
 	}
 	@DoControllerLog(name="进入充值未完成记录列表页面")
 	@RequestMapping("/rechargeUnstatistics")
 	public String rechargeUnstatistics(@RequestParam(name="id", required=false) Integer id, ModelMap mm) {
+		ShiroUser user = ShiroKit.getUser();
+		Integer uid =(Integer) user.getId();
+		// 查询包id
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", uid));
+		if (pack!=null){
+			String clientType = pack.getClientType();
+			Integer[] ids = Convert.toIntArray(clientType);
+			mm.put("clientType", ids[0]);
+		}else {
+			mm.put("clientType", -9);
+		}
 		mm.put("code", CODE);
 		mm.put("id", id);
 		return BASE_PATH + "player_recharge_unstatistics.html";
@@ -74,8 +103,8 @@ public class PlayerRechargeLogController extends BaseController implements Const
 		return paginateBySelf("player_recharge_log1.recharge_unstatistics");
 	}
 
-	//	@SystemControllerLog(description = "充值记录列表")
-	//@SuppressWarnings({ "rawtypes", "unchecked" })
+//		@SystemControllerLog(description = "充值记录列表")
+//	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Json
 	@RequestMapping(KEY_RCHARGE_LOG)
 	public Object rllist() {

@@ -33,7 +33,7 @@
 	var ctx = "${ctxPath}";
 	var grid_selector = "#grid-table";
 	var pager_selector = "";
-	var _filter = '{"startTime":"' +getBeforeDate(30) +'","endTime":"' +getBeforeDate(1)+'","PlatformID":"-1"}';
+	var _filter = '{"startTime":"' +getBeforeDate(30) +'","endTime":"' +getBeforeDate(1)+'","PlatformID":"${clientType}"}';
 	_filter = encodeURI(_filter);
 
 	$(function() {
@@ -174,9 +174,13 @@
 	new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
         	var type = data.data;
-        	var html = '<option value="-1">请选择</option>';
-        	for (var i = 0; i < type.length; i++) {
-				html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+			var html = ''; //
+			for (var i = 0; i < type.length; i++) {
+				if (type[i]==-1){
+					html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+				}else {
+					html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+				}
 			}
         	$("#ptypeid").html(html);
         }

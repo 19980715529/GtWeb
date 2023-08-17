@@ -4,7 +4,7 @@
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
     var grid_data = [ ];
-    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"-1"}';
+    var _filter = '{"StartTime":"' +getCurrentMonthFirst().format('yyyy-MM-dd') +'","EndTime":"' +getBeforeDate(0)+'","clientType":"${clientType}"}';
 
     $(function() {
         backDom('新增充值统计','newrecharge');
@@ -15,17 +15,23 @@
 
     function initGrid() {
         var grid_url = ctx + "/newrecharge/list";//查询列表接口
-        var _colnames=["id","时间", "新增用户","注册人数","充值人数","新增充值人数","充值次数","充值总额","兑换人数","兑换总额","充提差","人均充值","付费成本","投放成本","操作"];
+        var _colnames=["id","时间", "包来源<br><span style='color: red'>(包id为-1是总包汇总)</span></span>","新增用户","注册人数","新增充值人数","新增充值金额","新增充值次数",
+            "充值人数","充值次数","充值总额","兑换人数","兑换总额","充提差","人均充值","付费成本","投放成本","操作"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
+            {name:"clientType",sortable:true},
             {name:"newUserNum", sortable:false},
             //
             {name:"registerNum",  sortable:false},
+            // 新增充值人数
+            {name:"newRecUser", sortable:false},
+            // 新增充值金额
+            {name:"drNewRecharge", sortable:false},
+            // 新增充值次数
+            {name:"drNewRechargeNum", sortable:false},
             // 充值人数
             {name:"recUserNum", sortable:false},
-            // 新增充值人数
-            {name:"newRecUser", sortable:false,hidden:true},
             // 充值次数
             {name:"newRecNum", sortable:false},
             // 充值金额
@@ -126,9 +132,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="-1">请选择</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#clientType").html(html);
         }

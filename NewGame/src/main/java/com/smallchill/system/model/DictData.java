@@ -14,7 +14,7 @@ public class DictData extends BaseModel {
     private Integer value; // 字典值
     private String param; //额外参数
     private Integer num; //排序号
-    private String pcode; //父字典编码
+    private String pcode; //父字典编码, 顶层为0
     private String tips; //备注
 
     @AutoID

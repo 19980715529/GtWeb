@@ -3,7 +3,7 @@
     var ctx="${ctxPath}";
     var grid_selector = "#grid-table";
     var pager_selector = "#grid-pager";
-    var _filter = '{"clientType":""}';
+    var _filter = '{"clientType":"${clientType}"}';
     var isAutoFlushTab=true;
     $(function(){
         backDom('公告管理','announcement');
@@ -89,9 +89,13 @@
         console.log(data);
         if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;
-            var html = '<option value="">全部</option>';
+            var html = ''; //
             for (var i = 0; i < type.length; i++) {
-                html += '<option value="' + type[i]['clientType'] + '">' + type[i]['name'] + '</option>';
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
             }
             $("#ptypeid").html(html);
         }

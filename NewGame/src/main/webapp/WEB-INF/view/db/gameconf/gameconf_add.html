@@ -44,8 +44,6 @@
                         <input type="radio" name="gameconf.isOpen" value="0">关闭</input>&nbsp;&nbsp;&nbsp;
                         <input type="radio" name="gameconf.isOpen" value="1">开启</input>
                     </td>
-                </tr>
-                <tr>
 
                     <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">图标大小: </td>
                     <td>
@@ -76,7 +74,7 @@
         }).start();
     }
     // 获取平台列表
-    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfos", function (data) {
         console.log(data);
         if(data.code == 0 && BladeTool.isNotEmpty(data.data)) {
             var type = data.data;

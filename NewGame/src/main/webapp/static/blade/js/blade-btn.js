@@ -62,7 +62,7 @@ var exwhere;
     
     //一级按钮点击事件
     blade_btn.prototype.itemClick = function () {
-        console.log("点击按钮");
+        // console.log(this.alias);
         var ids = getGridXls().join(",");
         var rows = getGridXls().length;
         var rowData = getRowData();
@@ -72,6 +72,21 @@ var exwhere;
         	this.open(this.url);
             return;
         }
+        if (this.alias == "user_client") {
+            if (rows == 0) {
+                layer_alert('请选择一条数据!', "warn");
+                return;
+            }
+            if (rows > 1) {
+                layer_alert('只能选择一条数据!', "warn");
+                return;
+            }
+
+            var url = this.url;
+            this.open(url + split + ids, ids);
+            return;
+        }
+
     	if (this.alias == "siteconfig_add") {
     		this.open(this.url + '?PlatformID='+PlatformID);
     		return;
@@ -289,7 +304,8 @@ var exwhere;
             this.open(url + split + ids, ids);
             return;
         }
-        
+
+
         if (this.alias == "remove" || this.alias == "del") {
             if (rows == 0) {
                 layer_alert('请选择一条数据!', "warn");

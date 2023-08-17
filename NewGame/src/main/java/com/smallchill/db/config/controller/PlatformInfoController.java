@@ -5,6 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.smallchill.common.vo.ShiroUser;
+import com.smallchill.core.shiro.ShiroKit;
+import com.smallchill.core.toolbox.CMap;
+import com.smallchill.core.toolbox.support.Convert;
+import com.smallchill.system.model.UserPack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -149,13 +154,60 @@ public class PlatformInfoController extends BaseController implements ConstShiro
 
 	/**
 	 *  获取所有包数据
+	 *  ShiroUser user = ShiroKit.getUser();
+	 *  String username = Func.toStr(user.getName());
 	 * @return
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Json
 	@RequestMapping("/getPlatformInfo")
 	public AjaxResult getPlatformInfo() {
+//		List<Map> list = commonService.getInfoList(LIST_SOURCE,null);
+		ShiroUser user = ShiroKit.getUser();
+		Integer id =(Integer) user.getId();
+		// 查询包用户拥有的包id
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", id));
+		String clientType = pack.getClientType();
+		Integer[] ids = Convert.toIntArray(clientType);
+		return json(ids);
+	}
+
+	@Json
+	@RequestMapping("/getPlatformInfos")
+	public AjaxResult getPlatformInfos() {
 		List<Map> list = commonService.getInfoList(LIST_SOURCE,null);
+		return json(list);
+	}
+
+	@Json
+	@RequestMapping("/getPlatformAll/{uid}")
+	public AjaxResult getPlatformAll(@PathVariable Integer uid) {
+		// 查询所有包来源
+		List<Map> list = commonService.getInfoList(LIST_SOURCE,null);
+		HashMap<String, Object> tmap = new HashMap<>();
+		tmap.put("name","全部");
+		tmap.put("clientType",-1);
+		list.add(0,tmap);
+		// 查询用户拥有的包来源
+		Blade blade = Blade.create(UserPack.class);
+		UserPack pack = blade.findFirstBy("uid=#{uid}", CMap.init().set("uid", uid));
+		if (pack==null){
+			for (Map map:list){
+				map.put("checked",false);
+			}
+			return json(list);
+		}
+		String clientType = pack.getClientType();
+		Integer[] ids = Convert.toIntArray(clientType);
+		for (Map map:list){
+			map.put("checked",false);
+			for (int id:ids){
+				if (Integer.parseInt(map.get("clientType").toString())==id){
+					map.put("checked",true);
+				}
+			}
+		}
 		return json(list);
 	}
 }
