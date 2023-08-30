@@ -86,7 +86,8 @@ old_list
 
 record_list
 ===
-    select CONVERT(VARCHAR(10), createTime, 23) writeTime,*,(turntableAwardCoins+rechargeCoins+ShareRewardCoins+BindPhoneRewards) RewardCoins 
+    select CONVERT(VARCHAR(10), createTime, 23) writeTime,*,(turntableAwardCoins+rechargeCoins+ShareRewardCoins+BindPhoneRewards) RewardCoins,
+    (case when (recMoney=0) then '0.000' else CONVERT(decimal(18,3),(cast((recMoney-excMoney) as FLOAT)/cast(recMoney as FLOAT))) end) as Proportion
     FROM [QPGameRecordDB].[dbo].[DailyGameStats]
     where 1=1
     @if(!isEmpty(clientType)){

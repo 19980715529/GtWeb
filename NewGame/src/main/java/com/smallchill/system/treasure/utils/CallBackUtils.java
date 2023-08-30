@@ -142,17 +142,20 @@ public class CallBackUtils {
                 gameParam.put("IsFirstRecharge", rechargeRecords.getIsFirstCharge());
                 SendHttp.sendGame1002(gameParam);
                 // 获取充值成功的邮件
-                Map emailParam = RechargeExchangeCommon.getEmailConf(2);
-                // 普通充值类型
-                emailParam.put("goldType", 5);
-                // 判断是否首充
-                if (rechargeRecords.getIsFirstCharge() == 1) {
-                    // 邮件类型首充
-                    emailParam.put("goldType", 207);
+                Integer integer = Db.queryInt("select isOpen from blade_dict_data where code='RechargeMail'", null);
+                if (integer==0){
+                    Map emailParam = RechargeExchangeCommon.getEmailConf(2);
+                    // 普通充值类型
+                    emailParam.put("goldType", 5);
+                    // 判断是否首充
+                    if (rechargeRecords.getIsFirstCharge() == 1) {
+                        // 邮件类型首充
+                        emailParam.put("goldType", 207);
+                    }
+                    emailParam.put("gold", 0);
+                    emailParam.put("toUserid", rechargeRecords.getUserId());
+                    SendHttp.sendEmail(emailParam);
                 }
-                emailParam.put("gold", 0);
-                emailParam.put("toUserid", rechargeRecords.getUserId());
-                SendHttp.sendEmail(emailParam);
                 // 修改钱包记录
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                 RechargeExchangeCommon.walletStatistics(rechargeRecords.getOrderNumber(),rechargeRecords.getPackageName(),

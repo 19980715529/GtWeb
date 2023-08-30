@@ -57,7 +57,8 @@ day_recharge
 
 new_list1
 ===
-        select id,CONVERT(VARCHAR(10), writedate, 23) writedate,recAmount,newRecAmount,recNum,newRecNum,recCount,newRecCount,excAmount,excNum,excCount,RE
+        select id,CONVERT(VARCHAR(10), writedate, 23) writedate,recAmount,newRecAmount,recNum,newRecNum,recCount,newRecCount,excAmount,excNum,excCount,RE,
+        (case when (recAmount=0) then '0.000' else CONVERT(decimal(18,3),(cast((recAmount-excAmount) as FLOAT)/cast(recAmount as FLOAT))) end) as Proportion
         from [QPGameRecordDB].[dbo].[DailyDataMonitorRecords]
         where 1=1
         @if(!isEmpty(startTime)){

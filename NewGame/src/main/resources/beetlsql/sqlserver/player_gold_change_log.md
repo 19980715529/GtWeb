@@ -21,15 +21,15 @@ new_gold_change_log
 	@}
 	@if(!isEmpty(ChangeType_Id)){
 	 	@if(ChangeType_Id=='-4'){
-		 	and p.ChangeType_Id in (5,207,221,218)
+		 	and p.ChangeType_Id in (select value from blade_dict_data where pid=23 and isDel=0)
 	  	@}else if(ChangeType_Id=='-8') {
-	  		and p.ChangeType_Id in (206,211)
+	  		and p.ChangeType_Id in (select value from blade_dict_data where pid=28 and isDel=0)
 	  	@}else if(ChangeType_Id=='-9'){
-            and p.ChangeType_Id in (209,210)
+            and p.ChangeType_Id in (select value from blade_dict_data where pid=31 and isDel=0)
         @}else if(ChangeType_Id=='-11'){
-            and p.ChangeType_Id in (214,220,223,217,218,219,222)
+            and p.ChangeType_Id in (select value from blade_dict_data where pid=34 and isDel=0)
         @}else if(ChangeType_Id=='-10'){
-            and p.ChangeType_Id in (212,213)
+            and p.ChangeType_Id in (select value from blade_dict_data where pid=42 and isDel=0)
         @}else{
             and p.ChangeType_Id =#{ChangeType_Id}
         @}
@@ -37,6 +37,34 @@ new_gold_change_log
 	@if(!isEmpty(orderBy)){
 	order by p.LogTime asc
 	@}
+all_change_log
+===
+    select [User_Id] as user_id,[PreAmount] as preamount,[Amount] as amount ,[AftAmount] as aftamount
+      ,[Remark] as remark,[LogTime] as logtime,[ServerId] as serverid
+      ,[CheatRate] as cheatrate,[CheatLimit] as cheatlimit,ExGameMsg as exgamemsg,Time_Id
+	,(SELECT b.Remark FROM QPGameUserDB.dbo.AA_ZZ_Log_PropChange_ChangeType as b  WHERE b.ChangeType_Id = p51.ChangeType_Id)as typeremark
+	,(select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId) as roomname
+    	from #{text(dbTable)} as p51 with (nolock)
+    	where p51.Prop_Id=1
+    	@if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	@if(!isEmpty(ServerID)){
+    	 and p51.ServerId =#{ServerID}
+    	@}
+    	@if(!isEmpty(ChangeType_Id)){
+    	 	@if(ChangeType_Id=='-4'){
+    		 	and p51.ChangeType_Id in (5,102)
+    	  	@} else {
+    	  		and p51.ChangeType_Id =#{ChangeType_Id}
+    	  	@}
+    	@}
 
 1_change_log
 ===
@@ -578,22 +606,22 @@ new_gold_change_log
     	@if(!isEmpty(UserID)){
     	 and p51.User_Id =#{UserID}
     	@}
-   @if(!isEmpty(InsertTime_dategt)){
-    		 and Time_Id>=#{InsertTime_dategt}
-    	  @}
-    	  @if(!isEmpty(InsertTime_datelt)){
-    		 and Time_Id<=#{InsertTime_datelt}
-    	  @}
-    	@if(!isEmpty(ServerID)){
-    	 and p51.ServerId =#{ServerID}
-    	@}
-    	@if(!isEmpty(ChangeType_Id)){
-    	 	@if(ChangeType_Id=='-4'){
-    		 	and p51.ChangeType_Id in (5,102)
-    	  	@} else {
-    	  		and p51.ChangeType_Id =#{ChangeType_Id}
-    	  	@}
-    	@}
+       @if(!isEmpty(InsertTime_dategt)){
+                 and Time_Id>=#{InsertTime_dategt}
+              @}
+              @if(!isEmpty(InsertTime_datelt)){
+                 and Time_Id<=#{InsertTime_datelt}
+              @}
+            @if(!isEmpty(ServerID)){
+             and p51.ServerId =#{ServerID}
+            @}
+            @if(!isEmpty(ChangeType_Id)){
+                @if(ChangeType_Id=='-4'){
+                    and p51.ChangeType_Id in (5,102)
+                @} else {
+                    and p51.ChangeType_Id =#{ChangeType_Id}
+                @}
+            @}
     	
 
 25_change_log
@@ -1568,7 +1596,35 @@ new_gold_change_log
     	  		and p51.ChangeType_Id =#{ChangeType_Id}
     	  	@}
     	@}
-       	
+69_change_log
+===
+	select [User_Id] as user_id,[PreAmount] as preamount,[Amount] as amount ,[AftAmount] as aftamount
+      ,[Remark] as remark,[LogTime] as logtime,[ServerId] as serverid
+      ,[CheatRate] as cheatrate,[CheatLimit] as cheatlimit,ExGameMsg as exgamemsg,Time_Id
+	,(SELECT b.Remark FROM QPGameUserDB.dbo.AA_ZZ_Log_PropChange_ChangeType as b  WHERE b.ChangeType_Id = p51.ChangeType_Id)as typeremark
+	,(select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId) as roomname
+    	from [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange_69] as p51 with (nolock)
+    	where p51.Prop_Id=1
+    	@if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	@if(!isEmpty(ServerID)){
+    	 and p51.ServerId =#{ServerID}
+    	@}
+    	@if(!isEmpty(ChangeType_Id)){
+    	 	@if(ChangeType_Id=='-4'){
+    		 	and p51.ChangeType_Id in (5,102)
+    	  	@} else {
+    	  		and p51.ChangeType_Id =#{ChangeType_Id}
+    	  	@}
+    	@}       	
+
 70_change_log
 ===
 	select [User_Id] as user_id,[PreAmount] as preamount,[Amount] as amount ,[AftAmount] as aftamount
@@ -1626,6 +1682,34 @@ new_gold_change_log
     	  		and p51.ChangeType_Id =#{ChangeType_Id}
     	  	@}
     	@}
+71_change_log
+===
+	select [User_Id] as user_id,[PreAmount] as preamount,[Amount] as amount ,[AftAmount] as aftamount
+      ,[Remark] as remark,[LogTime] as logtime,[ServerId] as serverid
+      ,[CheatRate] as cheatrate,[CheatLimit] as cheatlimit,ExGameMsg,Time_Id
+	,(SELECT b.Remark FROM QPGameUserDB.dbo.AA_ZZ_Log_PropChange_ChangeType as b  WHERE b.ChangeType_Id = p51.ChangeType_Id)as typeremark
+	,(select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId) as roomname
+    	from [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange_71] as p51 with (nolock)
+    	where p51.Prop_Id=1
+    	@if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	@if(!isEmpty(ServerID)){
+    	 and p51.ServerId =#{ServerID}
+    	@}
+    	@if(!isEmpty(ChangeType_Id)){
+    	 	@if(ChangeType_Id=='-4'){
+    		 	and p51.ChangeType_Id in (5,102)
+    	  	@} else {
+    	  		and p51.ChangeType_Id =#{ChangeType_Id}
+    	  	@}
+    	@}
     	  	
 allgame
 ===
@@ -1647,6 +1731,23 @@ new_room_gold_change
 	  @if(!isEmpty(InsertTime_datelt)){
 		 and CONVERT(VARCHAR(100), p.LogTime, 20) <= CONVERT(VARCHAR(100), #{InsertTime_datelt}, 20)
 	  @}
+all_gold_change
+===
+	SELECT SUM(Amount) TScore,p51.ServerId
+    	,isnull((select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId),'大厅') as RoomName
+    	FROM #{text(gameTable)} as p51 with (nolock)
+    	where p51.User_Id =#{UserID}
+    	  @if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	group by p51.ServerId
+
 1_gold_change
 ===
     SELECT SUM(Amount) TScore,p51.ServerId
@@ -2500,6 +2601,22 @@ new_room_gold_change
     		 and Time_Id<=#{InsertTime_datelt}
     	  @}
     	group by p51.ServerId
+69_gold_change
+===
+    SELECT SUM(Amount) TScore,p51.ServerId
+    	,isnull((select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId),'大厅') as RoomName
+    	FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange_69] as p51 with (nolock)
+    	where p51.User_Id =#{UserID}
+    	  @if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	group by p51.ServerId
 70_gold_change
 ===
     SELECT SUM(Amount) TScore,p51.ServerId
@@ -2521,6 +2638,22 @@ new_room_gold_change
     SELECT SUM(Amount) TScore,p51.ServerId
     	,isnull((select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId),'大厅') as RoomName
     	FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange_71] as p51 with (nolock)
+    	where p51.User_Id =#{UserID}
+    	  @if(!isEmpty(UserID)){
+    	 and p51.User_Id =#{UserID}
+    	@}
+    	@if(!isEmpty(InsertTime_dategt)){
+    		 and Time_Id>=#{InsertTime_dategt}
+    	  @}
+    	  @if(!isEmpty(InsertTime_datelt)){
+    		 and Time_Id<=#{InsertTime_datelt}
+    	  @}
+    	group by p51.ServerId
+72_gold_change
+===
+    SELECT SUM(Amount) TScore,p51.ServerId
+    	,isnull((select RoomName from [QPServerInfoDB].[dbo].[GameRoomItem] gr where gr.ServerID=p51.ServerId),'大厅') as RoomName
+    	FROM [QPGameRecordDB].[dbo].[AA_ZZ_Log_PropChange_72] as p51 with (nolock)
     	where p51.User_Id =#{UserID}
     	  @if(!isEmpty(UserID)){
     	 and p51.User_Id =#{UserID}

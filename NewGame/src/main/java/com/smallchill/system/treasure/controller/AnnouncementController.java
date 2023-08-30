@@ -174,8 +174,19 @@ public class AnnouncementController extends BaseController implements ConstShiro
     // 获取充值挡位
     @GetMapping("/recharge/gear")
     public AjaxResult getGear(){
-        List<Map> payChannel = Db.selectList("select id,gold,getExtra,amount,sort,skuId from Pay_RechargeGear where isDel=1 order by sort");
-        return json(payChannel);
+        List<Map> ordinary = Db.selectList("select id,gold,getExtra,amount,sort,skuId from Pay_RechargeGear where isDel=1 order by sort");
+//        // 印度需要的结构
+        List<Map> first = commonService.getInfoList("recharge_channel.first_list", null);
+        HashMap<String, List> map = new HashMap<>();
+        int integer = Db.queryInt("select value from blade_dict_data where code='recharge'", null);
+        if (integer==1){
+            // 巴西
+            return json(ordinary);
+        }
+        map.put("ordinary",ordinary);
+        map.put("first",first);
+        // 印度
+        return json(map);
     }
 
     // 获取转盘配置
@@ -209,7 +220,6 @@ public class AnnouncementController extends BaseController implements ConstShiro
     @GetMapping("/set/cache")
     @RateLimit(limit = 5)
     public AjaxResult set_cache(){
-
         return success("success");
     }
 }

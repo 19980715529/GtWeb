@@ -630,7 +630,29 @@ public class BladeController {
 		Object grid = GridManager.paginateBySelf(dbName, page, rows, source, where, sort, order, intercept, this);
 		return grid;
 	}
-	
+
+	/**
+	 * 动态设置表明
+	 * @param dbName
+	 * @param source
+	 * @param intercept
+	 * @param where
+	 * @return
+	 */
+	private Object basepageBySelf(String dbName, String source, IQuery intercept,String where){
+		Integer page = getParameterToInt("page", 1);
+		Integer rows = getParameterToInt("rows", 10);
+//		String where = getParameter("where", StrKit.EMPTY);
+		String sidx =  getParameter("sidx", StrKit.EMPTY);
+		String sord =  getParameter("sord", StrKit.EMPTY);
+		String sort =  getParameter("sort", StrKit.EMPTY);
+		String order =  getParameter("order", StrKit.EMPTY);
+		if (StrKit.notBlank(sidx)) {
+			sort = sidx + " " + sord + (StrKit.notBlank(sort) ? ("," + sort) : StrKit.EMPTY);
+		}
+		Object grid = GridManager.paginateBySelf(dbName, page, rows, source, where, sort, order, intercept, this);
+		return grid;
+	}
 
 	/**   
 	 * 分页
@@ -643,6 +665,9 @@ public class BladeController {
 
 	public Object paginateBySelf(String source){
 		return basepageBySelf(null, source, null);
+	}
+	public Object paginateBySelfWhere(String source,String where){
+		return basepageBySelf(null, source, null,where);
 	}
 	public Object paginateBySelfByName(String dbName,String source){
 		return basepageBySelf(dbName, source, null);

@@ -12,7 +12,9 @@ orderNum_One
     select * from [RYPlatformManagerDB].[dbo].[Recharge_records] where orderNumber = #{orderNumber}
 user_recharge_list
 ===
-    select createTime,topUpAmount as amount,gold,orderStatus from [RYPlatformManagerDB].[dbo].[Recharge_records] where userId= #{userId}
+    select createTime,topUpAmount as amount,gold, 
+    (case when orderStatus=4 then 3 else orderStatus end) orderStatus
+    from [RYPlatformManagerDB].[dbo].[Recharge_records] where userId= #{userId}
 get_unPay_recharge_list
 ===
     select * from [RYPlatformManagerDB].[dbo].[Recharge_records] where orderStatus = 1

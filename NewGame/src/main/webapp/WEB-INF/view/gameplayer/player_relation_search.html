@@ -14,21 +14,23 @@
 
 	function initGrid() {
 		var grid_url = ctx + "/${code}/relationlist";//查询列表接口
-		var _colnames = [ "ID","玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "<span class=\"text-blue\">登录时间</span>", "<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>", "<span class=\"text-blue\">金币</span>", "接收金币", "赠送金币", "奖券", "充值金额", "充值次数", "首选游戏", "游戏状态", "类型", "账号状态","作弊率"];
+		var _colnames = [ "ID","玩家ID", "昵称", "<span class=\"text-blue\">注册时间</span>", "<span class=\"text-blue\">登录时间</span>",
+			"<span class=\"text-blue\">总输赢</span>", "<span class=\"text-blue\">当日输赢</span>", "<span class=\"text-blue\">金币</span>",
+			"接收金币", "赠送金币", "奖券", "充值金额", "充值次数", "首选游戏", "游戏状态", "类型", "账号状态","作弊率"];
 		var _colmodel = [ 
 		                  {name : "UserID",hidden:true}, 
 		                  {name : "UserID",sortable:false, formatter:genLink}, 
 		                  {name : "NickName",sortable:false, formatter:genLink}, 
 		                  {name : "RegisterDate",index : "RegisterDate"}, 
-		                  {name : "LastLogonDate",index : "LastLogonDate"}, 
-		                  {name : "TotalWaste",index : "TotalWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "DayWaste",index : "DayWaste", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "LastLoginTime",index : "LastLoginTime"},
+		                  {name : "TotalScore",index : "TotalScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "TodayScore",index : "TodayScore", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
 		                  {name : "Score",index : "Score", formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
 		                  {name : "RcvScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
 		                  {name : "SendScore",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
 		                  {name : "UserMedal",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "RechargeNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
-		                  {name : "RechargeCountNum",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}}, 
+		                  {name : "TotalRecharge",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
+		                  {name : "RechargeCount",sortable:false, formatter:"integer", formatoptions:{"defaulValue ":0,thousandsSeparator:",",decimalPlaces:0}},
 		                  {name : "FirstEnterKindName",sortable:false}, 
 						  {name : "OnlineServerName",sortable:false}, 
 						  {name : "TypeName",sortable:false}, 
@@ -37,12 +39,12 @@
 
 		var totalJson = {
 				Score:0,//总金币
-				RechargeNum:0,//总充值
+				TotalRecharge:0,//总充值
 				UserMedal:0,//奖券总量
-				TotalWaste:0,//总输赢
+				TotalScore:0,//总输赢
 				RcvScore:0,//总接收金币
 				SendScore:0,//总赠送金币
-				DayWaste:0//当日总输赢
+				TodayScore:0//当日总输赢
 		};
 		jQuery(grid_selector).jqGrid({
 			url:grid_url,
@@ -58,14 +60,14 @@
 			rowNum:100,
 			height: 'auto',
 			afterInsertRow: function(rowid, rowdata, rowelem) {
-				if(BladeTool.isNotEmpty(rowdata['TotalWaste'])) {
-					totalJson['TotalWaste'] += rowdata['TotalWaste'];//总输赢
+				if(BladeTool.isNotEmpty(rowdata['TotalScore'])) {
+					totalJson['TotalScore'] += rowdata['TotalScore'];//总输赢
 				}
 				if(BladeTool.isNotEmpty(rowdata['Score'])) {
 					totalJson['Score'] += rowdata['Score'];//总金币
 				}
-				if(BladeTool.isNotEmpty(rowdata['RechargeNum'])) {
-					totalJson['RechargeNum'] += rowdata['RechargeNum'];//当日总税收
+				if(BladeTool.isNotEmpty(rowdata['TotalRecharge'])) {
+					totalJson['TotalRecharge'] += rowdata['TotalRecharge'];//总充值
 				}
 				if(BladeTool.isNotEmpty(rowdata['UserMedal'])) {
 					totalJson['UserMedal'] += rowdata['UserMedal'];//当前血池
@@ -76,8 +78,8 @@
 				if(BladeTool.isNotEmpty(rowdata['SendScore'])) {
 					totalJson['SendScore'] += rowdata['SendScore'];//总赠送金币
 				}
-				if(BladeTool.isNotEmpty(rowdata['DayWaste'])) {
-					totalJson['DayWaste'] += rowdata['DayWaste'];//血池银行
+				if(BladeTool.isNotEmpty(rowdata['TodayScore'])) {
+					totalJson['TodayScore'] += rowdata['TodayScore'];//单日输赢
 				}
 				if(BladeTool.isNotEmpty(rowdata['CheatRate'])) {
 					if(rowdata['CheatRate']>0) {
@@ -88,22 +90,22 @@
 				}
 			},
 			gridComplete:function() {
-				$("#TotalWaste").html(fmoney(totalJson['TotalWaste'],0));
+				$("#TotalScore").html(fmoney(totalJson['TotalScore'],0));
 				$("#Score").html(fmoney(totalJson['Score'],0));
-				$("#RechargeNum").html(fmoney(totalJson['RechargeNum'],0));
+				$("#TotalRecharge").html(fmoney(totalJson['TotalRecharge'],0));
 				$("#UserMedal").html(fmoney(totalJson['UserMedal'],0));
 				$("#RcvScore").html(fmoney(totalJson['RcvScore'],0));
 				$("#SendScore").html(fmoney(totalJson['SendScore'],0));
 				$("#RS").html(fmoney((totalJson['SendScore']-totalJson['RcvScore']),0));
-				$("#DayWaste").html(fmoney(totalJson['DayWaste'],0));
+				$("#TodayScore").html(fmoney(totalJson['TodayScore'],0));
 				totalJson = {
 						Score:0,//总金币
-						RechargeNum:0,//总充值
+						TotalRecharge:0,//总充值
 						UserMedal:0,//奖券总量
-						TotalWaste:0,//总输赢
+						TotalScore:0,//总输赢
 						RcvScore:0,//总接收金币
 						SendScore:0,//总赠送金币
-						DayWaste:0//当日总输赢
+						TodayScore:0//当日总输赢
 				};
 			}
 		});
@@ -141,13 +143,13 @@
 <div class="row">
 	<div class="total-block">
 		总金币：<span class="text-red" id="Score">0</span>
-		总充值：<span class="text-red" id="RechargeNum">0</span>
+		总充值：<span class="text-red" id="TotalRecharge">0</span>
 		奖券总量：<span class="text-red" id="UserMedal">0</span>
-		总输赢：<span class="text-red" id="TotalWaste">0</span>
+		总输赢：<span class="text-red" id="TotalScore">0</span>
 		总接收金币：<span class="text-red" id="RcvScore">0</span>
 		总赠送金币：<span class="text-red" id="SendScore">0</span>
 		总顺差金币：<span class="text-red" id="RS">0</span>
-		当日总输赢：<span class="text-red" id="DayWaste">0</span>
+		当日总输赢：<span class="text-red" id="TodayScore">0</span>
 	</div>
 	<!-- grid -->
 	<table id="grid-table"></table>

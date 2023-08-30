@@ -1,6 +1,8 @@
 all_list
 ===
-    select * from [QPGameRecordDB].dbo.NewRechargeRecord where 1=1 
+    select *, 
+    (case when (newRecAmount=0) then '0.000' else CONVERT(decimal(18,3),(cast((newRecAmount-newExcAmount) as FLOAT)/cast(newRecAmount as FLOAT))) end) as Proportion
+    from [QPGameRecordDB].dbo.NewRechargeRecord where 1=1 
     @if(!isEmpty(clientType)){
         and clientType=#{clientType}
     @}

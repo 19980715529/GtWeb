@@ -62,4 +62,6 @@ public interface ConstConfig {
 	String CALLBACK_IP = pool.get("callback.ip");
 	String META_Pay_URL = pool.get("MetaPay.url");
 
+	String APPLICATION_NAME = pool.get("Application.name");
+
 }

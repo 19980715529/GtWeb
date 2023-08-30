@@ -22,6 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static com.smallchill.core.constant.ConstKey.LETSPAY_KEY;
@@ -102,6 +103,7 @@ public class JunitTest extends BaseTest{
 	}
 	@Test
 	public void test5(){
+		LinkedHashMap<Integer, Integer> map = new LinkedHashMap<>();
 
 	}
 	@Resource

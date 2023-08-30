@@ -4,14 +4,14 @@
 <table class="layui-hide" id="ID-treeTable-demo"></table>
 <script type="text/html" id="TPL-treeTable-demo">
     <div class="layui-btn-container">
-        <button class="layui-btn layui-btn-sm" lay-event="getChecked">获取选中数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="addChecked">添加</button>
+        <button class="layui-btn layui-btn-danger layui-btn-sm" lay-event="remove">删除</button>
     </div>
 </script>
 <script type="text/html" id="TPL-treeTable-demo-tools">
     <div class="layui-btn-container">
-        <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
-        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="addChild">新增</a>
-        <a class="layui-btn layui-btn-xs" lay-event="more">更多 <i class="layui-icon layui-icon-down"></i></a>
+        <a class="layui-btn layui-btn-xs" lay-event="addChild">新增</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="edit">修改</a>
     </div>
 </script>
 <script>
@@ -33,21 +33,20 @@
                   autoParam: ["parentId=id"]
                 }
                 */
-                // customName: {
-                //
-                // },
             },
-            maxHeight: '501px',
+            maxHeight: '701px',
             toolbar: '#TPL-treeTable-demo',
             cols: [[
                 {type: 'checkbox', fixed: 'left'},
                 {field: 'id', title: 'ID', width: 80, sort: true, fixed: 'left'},
                 {field: 'name', title: '字典名称', width: 180, fixed: 'left'},
+                {field: 'code', title: '字典编码', width: 180},
                 {field: 'value', title: '字典参数'},
                 {field: 'param', title: '字典额外参数'},
                 {field: 'num', title: '排序', sort: true},
-                {field: 'pcode', title: '父编码'},
+                {field: 'pid', title: '父id'},
                 {field: 'isOpen', title: '是否启用'},
+                {field: 'tips', title: '备注'},
                 { fixed: "right", title: "操作", width: 181, align: "center", toolbar: "#TPL-treeTable-demo-tools"}
             ]],
             page: false
@@ -70,10 +69,10 @@
             var tableId = config.id;
             var status = treeTable.checkStatus(tableId);
             // 获取选中行
-            if (obj.event === "getChecked") {
+            if (obj.event === "addChecked") {
                 // if(!status.data.length) return layer.msg('无选中数据'); 添加
                 // console.log(status);
-                layer.open({
+                let index=layer.open({
                     type: 2, // page 层类型
                     area: ['500px', '650px'],
                     title: '添加',
@@ -81,7 +80,35 @@
                     shadeClose: true, // 点击遮罩区域，关闭弹层
                     maxmin: true, // 允许全屏最小化
                     anim: 0, // 0-6 的动画形式，-1 不开启
-                    content: ['${ctxPath}/dict_data/add','yes']
+                    content: ['${ctxPath}/dict_data/add','yes'],
+                });
+            }else if (obj.event === "remove"){
+                if(!status.data.length) return layer.msg('无选中数据')
+                layer.confirm("真的删除行么,此操作不可逆！", function (index) {
+                    layer.close(index);
+                    let checkVal = status.data
+                    let ids=checkVal.map((item)=>{
+                        return item.id
+                    })
+                    $.ajax({
+                        url:"${ctxPath}/dict_data/remove", // 请求路径
+                        type:"POST" , //请求方式
+                        data: "ids="+ids.join(","),//请求参数
+                        // data:JSON.stringify(field),
+                        dataType:"json",//设置接受到的响应数据的格式
+                        // contentType:"application/json",
+                        success:function (data) {
+                            if (data.code ===0){
+                                layer.msg(data.message)
+                            }else {
+                                layer.msg(data.message)
+                            }
+                            treeTable.reload("ID-treeTable-demo")
+                        },//响应成功后的回调函数
+                        error:function (err) {
+                            layer.msg('服务器异常')
+                        },//表示如果请求响应出现错误，会执行的回调函数
+                    })
                 });
             }
         });
@@ -91,49 +118,27 @@
             var trElem = obj.tr;
             var trData = obj.data;
             var tableId = obj.config.id;
-            if (layEvent === "detail") {
-                layer.msg("查看操作：" + trData.name);
-            } else if (layEvent === "addChild") {
-                var data = { id: Date.now(), name: "新节点" };
-                var newNode2 = treeTable.addNodes(tableId, {
-                    parentIndex: trData["LAY_DATA_INDEX"],
-                    index: -1,
-                    data: data
+            if (layEvent === "edit") {
+                layer.open({
+                    type: 2, // page 层类型
+                    area: ['500px', '650px'],
+                    title: '修改',
+                    shade: 0.6, // 遮罩透明度
+                    shadeClose: true, // 点击遮罩区域，关闭弹层
+                    maxmin: true, // 允许全屏最小化
+                    anim: 0, // 0-6 的动画形式，-1 不开启
+                    content: ['${ctxPath}/dict_data/edit/'+trData.id,'yse'],
                 });
-            } else if (layEvent === "more") {
-                // 下拉菜单
-                dropdown.render({
-                    elem: this, // 触发事件的 DOM 对象
-                    show: true, // 外部事件触发即显示
-                    align: "right", // 右对齐弹出
-                    data: [
-                        {
-                            title: "修改积分",
-                            id: "edit"
-                        },
-                        {
-                            title: "删除",
-                            id: "del"
-                        }
-                    ],
-                    click: function (menudata) {
-                        if (menudata.id === "del") {
-                            layer.confirm("真的删除行么", function (index) {
-                                obj.del(); // 等效如下
-                                // treeTable.removeNode(tableId, trElem.attr('data-index'))
-                                layer.close(index);
-                            });
-                        } else if (menudata.id === "edit") {
-                            layer.prompt({
-                                value: trData.experience,
-                                title: "输入新的积分"
-                            }, function (value, index) {
-                                obj.update({ experience: value }); // 等效如下
-                                // treeTable.updateNode(tableId, trElem.attr('data-index'), {experience: value});
-                                layer.close(index);
-                            });
-                        }
-                    }
+            } else if (layEvent === "addChild") {
+                layer.open({
+                    type: 2, // page 层类型
+                    area: ['500px', '650px'],
+                    title: '添加',
+                    shade: 0.6, // 遮罩透明度
+                    shadeClose: true, // 点击遮罩区域，关闭弹层
+                    maxmin: true, // 允许全屏最小化
+                    anim: 0, // 0-6 的动画形式，-1 不开启
+                    content: ['${ctxPath}/dict_data/add?id='+trData.id,'yes'],
                 });
             }
         });

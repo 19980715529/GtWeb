@@ -10,6 +10,7 @@
 	$(function() {
 		backDom('未统计充值记录','recharge_unstatistics');
 		initGrid();
+		initMenuBtn("btns","platform_rechargelog");
 	});
 
 	function initGrid() {
@@ -17,7 +18,7 @@
 		var _colnames = [ "发起时间", "订单号","用户ID","昵称","充值金额(PHP)", "获得金币", "订单状态", "包名称", "充值渠道", "充值类型","商户反馈", "订单关闭时间"];
 		var _colmodel = [
 			{ name : "createTime", sortable:false,width:200 },
-			{ name : "orderNumber", sortable:false},
+			{ name : "orderNumber", sortable:false,width:250 },
 			{ name : "userId", sortable:false,formatter:genLink},
 			{ name : "nickname", sortable:false,formatter:genLink},
 			{ name : "topUpAmount",sortable:false},
@@ -37,7 +38,7 @@
 			colModel : _colmodel,
 			pager : pager_selector,
 			postData : {where: _filter, sort: "createTime", order: "desc"},
-			multiselect : false,
+			multiselect : true,
 			rownumbers : true,
 			rowNum: 100,
 			jsonReader : {
@@ -61,7 +62,8 @@
 			var dict_status = {
 				1:"待支付",
 				2:"已完成",
-				3:"已关闭"
+				3:"已关闭",
+				4:"取消支付"
 			}
 			var html = '<span class="text-red">' + cellvalue + '</span>';
 			if(options.colModel.name=='orderStatus') {
@@ -71,6 +73,8 @@
 					html = '<span class="label label-success">' + dict_status[cellvalue] + '</span>';
 				}else if (cellvalue === 3) {
 					html = '<span class="label label-default">' + dict_status[cellvalue] + '</span>';
+				}else {
+					html = '<span>' + dict_status[cellvalue] + '</span>';
 				}
 			}
 			return html;
@@ -125,6 +129,8 @@
 			</label>
 		</div>
 	</form>
+	<!-- 按钮组 -->
+	<div class="welljq well-sm" id="btns"></div>
 	<!-- grid -->
 	<table id="grid-table"></table>
 	<!-- 分页 -->

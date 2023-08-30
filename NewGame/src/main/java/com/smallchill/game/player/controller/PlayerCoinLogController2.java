@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.smallchill.core.plugins.dao.Db;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -323,9 +324,13 @@ public class PlayerCoinLogController2 extends BaseController implements ConstShi
     		paras = JSON.parseObject(parameter, Map.class);
     	}
     	List<Map> list = new ArrayList<>();
-    	String[] games = ConstConfig.SYS_GAMES.split(",");
+//    	String[] games = ConstConfig.SYS_GAMES.split(",");
+		String gameIds = Db.queryStr("select param from blade_dict_data where code='128'", null);
+		String[] games = gameIds.split(",");
     	for (String gameId : games) {
-			list.addAll(commonService.getInfoList("player_gold_change_log."+gameId+"_gold_change",paras));
+			paras.put("gameTable","[QPGameRecordDB].[dbo].AA_ZZ_Log_PropChange_"+gameId);
+//			list.addAll(commonService.getInfoList("player_gold_change_log."+gameId+"_gold_change",paras));
+			list.addAll(commonService.getInfoList("player_gold_change_log.all_gold_change",paras));
 		}
     	/*
     	List<Map> xml5 = commonService.getInfoList("player_gold_change_log.5_gold_change",paras);

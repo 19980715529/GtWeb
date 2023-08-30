@@ -1,12 +1,12 @@
-
 <script src="${ctxPath}/static/layui-v2.8.4/layui/layui.js"></script>
 <link href="${ctxPath}/static/layui-v2.8.4/layui/css/layui.css" rel="stylesheet">
 <!-- 给容器追加 class="layui-form-pane"，即可显示为方框风格 -->
-<form class="layui-form layui-form-pane" method="post" enctype="multipart/form-data" action="${ctxPath}/dict_data/save" lay-filter="demo-val-filter">
+<form class="layui-form layui-form-pane" id="update_form" method="post" enctype="multipart/form-data" action="${ctxPath}/dict_data/update" lay-filter="demo-val-filter">
     <div class="layui-form-item">
         <label class="layui-form-label">字典名称</label>
         <div class="layui-input-block">
             <input type="text" name="name" autocomplete="off" placeholder="请输入" lay-verify="required" class="layui-input">
+            <input type="hidden" name="id" autocomplete="off" lay-verify="required" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
@@ -54,7 +54,8 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <button class="layui-btn" lay-submit lay-filter="demo2">确认</button>
+<!--        style="display: none"-->
+        <button class="layui-btn" lay-submit lay-filter="edit_btn">确认</button>
         <button type="reset" class="layui-btn layui-btn-primary">重置</button>
     </div>
 </form>
@@ -62,21 +63,26 @@
     layui.use(['form'], function(){
         var form = layui.form;
         var layer = layui.layer;
-        // 提交事件
         form.val('demo-val-filter', {
-            "pid": "${pId}"
+            "id":"${model.id}",
+            "name":"${model.name}",
+            "code": "${model.code}",
+            "value": "${model.value}",
+            "param": "${model.param}",
+            "num": "${model.num}",
+            "pid": "${model.pid}",
+            "isOpen": "${model.isOpen}",
+            "tips": "${model.tips}"
         });
-        form.on('submit(demo2)', function(data){
-            var field = form.val('demo-val-filter'); // 获取表单字段值
-            // 此处可执行 Ajax 等操作
+        // 提交事件
+        form.on('submit(edit_btn)', function(arg){
+            var field = arg.field;
             layui.jquery.ajax({
-                url:"${ctxPath}/dict_data/save" , // 请求路径
-                type:"POST" , //请求方式
-                //data: "username=jack&age=23",//请求参数
-                data:field,
-                dataType:"json",//设置接受到的响应数据的格式
-                // contentType:"application/json",
-                success:function (result) {
+                url: '${ctxPath}/dict_data/update',
+                data: field,
+                dataType: 'json',
+                type: 'POST',
+                success:function(result){
                     if(result.code != 0){
                         parent.layer.msg(result.message, {shade: 0.3})
                     }else{
@@ -87,12 +93,10 @@
                         parent.layer.msg(result.message,{shade: 0.3})
                         // parent.location.reload();
                     }
-                },//响应成功后的回调函数
-                error:function (err) {
-                    parent.layer.msg(err.message, {shade: 0.3})
-                },//表示如果请求响应出现错误，会执行的回调函数
-            })
-            return false; // 阻止默认 form 跳转
+                }
+            });
+            return false;
         });
+
     });
 </script>

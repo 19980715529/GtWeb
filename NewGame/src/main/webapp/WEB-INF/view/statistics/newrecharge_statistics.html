@@ -16,7 +16,7 @@
     function initGrid() {
         var grid_url = ctx + "/newrecharge/list";//查询列表接口
         var _colnames=["id","时间", "包来源<br><span style='color: red'>(包id为-1是总包汇总)</span></span>","新增用户","注册人数","新增充值人数","新增充值金额","新增充值次数",
-            "充值人数","充值次数","充值总额","兑换人数","兑换总额","充提差","人均充值","付费成本","投放成本","操作"];
+            "充值人数","充值次数","充值总额","兑换人数","兑换总额","充提差","充提比","人均充值","付费成本","投放成本","操作"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -42,6 +42,8 @@
             {name:"newExcAmount", sortable:false},
             // 充提差
             {name:"newRE", sortable:false},
+            // 充提比 （充值-兑换）/充值
+            {name:"Proportion", sortable:false},
             // 人均充值
             {name:"averageRecharge", sortable:false},
             // 费用成本

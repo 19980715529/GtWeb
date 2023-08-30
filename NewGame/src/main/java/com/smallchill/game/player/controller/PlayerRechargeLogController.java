@@ -9,7 +9,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.common.task.GlobalDelayQueue;
 import com.smallchill.common.vo.ShiroUser;
+import com.smallchill.core.annotation.Before;
+import com.smallchill.core.annotation.Permission;
 import com.smallchill.core.aop.SystemControllerLog;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.plugins.dao.Db;
@@ -17,11 +20,15 @@ import com.smallchill.core.shiro.ShiroKit;
 import com.smallchill.core.toolbox.CMap;
 import com.smallchill.core.toolbox.kit.HttpKit;
 import com.smallchill.core.toolbox.support.Convert;
+import com.smallchill.game.player.meta.intercept.OrderValidator;
 import com.smallchill.system.model.UserPack;
+import com.smallchill.system.service.RechargeRecordsService;
+import com.smallchill.system.treasure.model.RechargeRecords;
 import com.smallchill.system.treasure.utils.RechargeExchangeCommon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,14 +43,20 @@ import com.smallchill.core.toolbox.kit.StrKit;
 import com.smallchill.core.toolbox.kit.URLKit;
 import com.smallchill.game.service.CommonService;
 
+import static com.smallchill.system.treasure.utils.CallBackUtils.successRecExecuted;
+
 @Controller
 @RequestMapping("/player")
 public class PlayerRechargeLogController extends BaseController implements ConstShiro {
 	private static String BASE_PATH = "/gameplayer/";
 	private static String CODE = "player";
+
 	
 	@Autowired
 	private CommonService commonService;
+
+	@Autowired
+	private RechargeRecordsService rechargeRecordsService;
 
 	@DoControllerLog(name="进入充值记录列表页面")
 	@RequestMapping(KEY_PLAYER_RECHARGE_LOG)
@@ -200,5 +213,35 @@ public class PlayerRechargeLogController extends BaseController implements Const
 		map.put("TotalExcUserNum",e.get("TotalNewExcUserNum").toString());
 		map.put("RE",totalRecMoney.subtract(totalExcMoney));
 		return json(map);
+	}
+
+	/**
+	 * 手动设置订单完成
+	 */
+	@RequestMapping(KEY_EDIT+"/{id}")
+	public String edit(@PathVariable Integer id,ModelMap mm){
+		// 根据订单id查询订单号
+		RechargeRecords records = rechargeRecordsService.findById(id);
+		mm.put("player",records);
+		mm.put("code",CODE);
+		return BASE_PATH+"player_recharge_edit.html";
+	}
+	/**
+	 * 手动设置订单完成
+	 */
+	@Json
+	@Before(OrderValidator.class)
+	@Permission({ADMINISTRATOR,ADMIN})
+	@RequestMapping("pay/"+KEY_UPDATE)
+	public AjaxResult update(){
+		String id = getRequest().getParameter("player.id");
+		String orderStatus = getRequest().getParameter("player.orderStatus");
+		// 根据订单id查询订单号
+		RechargeRecords recharge = rechargeRecordsService.findById(id);
+		if (recharge.getOrderStatus()==2){
+			return fail("订单已经完成不可以操作!");
+		}
+		successRecExecuted(recharge.getOrderNumber(),recharge);
+		return json(UPDATE_SUCCESS_MSG);
 	}
 }

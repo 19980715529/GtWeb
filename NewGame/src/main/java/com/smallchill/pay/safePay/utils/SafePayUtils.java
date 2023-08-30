@@ -47,7 +47,7 @@ public class SafePayUtils {
     public static String exchange(@NotNull ExchangeReview exchangeReview, Map<String,Object> channel, SafePay safePay){
         Map<String, Object> params = new HashMap<>();
         params.put("currency", safePay.getCurrency());
-        params.put("mer_no", safePay.getPayUrl());
+        params.put("mer_no", safePay.getMerNo());
         params.put("order_amount", exchangeReview.getMoney().toString());
         params.put("method", "fund.apply");
         params.put("order_no", exchangeReview.getOrderNumber());

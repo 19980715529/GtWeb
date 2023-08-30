@@ -8,7 +8,7 @@ online_total
 	a.RegisterDate, c.RealScore,
 	c.CheatRate,
 	isnull((SELECT d.name FROM QPGameUserDB.dbo.AccountTypeName as d where a.clientType = d.clientType),(case when a.ClientType=0 then '大厅' else '包'+cast(a.ClientType as varchar) end)) as PackageName,
-	(select SUM(UnitRMB) as GetGold from [QPGameUserDB].[dbo].[AA_Recharge_TotalRecord] r where r.User_Id=a.UserID) as RechargeAmount
+	(select isnull(sum(r.topUpAmount),0) from RYPlatformManagerDB.dbo.Recharge_records as r where r.userId=a.UserID and orderStatus=2) as RechargeAmount
 	FROM QPGameUserDB.dbo.AccountsInfo AS a,
 	QPTreasureDB.dbo.GameScoreLocker as b,
 	QPTreasureDB.dbo.GameScoreInfo as c

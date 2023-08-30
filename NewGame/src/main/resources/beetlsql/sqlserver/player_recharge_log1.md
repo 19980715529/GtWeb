@@ -121,7 +121,7 @@ all_recharges
 
 recharge_unstatistics
 ===
-	SELECT [createTime] ,[orderNumber] ,a.userId ,b.NickName nickname,[topUpAmount] ,[gold],[orderStatus],[packageName],[channel],[channel_type],[endTime],[msg]
+	SELECT id,[createTime] ,[orderNumber] ,a.userId ,b.NickName nickname,[topUpAmount] ,[gold],[orderStatus],[packageName],[channel],[channel_type],[endTime],[msg]
 	FROM [RYPlatformManagerDB].[dbo].[Recharge_records] as a join QPGameUserDB.dbo.AccountsInfo as b on a.userId=b.UserID
 	where 1=1
 	@if(!isEmpty(UserID)){
@@ -135,7 +135,7 @@ recharge_unstatistics
     @if(!isEmpty(orderStatus)){
     	 and orderStatus =#{orderStatus}
     @}else{
-        and orderStatus in (1,3)
+        and orderStatus != 2
     @}
 	@if(!isEmpty(EndTime)){
         and DATEDIFF(DAY,createTime,#{StartTime})<=0
@@ -169,7 +169,9 @@ query_list
         and r.isThatTay=#{recType}
     @}
     @if(!isEmpty(clientType)){
-        and r.packageName=#{clientType}
+        @if(clientType!='-1'){
+            and r.packageName=#{clientType}
+        @}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,createTime,#{createTime})<=0
@@ -184,7 +186,7 @@ query_exc_list
     from [RYPlatformManagerDB].[dbo].[Exchange_review] as e inner join  [RYPlatformManagerDB].[dbo].[Pay_MCPool] as c on e.channelId = c.mcId 
     where status in (3,4)
     @if(!isEmpty(UserID)){
-	 and r.userId =#{UserID}
+	 and e.userId =#{UserID}
 	@}
     @if(!isEmpty(ChannelID)){
 	    and c.id =#{ChannelID}
@@ -196,7 +198,9 @@ query_exc_list
 	    and amount <=#{moneyMax}
 	@}
     @if(!isEmpty(clientType)){
-        and sourcePlatform=#{clientType}
+        @if(clientType!='-1'){
+            and sourcePlatform=#{clientType}
+        @}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,createTime,#{createTime})<=0
@@ -221,7 +225,9 @@ query_new_user
 	    and r.topUpAmount <=#{moneyMax}
 	@}
     @if(!isEmpty(clientType)){
-        and r.packageName=#{clientType}
+        @if(clientType!='-1'){
+            and r.packageName=#{clientType}
+        @}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,createTime,#{createTime})<=0
@@ -247,7 +253,9 @@ query_new_list
 	    and r.topUpAmount <=#{moneyMax}
 	@}
     @if(!isEmpty(clientType)){
-        and r.packageName=#{clientType}
+        @if(clientType!='-1'){
+            and r.packageName=#{clientType}
+        @}
     @}
     @if(!isEmpty(createTime)){
 		and DATEDIFF(DAY,createTime,#{createTime})<=0

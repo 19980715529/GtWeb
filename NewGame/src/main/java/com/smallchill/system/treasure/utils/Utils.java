@@ -81,7 +81,7 @@ public class Utils {
     }
 
     // 判断字符串是否为空
-    private static Boolean isBlank(String s){
+    public static Boolean isBlank(String s){
         if (s == null) {
             return true;
         }

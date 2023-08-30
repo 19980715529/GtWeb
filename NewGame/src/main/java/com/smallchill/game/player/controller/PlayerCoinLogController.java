@@ -9,6 +9,7 @@ import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 
 import com.alibaba.fastjson.JSONObject;
+import com.smallchill.core.toolbox.kit.*;
 import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,10 +27,6 @@ import com.smallchill.core.constant.ConstShiro;
 import com.smallchill.core.plugins.dao.Blade;
 import com.smallchill.core.toolbox.ajax.AjaxResult;
 import com.smallchill.core.toolbox.grid.BladePage;
-import com.smallchill.core.toolbox.kit.CharsetKit;
-import com.smallchill.core.toolbox.kit.DateFormatKit;
-import com.smallchill.core.toolbox.kit.StrKit;
-import com.smallchill.core.toolbox.kit.URLKit;
 import com.smallchill.game.model.request.AaZzLogPropchangeRequest;
 import com.smallchill.game.model.request.OrderByRequest;
 import com.smallchill.game.newmodel.Gameroomitem;
@@ -80,12 +77,14 @@ public class PlayerCoinLogController extends BaseController implements ConstShir
 		if (changeType_id==null){
 			changeType_id = "";
 		}
-		LOGGER.error("changeType_id"+changeType_id.toString());
+		LOGGER.error("changeType_id"+ changeType_id);
 		String ServerId = JSON.toJSONString(paras.get("ServerID")).replaceAll("\"", "");
         if (ServerId != null && !ServerId.equals("") && !ServerId.equals("null")) {
             Gameroomitem room = Blade.create(Gameroomitem.class).findFirstBy(" where ServerID=" + ServerId, null);
             if(ConstConfig.SYS_ISONSEARCH.equalsIgnoreCase("false")) {
-            	gird = paginateBySelf("player_gold_change_log." + String.valueOf(room.getKindid()) + "_change_log");
+//            	gird = paginateBySelf("player_gold_change_log." + String.valueOf(room.getKindid()) + "_change_log");
+				paras.put("dbTable","[QPGameRecordDB].[dbo].AA_ZZ_Log_PropChange_"+room.getKindid());
+            	gird = paginateBySelfWhere("player_gold_change_log.all_change_log", JsonKit.toJson(paras));
             	return gird;
             }
         } else if("-7".equals(changeType_id.toString())){

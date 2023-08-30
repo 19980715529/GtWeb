@@ -8,7 +8,7 @@ new_list(Has js_bankScoreCount)
 	(SELECT c.Amount FROM QPGameUserDB.dbo.AA_Shop_Prop_UserProp as c with (nolock) WHERE a.userID = c.user_id and c.Prop_Id = 2) AS UserMedal,
 	a.RegisterDate,a.LastLogonDate,a.BindPhone,
 	isnull((select SUM(UnitRMB) FROM QPGameUserDB.dbo.AA_Recharge_TotalRecord with (nolock) WHERE User_Id = a.userID),0) AS RechargeNum,
-	(select count(*) FROM QPGameUserDB.dbo.AA_Recharge_TotalRecord with (nolock) WHERE User_Id = a.userID) AS RechargeCountNum,
+	(select count(*) FROM RYPlatformManagerDB.dbo.Recharge_records with (nolock) WHERE userId = a.userID AND orderStatus=2) AS RechargeCountNum,
 	isnull(b.RealScore,0) as TotalWaste,b.InsureScore,
 	(case when (DATEDIFF(DAY,b.changeScoreTime,GETDATE())>0) then 0 else isnull(b.todayScore,0) end) as DayWaste,
 	(isnull(b.js_BussniessCount,0)+isnull(b.js_bankScoreCount,0)) as RcvScore,

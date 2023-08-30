@@ -13,7 +13,7 @@
 	}
 
 	$(function() {
-		backDom('充值记录','player_rechargelog');
+		backDom('充值记录','platform_rechargelog');
 		initGrid();
 		var where = BladeTool.isEmpty(_filter) ? "" : encodeURI(_filter);
 		real_time_data(where);
@@ -23,7 +23,7 @@
 		var grid_url = ctx + "/${code}/rllist";//查询列表接口
 		var _colnames = [ "发起时间", "订单号","用户ID","昵称","充值金额(PHP)", "获得金币", "订单状态", "包名称", "充值渠道", "充值类型", "完成时间"];
 		var _colmodel = [ { name : "createTime", sortable:false,width:200 },
-			{ name : "orderNumber", sortable:false},
+			{ name : "orderNumber", sortable:false,width: 250},
 			{ name : "userId", sortable:false,formatter:genLink},
 			{ name : "nickname", sortable:false,formatter:genLink},
 			{ name : "topUpAmount",sortable:false},
@@ -42,8 +42,8 @@
 			colModel : _colmodel,
 			pager : pager_selector,
 			postData : {where: _filter,sort: "createTime", order: "desc"},
-			multiselect : false,
-			rownumbers : true,
+			multiselect : false, // 是否显示勾选框
+			rownumbers : true, // 是否出现排序
 			rowNum: 100,
 			gridComplete:function() {
 				getTotalRecharge(encodeURI(_filter));
@@ -53,7 +53,8 @@
 			var dict_status = {
 				1:"待支付",
 				2:"已完成",
-				3:"已关闭"
+				3:"已关闭",
+				4:"已取消"
 			}
 			var html = '<span class="text-red">' + cellvalue + '</span>';
 			if(options.colModel.name=='orderStatus') {
@@ -63,6 +64,8 @@
 					html = '<span class="label label-success">' + dict_status[cellvalue] + '</span>';
 				}else if (cellvalue === 3) {
 					html = '<span class="label label-default">' + dict_status[cellvalue] + '</span>';
+				}else {
+					html = '<span>' + dict_status[cellvalue] + '</span>';
 				}
 			}
 			return html;

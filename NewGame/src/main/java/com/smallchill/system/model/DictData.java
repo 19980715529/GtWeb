@@ -14,7 +14,9 @@ public class DictData extends BaseModel {
     private Integer value; // 字典值
     private String param; //额外参数
     private Integer num; //排序号
-    private String pcode; //父字典编码, 顶层为0
+    private Integer pid; // 父字典编码, 顶层为0
+    private Integer isOpen; // 是否开启
+    private Integer isDel=0; // 是否删除
     private String tips; //备注
 
     @AutoID
@@ -66,12 +68,28 @@ public class DictData extends BaseModel {
         this.num = num;
     }
 
-    public String getPcode() {
-        return pcode;
+    public Integer getPid() {
+        return pid;
     }
 
-    public void setPcode(String pcode) {
-        this.pcode = pcode;
+    public void setPid(Integer pid) {
+        this.pid = pid;
+    }
+
+    public Integer getIsOpen() {
+        return isOpen;
+    }
+
+    public void setIsOpen(Integer isOpen) {
+        this.isOpen = isOpen;
+    }
+
+    public Integer getIsDel() {
+        return isDel;
+    }
+
+    public void setIsDel(Integer isDel) {
+        this.isDel = isDel;
     }
 
     public String getTips() {

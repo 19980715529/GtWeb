@@ -24,6 +24,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -53,6 +54,15 @@ public class GoogleController extends BaseController implements ConstShiro {
         // 根据用户id查询用户数据
         Map user = commonService.getInfoByOne("player_operate.new_info", CMap.init().set("UserID",rechargeRecords.getUserId()));
         JSONObject resultMap = new JSONObject();
+        // 判断谷歌未完成订单，笔数是否已经有一笔存在
+        List<RechargeRecords> orders = rechargeRecordsService.findBy("orderStatus in (1,3) and userId=#{userId} and channelPid=3", CMap.init().set("userId", rechargeRecords.getUserId()));
+        if (orders.size()>0){
+            for (RechargeRecords r:orders){
+                // 设置为取消支付
+                r.setOrderStatus(4);
+                rechargeRecordsService.update(r);
+            }
+        }
         // 获取充值渠道id
         int channelId = Integer.parseInt(HttpKit.getRequest().getParameter("recharge.id"));
         Map<String, Object> info = RechargeExchangeCommon.recharge(rechargeRecords, resultMap, user,commonService,channelId);
@@ -64,6 +74,7 @@ public class GoogleController extends BaseController implements ConstShiro {
         resultMap.put("urlPay",rechargeRecords.getOrderNumber());
 //        resultMap.put("payCode",payCode);
         resultMap.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        rechargeRecordsService.saveRtId(rechargeRecords);
         return json(resultMap);
     }
 }

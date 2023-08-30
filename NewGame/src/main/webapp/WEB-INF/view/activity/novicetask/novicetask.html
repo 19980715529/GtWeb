@@ -14,7 +14,8 @@
 
     function initGrid() {
         var grid_url = ctx + "/novicetask/list";//查询列表接口
-        var _colnames=["id","时间", "任务发放金币","邀请任务好友完成数量","累计充值任务完成数量","需求打码任务完成数量","邀请好友任务完成发放金币","累计充值任务完成金币","需求打码任务完成发放金币"];
+        var _colnames=["id","时间", "任务发放金币","邀请好友任务完成数","邀请好友任务完成发放金币","累计充值任务完成数","累计充值任务完成金币",
+            "需求打码完成次数","需求打码任务完成发放金币"];
         var _colmodel=[
             {name:"id",sortable:true,hidden:true},
             {name:"createTime",sortable:true},
@@ -23,13 +24,13 @@
             {name:"inviteFriendsNum",  sortable:false},
             // 充值人数
             {name:"inviteFriendsAmount", sortable:false},
-            // 新增充值人数
+            // 累计充值任务完成数
             {name:"grandTotalRecNum", sortable:false},
-            // 新增充值次数
+            // 累计充值任务完成金币
             {name:"grandTotalRecAmount", sortable:false},
-            // 新增充值金额
+            // 需求打码完成次数
             {name:"needCodingNum",  sortable:false},
-            //
+            // 累计充值任务完成金币
             {name:"needCodingAmount",  sortable:false},
             // {name:"id",sortable:false,formatter:genLink},
         ];
