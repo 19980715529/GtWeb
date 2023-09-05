@@ -35,9 +35,10 @@
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">字典父id</label>
+        <label class="layui-form-label">字典父编码</label>
         <div class="layui-input-block">
-            <input type="text" name="pid" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" readonly>
+            <input type="text" name="pcode" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" readonly>
+            <input type="hidden" name="pid" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" readonly>
         </div>
     </div>
     <div class="layui-form-item" pane>
@@ -64,7 +65,8 @@
         var layer = layui.layer;
         // 提交事件
         form.val('demo-val-filter', {
-            "pid": "${pId}"
+            "pid": "${pId}",
+            "pcode":"${pcode}",
         });
         form.on('submit(demo2)', function(data){
             var field = form.val('demo-val-filter'); // 获取表单字段值
@@ -85,7 +87,9 @@
                         //layer信息提示
                         setTimeout(function () { parent.layer.close(index) }, 330);//延迟
                         parent.layer.msg(result.message,{shade: 0.3})
-                        // parent.location.reload();
+                        setTimeout(function () {
+                            parent.location.reload();
+                        },500)
                     }
                 },//响应成功后的回调函数
                 error:function (err) {

@@ -1,0 +1,166 @@
+@layout("/common/_container.html"){
+<script src="${ctxPath}/static/layui-v2.8.4/layui/layui.js"></script>
+<link href="${ctxPath}/static/layui-v2.8.4/layui/css/layui.css" rel="stylesheet">
+<form class="layui-form layui-row layui-col-space16">
+    <div class="layui-row">
+        <div class="layui-col-xs12">
+            <div class="layui-input-inline">
+                <label class="layui-form-label">包来源:</label>
+            </div>
+            <div class="layui-input-inline">
+                <select id="clientType" name="clientType">
+                </select>
+            </div>
+            <div class="layui-input-inline" id="ID-laydate-range">
+                <div class="layui-input-inline">
+                    <label class="layui-form-label">时间:</label>
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="StartTime" autocomplete="off" id="ID-laydate-start-date"
+                           class="layui-input" placeholder="开始日期">
+                </div>
+                <div class="layui-input-inline">
+                    <input type="text" name="EndTime" autocomplete="off" id="ID-laydate-end-date" class="layui-input"
+                           placeholder="结束日期">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-btn-container layui-col-xs12">
+        <button class="layui-btn" lay-submit lay-filter="demo-table-search">查询</button>
+        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+    </div>
+</form>
+<script type="text/html" id="RechargeUserID">
+    <a href="${ctxPath}/player/detailinfo/{{= d.RechargeUserID }}" style="color:royalblue;font-size:16px" target="_blank">{{= d.RechargeUserID }}</a>
+</script>
+<script type="text/html" id="AgentUser_id">
+    <a href="${ctxPath}/player/detailinfo/{{= d.AgentUserID }}" style="color:royalblue;font-size:16px" target="_blank">{{= d.AgentUserID }}</a>
+</script>
+<script type="text/html" id="AgentUpUserID">
+    <a href="${ctxPath}/player/detailinfo/{{= d.AgentUpUserID }}" style="color:royalblue;font-size:16px" target="_blank">{{= d.AgentUpUserID }}</a>
+</script>
+
+<div class="layui-row">
+</div>
+<table class="layui-hide" id="ID-table-demo-search"></table>
+<script>
+    var ctx = "${ctxPath}";
+    var _filter = '';
+    console.log(ctx + "/${code}/list")
+    layui.use(function () {
+        var laydate = layui.laydate;
+        // 日期范围 - 左右面板独立选择模式
+        laydate.render({
+            elem: '#ID-laydate-start-date',
+            value: getCurrentMonthFirst().format('yyyy-MM-dd'),
+            isInitValue: true
+        })
+        laydate.render({
+            elem: '#ID-laydate-end-date',
+            value: getBeforeDate(0),
+            isInitValue: true
+        })
+        laydate.render({
+            elem: '#ID-laydate-range',
+            range: ['#ID-laydate-start-date', '#ID-laydate-end-date']
+        });
+        var table = layui.table;
+        var form = layui.form;
+        // 创建表格实例
+        table.render({
+            elem: '#ID-table-demo-search'
+            , url: ctx + "/${code}/list" // 此处为静态模拟数据，实际使用时需换成真实接口
+            , toolbar: true
+            , defaultToolbar: ['filter', 'exports', 'print']  //工具
+            , where: {
+                where: _filter,
+                sort: "Time",
+                order: "desc",
+                _search: false,
+                nd: new Date().getTime(),
+                sidx: "",
+                sord: "asc"
+            }
+            , limit: 50
+            , limits: [10, 50, 100]
+            , request: {
+                pageName: 'page', // 页码的参数名称，默认：page
+                limitName: 'rows' // 每页数据条数的参数名，默认：limit
+            },
+            parseData: function (res) { // res 即为原始返回的数据
+                return {
+                    "code": res.code, // 解析接口状态
+                    "msg": res.msg, // 解析提示文本
+                    "count": res.data.records, // 解析数据长度
+                    "data": res.data.rows // 解析数据列表
+                };
+            }
+            , cols: [[
+                { type: 'numbers', title: '序号', width: 80, fixed: 'left' }// 序号
+                ,{field: 'id', title: 'ID', width: 150, sort: true, fixed: 'left'}
+                , {field: 'Time', title: '日期', width: 180, fixed: 'left'}
+                , {field: 'RechargeUserID', title: 'GM充值金额(卢比)', width: 180, sort: true, templet: '#RechargeUserID'}
+                , {field: 'clientType', title: 'GM充值金币', width: 180}
+                , {field: 'AgentUserID', title: '玩家上分', width: 180, templet: '#AgentUser_id'}
+                , {field: 'Rebate', title: '玩家下分', width: 180}
+                , {field: 'AgentUpUserID', title: '当日上下差', sort: true, width: 180, templet: '#AgentUpUserID'}
+                , {field: 'AgentUpRebate', title: '上下比例', sort: true, width: 180}
+                , {field: 'amount', title: '上分人数', sort: true, width: 180}
+                , {field: 'amount', title: '下分人数', sort: true, width: 180}
+                , {field: 'amount', title: '代理转账', sort: true, width: 180}
+                , {field: 'amount', title: '玩家转账', sort: true, width: 180}
+                , {field: 'amount', title: '转账手续费', sort: true, width: 180}
+            ]]
+            , totalRow: false // 开启合计行
+            , page: true
+            , height: 650
+        });
+        // 搜索提交
+        form.on('submit(demo-table-search)', function (data) {
+            var field = data.field; // 获得表单字段
+            // 执行搜索重载
+            table.reload('ID-table-demo-search', {
+                page: {
+                    curr: 1 // 重新从第 1 页开始
+                }
+                , where: {
+                    "where": JSON.stringify(field),
+                    sort: "Time",
+                    order: "desc",
+                    _search: false,
+                    nd: new Date().getTime(),
+                    sidx: "",
+                    sord: "asc"
+                }
+            });
+            // layer.msg('搜索成功<br>此处为静态模拟数据，实际使用时换成真实接口即可');
+            return false; // 阻止默认 form 跳转
+        });
+    });
+    // 获取平台列表
+    new Ajax("${ctxPath}/newsplatform/getPlatformInfo", function (data) {
+        console.log(data);
+        if (data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = ''; //
+            for (var i = 0; i < type.length; i++) {
+                if (type[i]==-1){
+                    html += '<option value="' + type[i] + '">'+'请选择'+'</option>';
+                }else {
+                    html += '<option value="' + type[i] + '">' +'包'+ type[i] + '</option>';
+                }
+            }
+            $("#clientType").html(html);
+        }
+        // 渲染select
+        layui.use('form', function () {
+            var form = layui.form;
+            form.render("select");
+        });
+    }).start();
+</script>
+<!-- 引入列表页所需js -->
+@include("/common/_listscript.html"){}
+@}

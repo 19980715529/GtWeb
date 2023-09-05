@@ -74,7 +74,7 @@ public class GooglePayCallbackController extends BaseController implements Const
             /**
              * 返回参数
              * {
-             * "purchaseTimeMillis": "16239806",//购买产品的时间，自纪元（1970 年 1 月 1 日）以来的毫秒数。
+             * "purchaseTimeMillis": "16239806"//
              * "purchaseState": 0,//订单的购买状态。可能的值为：0. 已购买 1. 已取消 2. 待定
              * "consumptionState": 0,//产品的消费状态。可能的值为： 0. 尚未消耗 1. 已消耗
              * "developerPayload": "",透传的订单号
@@ -89,7 +89,7 @@ public class GooglePayCallbackController extends BaseController implements Const
             // 根据谷歌订单进行出现是否存在
             RechargeRecords googleOrder = rechargeRecordsService.findFirstBy("pfOrderNum=#{orderNumber}", CMap.init().set("orderNumber", purchase.getOrderId()));
             // 判断向谷歌查询的订单和游戏端是否一样，不一样不处理
-            if (purchase.getOrderId().equals(googlePayDto.getOrderId())){
+            if (!purchase.getOrderId().equals(googlePayDto.getOrderId())){
                 return fail("订单错误");
             }
             // 用户重复回调检测

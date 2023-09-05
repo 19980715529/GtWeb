@@ -65,8 +65,13 @@ public class DictDataController extends BaseController {
     public String add(@RequestParam(required = false) Integer id, ModelMap mm) {
         if (null != id) {
             mm.put("pId", id);
+//            Map dict = Blade.create(DictData.class).findFirst("select * from [dbo].[blade_dict_data] where id = #{id}",
+//                    CMap.init().set("id", id));
+            DictData dict = Blade.create(DictData.class).findById(id);
+            mm.put("pcode", dict.getCode());
         }else {
             mm.put("pId", 0);
+            mm.put("pcode", "0");
         }
         mm.put("code", CODE);
         return BASE_PATH + "dict_data_add.html";
@@ -75,10 +80,9 @@ public class DictDataController extends BaseController {
     @RequestMapping(KEY_EDIT + "/{id}")
     public String edit(@PathVariable Integer id, ModelMap mm) {
         LOGGER.error(id);
-        Object dict = Blade.create(DictData.class).findFirst("select * from [dbo].[blade_dict_data] where id = #{id}",
-                CMap.init().set("id", id));
-//        Object dict = Blade.create(DictData.class).findById(id);
-        LOGGER.error(JsonKit.toJson(dict));
+//        Object dict = Blade.create(DictData.class).findFirst("select * from [dbo].[blade_dict_data] where id = #{id}",
+//                CMap.init().set("id", id));
+        Object dict = Blade.create(DictData.class).findById(id);
         mm.put("model", dict);
         mm.put("code", CODE);
         return BASE_PATH + "dict_data_edit.html";

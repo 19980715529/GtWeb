@@ -18,6 +18,7 @@ public class DictData extends BaseModel {
     private Integer isOpen; // 是否开启
     private Integer isDel=0; // 是否删除
     private String tips; //备注
+    private String pcode="0"; //父编码
 
     @AutoID
     public Integer getId() {
@@ -98,5 +99,13 @@ public class DictData extends BaseModel {
 
     public void setTips(String tips) {
         this.tips = tips;
+    }
+
+    public String getPcode() {
+        return pcode;
+    }
+
+    public void setPcode(String pcode) {
+        this.pcode = pcode;
     }
 }

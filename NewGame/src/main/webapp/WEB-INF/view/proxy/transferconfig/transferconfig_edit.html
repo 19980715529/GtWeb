@@ -3,42 +3,59 @@
 <!-- 给容器追加 class="layui-form-pane"，即可显示为方框风格 -->
 <form class="layui-form layui-form-pane" id="update_form" method="post" enctype="multipart/form-data" action="${ctxPath}/dict_data/update" lay-filter="demo-val-filter">
     <div class="layui-form-item">
-        <label class="layui-form-label">字典名称</label>
+        <label class="layui-form-label">代理身份</label>
         <div class="layui-input-block">
-            <input type="text" name="name" autocomplete="off" placeholder="请输入" lay-verify="required" class="layui-input">
+            <input type="text" name="name" autocomplete="off" placeholder="请输入" lay-verify="required" class="layui-input" readonly>
             <input type="hidden" name="id" autocomplete="off" lay-verify="required" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">字典编码</label>
+        <label class="layui-form-label">快捷1</label>
         <div class="layui-input-block">
-            <input type="text" name="code" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+            <input type="text" name="level1" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
         </div>
     </div>
 
     <div class="layui-form-item">
-        <label class="layui-form-label">值</label>
+        <label class="layui-form-label">快捷2</label>
         <div class="layui-input-block">
-            <input type="text" name="value" placeholder="请输入" autocomplete="off" class="layui-input">
+            <input type="text" name="level2" placeholder="请输入" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">额外值</label>
+        <label class="layui-form-label">快捷3</label>
         <div class="layui-input-block">
-            <input type="text" name="param" placeholder="请输入" autocomplete="off" class="layui-input">
+            <input type="text" name="level3" placeholder="请输入" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">排序</label>
+        <label class="layui-form-label">快捷4</label>
         <div class="layui-input-block">
-            <input type="text" name="num" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+            <input type="text" name="level4" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item">
-        <label class="layui-form-label">字典父编码</label>
+        <label class="layui-form-label">快捷5</label>
         <div class="layui-input-block">
-            <input type="hidden" name="pid" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" readonly>
-            <input type="text" name="pcode" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input" readonly>
+            <input type="text" name="level5" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">快捷6</label>
+        <div class="layui-input-block">
+            <input type="text" name="level6" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">快捷7</label>
+        <div class="layui-input-block">
+            <input type="text" name="level7" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">快捷8</label>
+        <div class="layui-input-block">
+            <input type="text" name="level8" placeholder="请输入" lay-verify="required" autocomplete="off" class="layui-input">
         </div>
     </div>
     <div class="layui-form-item" pane>
@@ -48,14 +65,8 @@
             <input type="radio" name="isOpen" value="1" title="禁用">
         </div>
     </div>
-    <div class="layui-form-item layui-form-text">
-        <label class="layui-form-label">描述</label>
-        <div class="layui-input-block">
-            <textarea placeholder="请输入内容" name="tips" class="layui-textarea"></textarea>
-        </div>
-    </div>
     <div class="layui-form-item">
-<!--        style="display: none"-->
+        <!--        style="display: none"-->
         <button class="layui-btn" lay-submit lay-filter="edit_btn">确认</button>
         <button type="reset" class="layui-btn layui-btn-primary">重置</button>
     </div>
@@ -67,20 +78,21 @@
         form.val('demo-val-filter', {
             "id":"${model.id}",
             "name":"${model.name}",
-            "code": "${model.code}",
-            "value": "${model.value}",
-            "param": "${model.param}",
-            "num": "${model.num}",
-            "pid": "${model.pid}",
-            "isOpen": "${model.isOpen}",
-            "tips": "${model.tips}",
-            "pcode": "${model.pcode}",
+            "isOpen":"${model.isOpen}",
+            "level1":"${model.level1}",
+            "level2":"${model.level2}",
+            "level3":"${model.level3}",
+            "level4":"${model.level4}",
+            "level5":"${model.level5}",
+            "level6":"${model.level6}",
+            "level7":"${model.level7}",
+            "level8":"${model.level8}",
         });
         // 提交事件
         form.on('submit(edit_btn)', function(arg){
             var field = arg.field;
             layui.jquery.ajax({
-                url: '${ctxPath}/dict_data/update',
+                url: '${ctxPath}/transferconfig/update',
                 data: field,
                 dataType: 'json',
                 type: 'POST',
