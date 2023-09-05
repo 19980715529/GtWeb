@@ -32,12 +32,34 @@
                         <input type="text" name="rechargegear.skuId" value="${rechargegear.skuId}"/>
                     </td>
                 </tr>
+                <tr>
+                    <td style="vertical-align: middle !important;text-align:right;" class="bg-F5F5F5">标签: </td>
+                    <td id="label">
+                    </td>
+                </tr>
                 </tbody>
             </table>
         </form>
     </div>
 </div>
 <script>
+    // 获取平台列表
+    new Ajax("${ctxPath}/dict_data/data?pcode=GearLabel", function (data) {
+        console.log(${rechargegear.label});
+        if(data.code === 0 && BladeTool.isNotEmpty(data.data)) {
+            var type = data.data;
+            var html = '';
+            for (var i = 0; i < type.length; i++) {
+                if (type[i]['value'] === ${rechargegear.label}){
+                    html += '<input type="radio" name="rechargegear.label" value="' + type[i]['value'] + '"checked>' + type[i]['name'] + '&nbsp;&nbsp;&nbsp;';
+                }else {
+                    html += '<input type="radio" name="rechargegear.label" value="' + type[i]['value'] + '">' + type[i]['name'] + '&nbsp;&nbsp;&nbsp;';
+                }
+
+            }
+            $("#label").html(html);
+        }
+    }).start();
 </script>
 <!-- 按钮 -->
 @ include("/common/_curd/_btn.html",{btn_save:"确认修改",btn_close:"关闭"}) {}

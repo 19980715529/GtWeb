@@ -134,6 +134,15 @@ public class DictDataController extends BaseController {
             return error(DEL_FAIL_MSG);
         }
     }
+    /**
+     * 更加父编码查询
+     */
+    @Json
+    @RequestMapping("/data")
+    public AjaxResult data(@RequestParam String pcode) {
+        List<Object> list = Blade.create(DictData.class).findBy("pcode=#{pcode}", CMap.init().set("pcode", pcode));
+        return json(list);
+    }
 
     /**
      * 生成树状结构

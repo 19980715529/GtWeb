@@ -16,6 +16,7 @@ public class RechargeGear extends BaseModel {
     private BigDecimal getExtra;
     private Long amount;
     private Integer sort;
-    private Integer isDel; // 是否删除
+    private Integer isDel=1; // 是否删除,1：没有删除，0：已删除
     private String skuId; // 商品id
+    private Integer label; // 挡位标签
 }
