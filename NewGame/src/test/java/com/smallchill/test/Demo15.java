@@ -64,7 +64,7 @@ public class Demo15 extends BaseTest {
     @Test
     public void testReaderFile() throws IOException {
         ResourceLoader resourceLoader = new DefaultResourceLoader();
-        Resource resource = resourceLoader.getResource("classpath:google.json");
+        Resource resource = resourceLoader.getResource("classpath:banner.txt");
         InputStream is = resource.getInputStream();
         InputStreamReader isr = new InputStreamReader(is);
         BufferedReader br = new BufferedReader(isr);
